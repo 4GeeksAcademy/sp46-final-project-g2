@@ -11,6 +11,14 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
 
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+    def serialize(self):
+        # do not serialize the password, its a security breach
+        return {"id": self.id,
+                "email": self.email,}
+      
 
 class Member(db.Model):
     __tablename__ = 'member'
@@ -110,11 +118,3 @@ class Report(db.Model):
     author_id = db.Column(db.ForeignKey(Author.id))
     bill_id = db.Column(db.ForeignKey(Bill.id))
 
-
-    def __repr__(self):
-        return f'<User {self.email}>'
-
-    def serialize(self):
-        # do not serialize the password, its a security breach
-        return {"id": self.id,
-                "email": self.email,}
