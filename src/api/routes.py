@@ -18,7 +18,7 @@ def handle_users():
         return jsonify(response_body), 200 
     if request.method == 'POST':
         data = request.get_json()
-        user = Users(email=data['email'], password=data['password'], is_active=data['is_active'])
+        user = Users(email=data['email'], password=data['password'], is_active=True)
         db.session.add(user)
         db.session.commit()
         response_body = user.serialize()
@@ -30,8 +30,7 @@ def handle_user_id(user_id):
     user = db.session.execute(db.select(Users).order_by(Users.user_id)) #  Antes: Users.query.get(user_id) 
     if user is None:
         response_body = {'message': 'User not found'}
-        return jsonify(response_body), 404
-    
+        return response_body, 404
     if request.method == 'GET':
         response_body = user.serialize()
         return jsonify(response_body), 200
@@ -44,10 +43,10 @@ def handle_user_id(user_id):
         response_body = user.serialize()
         return jsonify(response_body), 200
     elif request.method == 'DELETE':
-        db.session.delete(user)
+        user.is_active = False
         db.session.commit()
-        response_body = {'message': 'User deleted'}
-        return jsonify(response_body), 200
+        response_body = {'message': 'User inactived'}
+        return response_body, 200
        
 
 @api.route('/authors-and-members', methods=['GET'])  # Solo GET porque para crearlos es en Users 
@@ -208,16 +207,45 @@ def handle_shopping_cart(shopping_cart_id):
         return jsonify(response_body), 200
     elif request.method == 'PUT':
         data = request.get_json()
-        shopping_cart.total_amount = data['total_amount']
+        #  Shopping_cart.total_amount = data['total_amount']
         shopping_cart.discount = data['discount']
-        shopping_cart.date = data ['date']
+        #  Shopping_cart.date = data ['date']
         shopping_cart.status = data['status']
         db.session.commit()
         response_body = shopping_cart.serialize()
         return jsonify(response_body), 200
     elif request.method == 'DELETE':
+        #  Borrar items y luego el shopping Cart
         db.session.delete(shopping_cart)
         db.session.commit()
         response_body = {'message': 'Shopping Cart deleted'}
         return jsonify(response_body), 200
    
+
+"""    Ejemplos   """
+
+
+@api.route('/reviews', methods=['GET', 'POST'])
+def handle_reviews():
+    if request.method == 'GET':
+        reviews = db.session.execute(db.select(Reviews).order_by(Reviews.id)).scalars()
+        review_list = [review.serialize() for review in reviews]
+        response_body = {'message': 'Listado de reviews',
+                         'results': review_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        response_body = {'message': 'endpoint todavia no realizado'}
+        return response_body, 200 
+
+
+@api.route('/reviews/<int:reviews_id>', methods=['GET', 'PUT', 'DELETE'])
+def reviews(reviews_id):
+    if request.method == 'GET':
+        response_body = {'message': 'endpoint todavia no realizado'}
+        return response_body, 200  
+    if request.method == 'PUT':
+        response_body = {'message': 'endpoint todavia no realizado'}
+        return response_body, 200 
+    if request.method == 'DELETE':
+        response_body = {'message': 'endpoint todavia no realizado'}
+        return respons
