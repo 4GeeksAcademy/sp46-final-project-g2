@@ -1,11 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, String, Integer, ForeignKey
+""" from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base """
 
 
 db = SQLAlchemy()
-base = declarative_base()
+# base = declarative_base()
 
 
 class Users(db.Model):
@@ -14,8 +14,8 @@ class Users(db.Model):
     password = db.Column(db.String(10), unique = False, nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     is_admin = db.Column(db.Boolean, unique = False, nullable = False)
-    author = db.relationship('Authors', uselist = False, backref = 'user')
-    advisor = db.relationship('Advisors', uselist = False, backref = 'user')
+    # author = db.relationship('Authors', uselist = False, backref = 'user')
+    # advisor = db.relationship('Advisors', uselist = False, backref = 'user')
     
     def __repr__(self):
         return f'<Users {self.email}>'
@@ -36,9 +36,10 @@ class Authors(db.Model):
     country = db.Column(db.String(120))
     quote = db.Column(db.String(120))
     about_me = db.Column(db.String(1500))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
-    followers = db.relationship('Followers', foreign_keys = [Followers.following_id], backref = 'following_author')
-    following = db.relationship('Followers', foreign_keys = [Followers.follower_id], backref = 'follower_author')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    users = db.relationship('Users')
+    # followers = db.relationship('Followers', foreign_keys = [Followers.following_id], backref = 'following_author')
+    # following = db.relationship('Followers', foreign_keys = [Followers.follower_id], backref = 'follower_author')
     
     def __repr__(self):
         return f'<Authors {self.alias}>'
@@ -65,9 +66,10 @@ class Members(db.Model):
     current_discount = db.Column(db.Integer)
     remaining_reviews = db.Column(db.Integer)
     reviews_expiring_date = db.Column(db.Date)
-    status = db.Column(db.Enum, nullable = False)
+    status = db.Column(db.Enum('Active', 'Inactive', 'Pending', name='status'), nullable = False)
     awards = db.Column(db.String(1000))
-    author_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable = False)
+    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), nullable = False)
+    autors = db.relationship('Authors')
     
     def __repr__(self):
         return f'<Members {self.id}>'
@@ -85,20 +87,21 @@ class Members(db.Model):
                 "reviews_expiring_date": self.reviews_expiring_date,
                 "status": self.status,
                 "awards": self.awards,
-                "author_id". self.author_id}
+                "author_id": self.author_id}
 
 
 class Advisors(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(120), unique = True, nullable = False)
     nif = db.Column(db.String(9), unique = True, nullable = False) 
-    category = db.Column(db.Enum, nullable = False)
+    category = db.Column(db.Enum('Reviewer', 'Mentor', name='category'), nullable = False)
     address = db.Column(db.String(150), nullable = False)
     city = db.Column(db.String(120), nullable = False)
     country = db.Column(db.String(120), nullable = False)
     about_me = db.Column(db.String(1500))
     is_active = db.Column(db.Boolean(), nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
+    users = db.relationship('Users')
     
     def __repr__(self):
         return f'<Advisors {self.name}>'
@@ -117,22 +120,25 @@ class Advisors(db.Model):
 
 
 class Followers(db.Model):
-    follower_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable = False)
-    following_id = db.Column(db.Integer, db.ForeignKey('author.id'), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('authors.id'), nullable = False)
+    following_id = db.Column(db.Integer, db.ForeignKey('authors.id'), nullable = False)
+    followers = db.relationship('Authors', foreign_keys=[follower_id])
+    followings = db.relationship('Authors', foreign_keys=[following_id])
     
     def __repr__(self):
-        return f'<Followers {self.name}>'
+        return f'<Followers {self.id}>'
     
     def serialize(self):
         return {"follower_id": self.follower_id,
                 "following_id": self.following_id,}
 
 
-class CategorysServices(db.Model):
+class CategoryServices(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String, nullable = False)  # Mentorship, Review
     description = db.Column(db.String(1500), unique = False)
-    
+        
     def __repr__(self):
         return f'<CategorysServices {self.name}>'
     
@@ -149,9 +155,11 @@ class Services(db.Model):
     final_date = db.Column(db.Date)
     is_available = db.Column(db.Boolean(), unique = False, nullable = False)
     price = db.Column(db.Float)
-    category_id = db.Column(db.Integer, db.ForeignKey(CategoryService.id), nullable = False)
-    advisor_id = db.Column(db.ForeignKey(Advisor.id), nullable = False)
-    services = db.relationship('Services', backref = 'category_service')
+    category_id = db.Column(db.Integer, db.ForeignKey(CategoryServices.id))
+    advisor_id = db.Column(db.ForeignKey(Advisors.id))
+    categories = db.relationship('CategoryServices', foreign_keys=[category_id])
+    advisors = db.relationship('Advisors', foreign_keys=[advisor_id]) 
+    # services = db.relationship('Services', backref = 'category_service')
     
     def __repr__(self):
         return f'<Services {self.name}>'
@@ -172,8 +180,9 @@ class ShoppingCart(db.Model):
     total_amount = db.Column(db.Float)
     discount = db.Column(db.Float)
     date = db.Column(db.Date)
-    status = db.Column(db.Enum, nullable = False)
-    member_id = db.Column(db.ForeignKey(Members.id), nullable = False) 
+    status = db.Column(db.Enum('Active', 'Inactive', 'Pending', name='status'), nullable = False)
+    member_id = db.Column(db.ForeignKey(Members.id), nullable = False)
+    members = db.relationship('Members')
     
     def __repr__(self):
         return f'<ShoppingCart {self.id}>'
@@ -188,9 +197,11 @@ class ShoppingCart(db.Model):
 
 
 class ShoppingCartItems(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
     quantity = db.Column(db.Integer)
     price = db.Column(db.Float, nullable = False)
-    service_id = db.Column(db.ForeignKey(Service.id), nullable = False) 
+    service_id = db.Column(db.ForeignKey(Services.id), nullable = False)
+    services = db.relationship('Services')
     
     def __repr__(self):
         return f'<ShoppingCartItems {self.quantity}>'
@@ -203,25 +214,18 @@ class ShoppingCartItems(db.Model):
 
 class Bills(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    member_name = db.Column(db.ForeignKey(Member.name), nullable = False) 
-    member_nif = db.Column(db.ForeignKey(Member.nif), nullable = False) 
-    member_address = db.Column(db.ForeignKey(Member.address), nullable = False) 
-    discount = db.Column(db.ForeignKey(Member.current_discount)) 
-    paying_method = db.Column(db.Enum, nullable = False)  # Dependiendo de Stripe
+    paying_method = db.Column(db.String(100), nullable = False)  # Dependiendo de Stripe
     total_amount = db.Float(db.Float)
     date = db.Column(db.Date)
-    status = db.Column(db.Enum, nullable = False)
-    member_id = db.Column(db.ForeignKey(Members.id), nullable = False) 
+    status = db.Column(db.Enum('Paid', 'Declined', 'Pending', name='status'), nullable = False)
+    member_id = db.Column(db.ForeignKey(Members.id), nullable = False)
+    Members = db.relationship('Members')
     
     def __repr__(self):
         return f'<Bills {self.billing_id_number}>'
     
     def serialize(self):
         return {"id": self.id,
-                "member_name": self.member_name,
-                "member_nif": self.member_nif,
-                "member_address": self.member_address,
-                "discount": self.discount,
                 "paying_method": self.paying_method,
                 "total_amount": self.total_amount,
                 "date": self.date,
@@ -229,16 +233,19 @@ class Bills(db.Model):
                 "member_id": self.member_id}
 
 
-class BillsItems(db.Model):
+class BillItems(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
     quantity = db.Column(db.Integer)
     price = db.Column (db.Float)  # por unidad
-    service_id = db.Column(db.ForeignKey(Service.id), nullable = False)
+    service_id = db.Column(db.ForeignKey(Services.id), nullable = False)
+    services = db.relationship('Services')
     
     def __repr__(self):
-        return f'<BillsItems {self.quantity}>'
+        return f'<BillItems {self.quantity}>'
     
     def serialize(self):
-        return {"quantity": self.quantity,
+        return {"id": self.id,
+                "quantity": self.quantity,
                 "price": self.price,
                 "service_id": self.service_id}
 
@@ -246,8 +253,9 @@ class BillsItems(db.Model):
 class BillingIssues(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(300), nullable = False)
-    status = db.Column(db.Enum, nullable = False)
+    status = db.Column(db.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable = False)
     bill_id = db.Column(db.ForeignKey(Bills.id), nullable = False)
+    bills = db.relationship('Bills')
     
     def __repr__(self):
         return f'<BillingIssues {self.id}>'
@@ -268,8 +276,8 @@ class Posts(db.Model):
     created_date = db.Column(db.Date)
     update_date = db.Column(db.Date)
     is_published = db.Column(db.Boolean(), unique = False, nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
-    user = db.relationship('Users', backref = db.backref('posts', lazy = True))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
+    users = db.relationship('Users')
     
     def __repr__(self):
         return f'<Posts {self.title}>'
@@ -282,15 +290,16 @@ class Posts(db.Model):
                 "text": self.text,
                 "created_date": self.created.date,
                 "update_date": self.update_date,
-                "is_published: self.is_published,
+                "is_published": self.is_published,
                 "user_id": self.user_id}
 
 
 class Media(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    type = db.Column(db.Enum, nullable = False)
+    source = db.Column(db.String(100), nullable = False)
     url = db.Column(db.String(250), unique = True, nullable = False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable = False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable = False)
+    posts = db.relationship('Posts')
     
     def __repr__(self):
         return f'<Media {self.type}>'
@@ -303,9 +312,12 @@ class Media(db.Model):
 
 
 class Likes(db.Model):
-    user_id = db.Column(db.ForeignKey('user.id'), nullable = False)
-    post_id = db.Column(db.ForeignKey('post.id'), nullable = False)
-    value = db.Column(db.Enum, nullable = False)
+    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.ForeignKey('users.id'), nullable = False)
+    post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
+    value = db.Column(db.Integer, nullable = False)
+    users = db.relationship('Users', foreign_keys=[user_id])
+    posts = db.relationship('Posts', foreign_keys=[post_id])
     
     def __repr__(self):
         return f'<Likes {self.user_id}>'
@@ -321,8 +333,10 @@ class Comments(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     date = db.Column(db.Date)
     text = db.Column(db.String(255), nullable = False)
-    post_id = db.Column(db.ForeignKey('post.id'), nullable = False)
-    author_id = db.Column(db.ForeignKey('user.id'), nullable = False)
+    post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
+    author_id = db.Column(db.ForeignKey('authors.id'), nullable = False)
+    posts = db.relationship('Posts', foreign_keys=[post_id])
+    authors = db.relationship('Authors', foreign_keys=[author_id])
     
     def __repr__(self):
         return f'<Comments {self.id}>'
@@ -336,16 +350,18 @@ class Comments(db.Model):
                 "author_id": self.author_id}
 
 
-class ReportsPosts(db.Model):
+class ReportPosts(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(255), nullable = False)
-    status = db.Column(db.Enum, nullable = False)
+    status = db.Column(db.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable = False)
     is_active = db.Column(db.Boolean(), unique=False, nullable = False)
-    user_id = db.Column(db.ForeignKey('author.id'), nullable = False)
-    post_id = db.Column(db.ForeignKey('post.id'), nullable = False)
+    author_id = db.Column(db.ForeignKey('authors.id'), nullable = False)
+    post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
+    authors = db.relationship('Authors', foreign_keys=[author_id])
+    posts = db.relationship('Posts', foreign_keys=[post_id])
     
     def __repr__(self):
-        return f'<ReportsPosts {self.id}>'
+        return f'<ReportPosts {self.id}>'
     
     def serialize(self):
         # do not serialize the password, its a security breach
@@ -353,6 +369,5 @@ class ReportsPosts(db.Model):
                 "description": self.description,
                 "status": self.status,
                 "is_active": self.is_active,
-                "user_id": self.user_id
+                "user_id": self.user_id,
                 "post_id": self.post_id}
-
