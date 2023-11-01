@@ -19,12 +19,15 @@ def handle_users():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        user = Users(email=data['email'], 
+        user = Users(id=data['id'],
+                     email=data['email'], 
                      password=data['password'], 
-                     is_active=True)
+                     is_active=True, 
+                     is_admin=True)
         db.session.add(user)
         db.session.commit()
-        response_body = {user.serialize()}
+        response_body = {'message': 'User created', 
+                         'results': user.serialize()}
         return response_body, 201
 
 
@@ -34,11 +37,11 @@ def handle_user_id(user_id):
     # if user is None:
     #    response_body = {'message': 'User not found'}
     #    return response_body, 404
-    user = db.one_or_404(
-    db.select(Users).filter_by(user_id=user_id), description=f"User not found , 404."
-    )
+    user = db.one_or_404(db.select(Users).filter_by(user_id=user_id), 
+                         description=f"User not found , 404.")
     if request.method == 'GET':
-        response_body = {user.serialize()}
+        response_body = {'message': 'User', 
+                         'results': user.serialize()}
         return response_body, 200
     if request.method == 'PUT':
         data = request.get_json()
@@ -47,7 +50,8 @@ def handle_user_id(user_id):
         user.is_active = data['is_active']
         user.is_admin = data['is_admin']
         db.session.commit()
-        response_body = {user.serialize()}
+        response_body = {'message': 'User updated', 
+                         'results': user.serialize()}
         return response_body, 200
     if request.method == 'DELETE':
         user.is_active = False
@@ -61,20 +65,24 @@ def handle_authors():
     if request.method == 'GET':
         authors = db.session.execute(db.select(Authors)) 
         authors_list = [author.serialize() for author in authors]
-        response_body = {author_list}
+        response_body = {'message': 'Author list', 
+                         'results': author_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        author = Authors(alias=data['alias'], 
+        author = Authors(id=data['id'],
+                         alias=data['alias'], 
                          birth_date=data['birth_date'], 
                          city=data['city'], 
                          country=data['country'], 
                          quote=data['quote'], 
                          about_me=data['about_me'], 
-                         is_active=True)
+                         is_active=True,
+                         user_id=dara['user_id'])
         db.session.add(author)
         db.session.commit()
-        response_body = {author.serialize()}
+        response_body = {'message': 'Author created', 
+                         'results': author.serialize()}
         return response_body, 201
 
 
@@ -83,18 +91,21 @@ def handle_author_id(author_id):
     author = db.one_or_404(db.select(Authors).filter_by(author_id=author_id), 
                            description=f"Author not found , 404.")
     if request.method == 'GET':
-        response_body = {author.serialize()}
-        return jsonifyresponse_body, 200
+        response_body = {'message': 'Author', 
+                         'results': author.serialize()}
+        return response_body, 200
     if request.method == 'PUT':
         data = request.get_json()
         author.alias = data['alias']
         author.birth_date = data['birth_date']
         author.city = data['city']
-        author.country = data ['country']
-        author.quote = data ['quote']
-        author.about_me = data ['about_me']
+        author.country = data['country']
+        author.quote = data['quote']
+        author.about_me = data['about_me']
+        author.is_active = data['is_active']
         db.session.commit()
-        response_body = {author.serialize()}
+        response_body = {'message': 'Author updated', 
+                         'results': author.serialize()}
         return response_body, 200
     if request.method == 'DELETE':
         author.is_active = False
@@ -108,7 +119,8 @@ def handle_members():
     if request.method == 'GET':
         members = db.session.execute(db.select(Members))
         members_list = [member.serialize() for member in members]
-        response_body = {members_list}
+        response_body = {'message': 'Members', 
+                         'results': members_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
@@ -123,6 +135,7 @@ def handle_members():
                          reviews_expiring_date=data['reviews_expiring_date'], 
                          status=data['status'], 
                          awards=data['awards'], 
+                         author_id=data['author_id'],
                          is_active=True)
         db.session.add(member)
         db.session.commit()
