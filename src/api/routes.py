@@ -14,15 +14,14 @@ def handle_users():
     if request.method == 'GET':
         users = db.session.execute(db.select(Users))
         users_list = [user.serialize() for user in users]
-        response_body = {users_list}
+        response_body = {'message': 'User List', 
+                         'results': users_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        user = Users(
-                    email=data['email'], 
-                    password=data['password'], 
-                    is_active=True
-                    )
+        user = Users(email=data['email'], 
+                     password=data['password'], 
+                     is_active=True)
         db.session.add(user)
         db.session.commit()
         response_body = {user.serialize()}
@@ -31,17 +30,17 @@ def handle_users():
 
 @api.route('/users/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_user_id(user_id):
-    """User = db.session.execute(db.select(Users).filter_by(user_id=user_id)).scalar_one() 
-    if user is None:
-        response_body = {'message': 'User not found'}
-        return response_body, 404"""
+    # User = db.session.execute(db.select(Users).filter_by(user_id=user_id)).scalar_one() 
+    # if user is None:
+    #    response_body = {'message': 'User not found'}
+    #    return response_body, 404
     user = db.one_or_404(
     db.select(Users).filter_by(user_id=user_id), description=f"User not found , 404."
     )
     if request.method == 'GET':
         response_body = {user.serialize()}
         return response_body, 200
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         data = request.get_json()
         user.email = data['email']
         user.password = data['password']
@@ -50,7 +49,7 @@ def handle_user_id(user_id):
         db.session.commit()
         response_body = {user.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         user.is_active = False
         db.session.commit()
         response_body = {'message': 'User inactived'}
@@ -66,15 +65,13 @@ def handle_authors():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        author = Authors(
-                        alias=data['alias'], 
-                        birth_date=data['birth_date'], 
-                        city=data['city'], 
-                        country=data['country'], 
-                        quote=data['quote'], 
-                        about_me=data['about_me'], 
-                        is_active=True
-                        )
+        author = Authors(alias=data['alias'], 
+                         birth_date=data['birth_date'], 
+                         city=data['city'], 
+                         country=data['country'], 
+                         quote=data['quote'], 
+                         about_me=data['about_me'], 
+                         is_active=True)
         db.session.add(author)
         db.session.commit()
         response_body = {author.serialize()}
@@ -83,13 +80,12 @@ def handle_authors():
 
 @api.route('/authors/<int:author_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_author_id(author_id):
-    author = db.one_or_404(
-    db.select(Authors).filter_by(author_id=author_id), description=f"Author not found , 404."
-    )
+    author = db.one_or_404(db.select(Authors).filter_by(author_id=author_id), 
+                           description=f"Author not found , 404.")
     if request.method == 'GET':
         response_body = {author.serialize()}
         return jsonifyresponse_body, 200
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         data = request.get_json()
         author.alias = data['alias']
         author.birth_date = data['birth_date']
@@ -100,7 +96,7 @@ def handle_author_id(author_id):
         db.session.commit()
         response_body = {author.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         author.is_active = False
         db.session.commit()
         response_body = {'message': 'Author inactived'}
@@ -116,20 +112,18 @@ def handle_members():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        member = Members(
-                        name=data['name'], 
-                        nif=data['nif'], 
-                        address=data['address'], 
-                        starting_date=data['starting_date'], 
-                        current_date=data['current_date'], 
-                        final_date=data['final_date'], 
-                        current_discount=data['current_discount'], 
-                        remaining_reviews=data['remaining_reviews'], 
-                        reviews_expiring_date=data['reviews_expiring_date'], 
-                        status=data['status'], 
-                        awards=data['awards'], 
-                        is_active=True
-                        )
+        member = Members(name=data['name'], 
+                         nif=data['nif'], 
+                         address=data['address'], 
+                         starting_date=data['starting_date'], 
+                         current_date=data['current_date'], 
+                         final_date=data['final_date'], 
+                         current_discount=data['current_discount'], 
+                         remaining_reviews=data['remaining_reviews'], 
+                         reviews_expiring_date=data['reviews_expiring_date'], 
+                         status=data['status'], 
+                         awards=data['awards'], 
+                         is_active=True)
         db.session.add(member)
         db.session.commit()
         response_body = {member.serialize()}
@@ -138,13 +132,12 @@ def handle_members():
 
 @api.route('/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_member_id(member_id):
-    member = db.one_or_404(
-    db.select(Members).filter_by(member_id=member_id), description=f"Member not found , 404."
-    )
+    member = db.one_or_404(db.select(Members).filter_by(member_id=member_id), 
+                           description=f"Member not found , 404.")
     if request.method == 'GET':
         response_body = {member.serialize()}
         return response_body, 200
-    elif request.method == 'PUT':  # ¿¿Esto permite que lo cambie el Member o el Admin??
+    if request.method == 'PUT':  # Revisar cuando tengamos la Autenticación
         data = request.get_json()
         member.name = data['name']
         member.nif = data['nif']
@@ -160,7 +153,7 @@ def handle_member_id(member_id):
         db.session.commit()
         response_body = {member.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         member.is_active = False
         db.session.commit()
         response_body = {'message': 'Member inactived'}
@@ -176,16 +169,14 @@ def handle_advisors():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        advisor = Advisor(
-                        name=data['name'], 
-                        nif=data['nif'], 
-                        category=data['category'], 
-                        address=data['address'], 
-                        city=data['city'], 
-                        country=data['country'], 
-                        about_me=data['about_me'], 
-                        is_active=True
-                        )
+        advisor = Advisor(name=data['name'], 
+                          nif=data['nif'], 
+                          category=data['category'], 
+                          address=data['address'], 
+                          city=data['city'], 
+                          country=data['country'], 
+                          about_me=data['about_me'], 
+                          is_active=True)
         db.session.add(advisor)
         db.session.commit()
         response_body = {advisor.serialize()}
@@ -228,59 +219,54 @@ def handle_followers():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        follower = Followers(
-                    follower_id=data['follower_id'], 
-                    following_id=data['following_id'], 
-                    is_active=True  # Hay que crearlo en models.py
-                    )
+        follower = Followers(follower_id=data['follower_id'], 
+                             following_id=data['following_id'])
         db.session.add(follower)
         db.session.commit()
         response_body = {user.serialize()}
         return response_body, 201
 
 
-@api.route('/followers/<int:author_id>', methods=['GET', 'DELETE'])  
-# No tiene PUT / AUTHOR_ID?? / Dos funciones en un endpoint?
+@api.route('/followers/<int:follower_id>', methods=['GET', 'DELETE'])  
+# No tiene PUT ni DELETE / AUTHOR_ID??
 def handle_follower_id(follower_id):
-    follower = db.one_or_404(
-    db.select(Follower).filter_by(follower_id=follower_id), description=f"Follower not found , 404."
-    )
+    followers = db.session.execute(db.select(Follower).filter_by(follower_id=follower_id)).scalars()
+    # if "There are no followers ." PREGUNTAR SI NO HAY 
     if request.method == 'GET':
         response_body = {follower.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
-        follower.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Follower inactived'}
+    if request.method == 'DELETE':
+        # Delete: quiero eliminar a alguien que me sigue
+        # JSON: recibo el id del que me sigue (following)
+        # Busco en la base de datos (modelo) el registro que tiene el follower (del endpoint) y el following (del json)
+        # si lo encuentro, borro ese registro. Sino lo encuentro es porque no me sigue ese usuario.  
+        response_body = {}
         return response_body, 200
+
+@api.route('/followings/<int:following_id>', methods=['GET'])  
 def handle_following_id(following_id):
-    following = db.one_or_404(
-    db.select(Follower).filter_by(following_id=following_id), description=f"Following not found , 404."
-    )
+    followings = db.session.execute(db.select(Follower).filter_by(following_id=following_id)).scalars()
     if request.method == 'GET':
         response_body = {follower.serialize()}  # Follower está correcto?
         return response_body, 200
-    elif request.method == 'DELETE':
-        following.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Following inactived'}
-        return response_body, 200
-       
+    # Delete: un seguidor quiere dejar de seguir a alguien 
+    # JSON: recibe el follower, 
+    # busco en la base de datos el registro que tiene el follower ( del json) y el following (del endpoint)
+    # si lo encuentro, borro ese registro. Sino lo encuentro es porque no se sigue a ese usuario.  
 
 @api.route('/services', methods=['GET', 'POST']) 
 def handle_services():
     if request.method == 'GET':
-        service = db.session.execute(db.select(Services))
+        services = db.session.execute(db.select(Services))
         services_list = [service.serialize() for service in services]
         response_body = {services_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        service = Services(
-                           name=data['name'], 
+        service = Services(name=data['name'], 
                            starting_date=data['starting_date'], 
                            final_date=data['final_date'], 
-                           is_available=data['is_available'],  #  Es lo mismo que is_active??
+                           is_available=data['is_available'],  #  Es lo mismo que is_active
                            price=data['price'])
         db.session.add(service)
         db.session.commit()
@@ -290,24 +276,28 @@ def handle_services():
 
 @api.route('/services/<int:service_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_service_id(service_id):
-    service = db.one_or_404(
-    db.select(Services).filter_by(service_id=service_id), description=f"service not found , 404."
-    )
+    service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
+                            description=f"service not found , 404.")
     if request.method == 'GET':
         response_body = {service.serialize()}
         return response_body, 200
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         data = request.get_json()
         service.name = data['name']
         service.starting_date = data['starting_date']
-        service.catfinal_dateegory = data ['final_date']
+        service.final_date = data['final_date']
         service.is_available = data['is_available']
-        service.price = data ['price']
+        service.price = data['price']
+        service.category_id = data['category_id']
+        service.advisor_id = data['advisor_id']
         db.session.commit()
         response_body = {service.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
-        service.is_available = False  #  Debería ser is_active??
+    if request.method == 'DELETE':
+        # Si el taller aún no inició se debería poder borrar. Y si ya se dió, debería haber otra clase diferente a Inactivo. 
+        # TODO: Preguntar si la fecha de inicio es posterior a la fecha de hoy. Si es así lo deshabilitamos. 
+        service.is_available = False  
+        # FIX: NO lo haremos en esta versión. Deberíamos avisar a los que han contratado el servicio 
         db.session.commit()
         response_body = {'message': 'Service unavailable'}
         return response_body, 200
@@ -316,16 +306,14 @@ def handle_service_id(service_id):
 @api.route('/category-services', methods=['GET', 'POST']) # Nombre compuesto
 def handle_category_services():
     if request.method == 'GET':
-        category_service = db.session.execute(db.select(CategoryServices))
+        category_services = db.session.execute(db.select(CategoryServices))
         category_services_list = [category_service.serialize() for category_service in category_services]
         response_body = {category_services_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        category_service = CategoryServices(
-                                           name=data['name'], 
-                                           description=data['description']
-                                           )  # Añadir is_active
+        category_service = CategoryServices(name=data['name'], 
+                                            description=data['description'])  # Añadir is_active
         db.session.add(category_service)
         db.session.commit()
         response_body = {category_service.serialize()}
@@ -341,49 +329,52 @@ def handle_category_service_id(category_service_id):
     if request.method == 'GET':
         response_body = {category_service.serialize()}
         return response_body, 200
-    elif request.method == 'PUT':  # Añadir is_active
+    if request.method == 'PUT':  # Añadir is_active
         data = request.get_json()
         category_service.name=data['name'], 
         category_service.description=data['description']
         db.session.commit()
         response_body = {category_service.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
+        # FIX: Marcar como inactiva una categoría si se va a dejar de impartir todos los servicios de esa categoría. 
         category_service.is_active = False  #  Añadir is_active a models.py
         db.session.commit()
         response_body = {'message': 'Category Service inactive'}
         return response_body, 200
 
 
-@api.route('/shopping-cart', methods=['GET', 'POST'])  # Nombre compuesto
-def handle_shopping_cart():
+@api.route('/shopping-carts', methods=['GET', 'POST'])  # Nombre compuesto
+def handle_shopping_carts():
     if request.method == 'GET':
-        shopping_cart = db.session.execute(db.select(ShoppingCart))
-        shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_cart]
+        shopping_carts = db.session.execute(db.select(ShoppingCarts))
+        shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
         response_body = {shopping_cart_list}
         return response_body, 200 
-    if request.method == 'POST':  # Borra carrito??
+    if request.method == 'POST':  
         data = request.get_json()
-        shopping_cart = ShoppingCart(
-                                    total_amount=data['total_amount'], 
-                                    discount=data['discount'], 
-                                    date=data['date'], 
-                                    status=data['status'])
+        shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
+                                     discount=data['discount'], 
+                                     date=data['date'], 
+                                     status=data['status'],
+                                     member_id=data['member_id']
+                                     )
         db.session.add(shopping_cart)
         db.session.commit()
         response_body = {shopping_cart.serialize()}
         return response_body, 201
 
 
-@api.route('/shopping-cart/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])  # ¿Dónde añadimos usuario e items?
+@api.route('/members/<int:member_id>/shopping-carts', methods=['GET', 'PUT', 'DELETE'])
 def handle_shopping_cart_id(shopping_cart_id):
-    shopping_cart = db.one_or_404(
-    db.select(ShoppingCart).filter_by(shopping_cart_id=shopping_cart_id), description=f"Shopping Cart not found , 404."
-    )
+    shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
+                                  description=f"Shopping Cart not found , 404.")
+    # shopping_cart_items. A todos los items que correspondan al shopping_cart.id --> esto es un GET
     if request.method == 'GET':
-        response_body = {shopping_cart.serialize()}
-        return jsonifyresponse_body, 200
-    elif request.method == 'PUT':
+        # TODO: ¿Qué pasa si en el carrito (abierto) tiene un servicio que ya caducó?
+        response_body = {shopping_cart.serialize()} # TODO: Añadir un array de los items
+        return response_body, 200
+    if request.method == 'PUT': # Revisar si es válido el método put en el carrito 
         data = request.get_json()
         #  Shopping_cart.total_amount = data['total_amount']
         shopping_cart.discount = data['discount']
@@ -392,14 +383,16 @@ def handle_shopping_cart_id(shopping_cart_id):
         db.session.commit()
         response_body = {shopping_cart.serialize()}
         return response_body, 200
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         #  Borrar items y luego el shopping Cart
-        db.session.delete(shopping_cart_items) 
+        db.session.delete(shopping_cart_items) # variable ya creada en el GET de shopping_cart_items
         db.session.delete(shopping_cart)
         db.session.commit()
         response_body = {'message': 'Shopping Cart deleted'}
         return response_body, 200
    
+
+
 
 """    Ejemplos   """
 

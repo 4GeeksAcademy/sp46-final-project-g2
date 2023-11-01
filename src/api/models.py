@@ -181,7 +181,7 @@ class ShoppingCart(db.Model):
     discount = db.Column(db.Float)
     date = db.Column(db.Date)
     status = db.Column(db.Enum('Active', 'Inactive', 'Pending', name='status'), nullable = False)
-    member_id = db.Column(db.ForeignKey(Members.id), nullable = False)
+    member_id = db.Column(db.ForeignKey(Members.id), nullable = False, unique=False)
     members = db.relationship('Members')
     
     def __repr__(self):
