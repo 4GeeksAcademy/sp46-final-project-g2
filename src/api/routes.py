@@ -13,15 +13,14 @@ api = Blueprint('api', __name__)
 @api.route('/users', methods=['GET', 'POST']) 
 def handle_users():
     if request.method == 'GET':
-        users = db.session.execute(db.select(Users))
+        users = db.session.execute(db.select(Users)).scalars()
         users_list = [user.serialize() for user in users]
         response_body = {'message': 'User List', 
                          'results': users_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        user = Users(id=data['id'],
-                     email=data['email'], 
+        user = Users(email=data['email'], 
                      password=data['password'], 
                      is_active=True, 
                      is_admin=True)
@@ -74,14 +73,13 @@ def handle_authors():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        author = Authors(id=data['id'],
-                         alias=data['alias'], 
+        author = Authors(alias=data['alias'], 
                          birth_date=data['birth_date'], 
                          city=data['city'], 
                          country=data['country'], 
                          quote=data['quote'], 
                          about_me=data['about_me'], 
-                         is_active=True,
+                         is_active=['is_active'],
                          user_id=data['user_id'])
         db.session.add(author)
         db.session.commit()
@@ -184,15 +182,14 @@ def handle_member_id(member_id):
 @api.route('/advisors', methods=['GET', 'POST'])  
 def handle_advisors():
     if request.method == 'GET':
-        advisors = db.session.execute(db.select(Advisors))
+        advisors = db.session.execute(db.select(Advisors)).scalars()
         advisors_list = [advisor.serialize() for advisor in advisors]
         response_body = {'message': 'Advisors List', 
                          'results': advisors_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        advisor = Advisor(id=data['id'],
-                          name=data['name'], 
+        advisor = Advisors(name=data['name'], 
                           nif=data['nif'], 
                           category=data['category'], 
                           address=data['address'], 
@@ -210,7 +207,7 @@ def handle_advisors():
 
 @api.route('/advisors/<int:advisor_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_advisor_id(advisor_id):
-    advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
+    advisor = db.one_or_404(db.select(Advisors).filter_by(id=advisor_id), 
                             description=f"Advisor not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Advisor', 
@@ -247,8 +244,7 @@ def handle_followers():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        follower = Followers(id=data['id'],
-                             follower_id=data['follower_id'], 
+        follower = Followers(follower_id=data['follower_id'], 
                              following_id=data['following_id'])
         db.session.add(follower)
         db.session.commit()
@@ -340,7 +336,7 @@ def handle_services():
 
 @api.route('/services/<int:service_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_service_id(service_id):
-    service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
+    service = db.one_or_404(db.select(Services).filter_by(id=service_id), 
                             description=f"service not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Service', 
@@ -451,7 +447,7 @@ def handle_shopping_carts():
 
 
 @api.route('/members/<int:member_id>/shopping-carts', methods=['GET', 'DELETE'])
-def handle_shopping_cart_id(shopping_cart_id):
+def handle_shopping_cart_id(member_id):
     shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
                                   description=f"Shopping Cart not found , 404.")
     if request.method == 'GET':
