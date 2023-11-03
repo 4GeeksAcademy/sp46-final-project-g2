@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, Users
+from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
 
@@ -38,7 +38,7 @@ def handle_user_id(user_id):
     # if user is None:
     #    response_body = {'message': 'User not found'}
     #    return response_body, 404
-    user = db.one_or_404(db.select(Users).filter_by(user_id=user_id), 
+    user = db.one_or_404(db.select(Users).filter_by(id=user_id), 
                          description=f"User not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'User', 
@@ -89,7 +89,7 @@ def handle_authors():
 
 @api.route('/authors/<int:author_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_author_id(author_id):
-    author = db.one_or_404(db.select(Authors).filter_by(author_id=author_id), 
+    author = db.one_or_404(db.select(Authors).filter_by(id=author_id), 
                            description=f"Author not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Author', 
@@ -147,7 +147,7 @@ def handle_members():
 
 @api.route('/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_member_id(member_id):
-    member = db.one_or_404(db.select(Members).filter_by(member_id=member_id), 
+    member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
                            description=f"Member not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Member', 
