@@ -25,6 +25,7 @@ def handle_users():
                      password=data['password'], 
                      is_active=True, 
                      is_admin=True)
+        # Aca se debe crear Advisor o Author asociado según los datos que vienen en el JSON
         db.session.add(user)
         db.session.commit()
         response_body = {'message': 'User created', 
@@ -48,7 +49,9 @@ def handle_user_id(user_id):
         data = request.get_json()
         user.email = data['email']
         user.password = data['password']
+        # si el is_active es false, no lo dejo modificar y le aviso ue tiene que hacerlo a través del método DELETE. Caso contrario, lo activo. A resolver en AUTENTICACION
         user.is_active = data['is_active']
+        # esto sólo lo puede hacer otro usuario que sea admin. A resolver en AUTENTICACION
         user.is_admin = data['is_admin']
         db.session.commit()
         response_body = {'message': 'User updated', 
@@ -477,6 +480,271 @@ def handle_shopping_cart_id(shopping_cart_id):
         return response_body, 200
    
 
+@api.route('/posts', methods=['GET', 'POST']) 
+def handle_posts():
+    if request.method == 'GET':
+        posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
+        posts_list = [post.serialize() for post in posts]
+        response_body = {'message': 'Posts List', 
+                         'results': posts_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        post = Posts(title=data['title'], 
+                     abstract=data['abstract'],
+                     tag=data['tag'],
+                     text=data['text'],
+                     created_date=data['created_date'],
+                     update_date=data['update_date'],
+                     is_active=True,
+                     is_published=True)  
+        db.session.add(post)
+        db.session.commit()
+        response_body = {post.serialize()}
+        return response_body, 201
+
+
+@api.route('/posts/<int:post_id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_post_id(post_id):
+    post = db.one_or_404(db.select(Posts).filter_by(post_id=member_id), 
+                           description=f"Post not found , 404.")
+    if request.method == 'GET':
+        response_body = {post.serialize()}
+        return response_body, 200
+    if request.method == 'PUT':  
+        data = request.get_json()
+        post.abstract=data['abstract']
+        post.tag=data['tag']
+        post.text=data['text']
+        post.created_date=data['created_date']
+        post.update_date=data['update_date']
+        post.is_published=data['is_published']
+        db.session.commit()
+        response_body = {post.serialize()}
+        return response_body, 200
+    if request.method == 'DELETE':
+        post.is_active = False
+        db.session.commit()
+        response_body = {'message': 'Post inactived'}
+        return response_body, 200
+
+
+@api.route('/users/<int:user_id>/posts', methods=['GET', 'DELETE'])
+def handle_post_by_user_id(user_id):   
+    if request.method == 'GET':
+        posts = db.session.execute(db.select(Posts).filter_by(user_id=user_id)).scalars()
+        posts_list = [post.serialize() for post in posts]
+        response_body = {'message': 'Posts List', 
+                         'results': posts_list}
+        return response_body, 200 
+    if request.method == 'DELETE':
+        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+        return response_body, 200
+
+
+@api.route('/media', methods=['GET', 'POST']) 
+def handle_media():
+    if request.method == 'GET':
+        media = db.session.execute(db.select(Media).order_by(Media.id)).scalars()
+        media_list = [medium.serialize() for medium in media]
+        response_body = {'message': 'Media List', 
+                         'results': media_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        medium = Media(id=data['id'],
+                       source=data['source'], 
+                       is_active=True,
+                       url=data['url'])
+        db.session.add(medium)
+        db.session.commit()
+        response_body = {'message': 'Media created', 
+                         'results': medium.serialize()}
+        return response_body, 201
+
+
+@api.route('/media/<int:media_id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_media_id(media_id):
+    medium = db.one_or_404(db.select(Media).filter_by(media_id=media_id), 
+                         description=f"Media not found , 404.")
+    if request.method == 'GET':
+        response_body = {'message': 'Media', 
+                         'results': medium.serialize()}
+        return response_body, 200
+    if request.method == 'PUT':
+        data = request.get_json()
+        medium.source = data['source']        
+        medium.is_active = data['is_active']
+        medium.url = data['url']
+        db.session.commit()
+        response_body = {'message': 'Media updated', 
+                         'results': medium.serialize()}
+        return response_body, 200
+    if request.method == 'DELETE':
+        medium.is_active = False
+        db.session.commit()
+        response_body = {'message': 'Media inactived'}
+        return response_body, 200
+
+
+@api.route('/posts/<int:post_id>/media', methods=['GET', 'DELETE'])
+def handle_media_by_post_id(post_id):   
+    if request.method == 'GET':
+        media = db.session.execute(db.select(Media).filter_by(post_id=post_id)).scalars()
+        media_list = [medium.serialize() for medium in media]
+        response_body = {'message': 'Media List sorted by post id', 
+                         'results': media_list}
+        return response_body, 200 
+    if request.method == 'DELETE':
+        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+        return response_body, 200
+
+
+@api.route('/likes', methods=['GET', 'POST']) 
+def handle_likes():
+    if request.method == 'GET':
+        likes = db.session.execute(db.select(Likes).order_by(Likes.id)).scalars()
+        likes_list = [like.serialize() for like in likes]
+        response_body = {'message': 'Likes List', 
+                         'results': likes_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        like = Likes(id=data['id'],
+                     is_active=True, 
+                     value=['value'])
+        db.session.add(like)
+        db.session.commit()
+        response_body = {'message': 'Like created', 
+                         'results': like.serialize()}
+        return response_body, 201
+
+
+@api.route('/likes/<int:like_id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_likes_id(like_id):
+    like = db.one_or_404(db.select(Likes).filter_by(like_id=like_id), 
+                         description=f"Like not found , 404.")
+    if request.method == 'GET':
+        response_body = {'message': 'Like', 
+                         'results': like.serialize()}
+        return response_body, 200
+    if request.method == 'PUT':
+        data = request.get_json()
+        like.value = data['value']
+        db.session.commit()
+        response_body = {'message': 'Like updated', 
+                         'results': like.serialize()}
+        return response_body, 200
+    if request.method == 'DELETE':
+        like.is_active = False
+        db.session.commit()
+        response_body = {'message': 'Like inactived'}
+        return response_body, 200
+
+
+@api.route('/posts/<int:post_id>/likes', methods=['GET', 'DELETE'])
+def handle_like_by_post_id(post_id):   
+    if request.method == 'GET':
+        likes = db.session.execute(db.select(Likes).filter_by(post_id=post_id)).scalars()
+        likes_list = [like.serialize() for like in likes]
+        response_body = {'message': 'Likes List sorted by post id', 
+                         'results': likes_list}
+        return response_body, 200 
+    if request.method == 'DELETE':
+        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+        return response_body, 200
+
+
+@api.route('/users/<int:user_id>/likes', methods=['GET', 'DELETE'])
+def handle_like_by_user_id(user_id):   
+    if request.method == 'GET':
+        likes = db.session.execute(db.select(Likes).filter_by(user_id=user_id)).scalars()
+        likes_list = [like.serialize() for like in likes]
+        response_body = {'message': 'Likes list sorted by user id', 
+                         'results': likes_list}
+        return response_body, 200 
+    if request.method == 'DELETE':
+        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+        return response_body, 200
+
+
+@api.route('/comments', methods=['GET', 'POST'])
+def handle_comments():
+    if request.method == 'GET':
+        comments = db.session.execute(db.select(Comments).order_by(Comments.id)).scalars()
+        comment_list = [comment.serialize() for comment in comments]
+        response_body = {'message': 'Comment List',
+                         'results': comment_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        comment = Comments(id=data['id'],
+                           date=data['date'],
+                           text=data['text'],
+                           is_active=True)
+        db.session.add(comment)
+        db.session.commit()
+        response_body = {'message': 'Comment created', 
+                         'results': comment.serialize()}
+        return response_body, 200 
+
+
+@api.route('/comments/<int:comment_id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_comment_id(media_id):
+    comment = db.one_or_404(db.select(Comments).filter_by(coment_id=comment_id), 
+                         description=f"Comment not found , 404.")
+    if request.method == 'GET':
+        response_body = {'message': 'Comment', 
+                         'results': comment.serialize()}
+        return response_body, 200
+    if request.method == 'PUT':
+        data = request.get_json()
+        comment.date = data['date']
+        comment.text = data['text']
+        comment.is_active = data['is_active']
+        db.session.commit()
+        response_body = {'message': 'Comment updated', 
+                         'results': comment.serialize()}
+        return response_body, 200
+    if request.method == 'DELETE':
+        comment.is_active = False
+        db.session.commit()
+        response_body = {'message': 'Comment inactived'}
+        return response_body, 200
+
+
+@api.route('/post/<int:post_id>/comments', methods=['GET', 'DELETE'])
+def handle_comments_by_post_id(post_id):   
+    if request.method == 'GET':
+        comments = db.session.execute(db.select(Comments).filter_by(post_id=post_id)).scalars()
+        comments_list = [post.serialize() for post in posts]
+        response_body = {'message': 'Comments list sorted by post id', 
+                         'results': comments_list}
+        return response_body, 200 
+    if request.method == 'DELETE':
+        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+        return response_body, 200
+
+
+@api.route('/report-posts', methods=['GET', 'POST'])
+def handle_report_posts():
+    if request.method == 'GET':
+        reports = db.session.execute(db.select(ReportPosts).order_by(ReportPosts.id)).scalars()
+        reports_list = [report.serialize() for report in reports]
+        response_body = {'message': 'Report Posts List',
+                         'results': reports_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        report = Comments(id=data['id'],
+                           description=data['description'],
+                           status=data['status'],
+                           is_active=True)
+        db.session.add(report)
+        db.session.commit()
+        response_body = {'message': 'Report Post created', 
+                         'results': report.serialize()}
+        return response_body, 200 
 
 
 """    Ejemplos   """
