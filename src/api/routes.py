@@ -5,9 +5,30 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 
 api = Blueprint('api', __name__)
+
+api.config["JWT_SECRET_KEY"] = "secret-key" 
+jwt = JWTManager(api)
+
+
+@api.route("/login", methods=["POST"])
+def create_token():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+    """user = db.one_or_404(db.select(Users).filter_by(email=email, password=password), 
+                           description=f"Bad username or password , 404.")"""
+    if email != "test" or email != "test":
+        response_body = {'message': "Bad username or password"}
+        return response_body, 401
+    # crea un nuevo token con el id de usuario dentro
+    access_token = create_access_token(identity=user.id)
+    response_body = {'message': 'Token created',
+                     'results': {'token': access_token, 
+                                 'user_id': user.id}}
+    return response_body, 200
 
 
 @api.route('/users', methods=['GET', 'POST']) 
@@ -66,7 +87,7 @@ def handle_user_id(user_id):
 @api.route('/authors', methods=['GET', 'POST']) 
 def handle_authors():
     if request.method == 'GET':
-        authors = db.session.execute(db.select(Authors)) 
+        authors = db.session.execute(db.select(Authors)).scalars()
         authors_list = [author.serialize() for author in authors]
         response_body = {'message': 'Author list', 
                          'results': author_list}
@@ -79,7 +100,7 @@ def handle_authors():
                          country=data['country'], 
                          quote=data['quote'], 
                          about_me=data['about_me'], 
-                         is_active=['is_active'],
+                         is_active=True,
                          user_id=data['user_id'])
         db.session.add(author)
         db.session.commit()
@@ -119,7 +140,7 @@ def handle_author_id(author_id):
 @api.route('/members', methods=['GET', 'POST']) 
 def handle_members():
     if request.method == 'GET':
-        members = db.session.execute(db.select(Members))
+        members = db.session.execute(db.select(Members)).scalars()
         members_list = [member.serialize() for member in members]
         response_body = {'message': 'Members', 
                          'results': members_list}
@@ -179,8 +200,14 @@ def handle_member_id(member_id):
         return response_body, 200
 
 
-@api.route('/advisors', methods=['GET', 'POST'])  
+@api.route('/advisors', methods=['GET', 'POST']) 
+@jwt_required() 
 def handle_advisors():
+    current_user_id = get_jwt_identity()
+    user = Users.filter.get(current_user_id)
+    response_body = {'message': 'Advisor validated',
+                     'results': {"id": user.id, 
+                                 "email": user.email}}
     if request.method == 'GET':
         advisors = db.session.execute(db.select(Advisors)).scalars()
         advisors_list = [advisor.serialize() for advisor in advisors]
@@ -189,7 +216,7 @@ def handle_advisors():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        advisor = Advisors(name=data['name'], 
+        advisor = Advisor(name=data['name'], 
                           nif=data['nif'], 
                           category=data['category'], 
                           address=data['address'], 
@@ -207,7 +234,7 @@ def handle_advisors():
 
 @api.route('/advisors/<int:advisor_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_advisor_id(advisor_id):
-    advisor = db.one_or_404(db.select(Advisors).filter_by(id=advisor_id), 
+    advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
                             description=f"Advisor not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Advisor', 
@@ -237,7 +264,7 @@ def handle_advisor_id(advisor_id):
 @api.route('/followers', methods=['GET', 'POST']) 
 def handle_followers():
     if request.method == 'GET':
-        followers = db.session.execute(db.select(Followers))
+        followers = db.session.execute(db.select(Followers)).scalars()
         followers_list = [follower.serialize() for follower in followers]
         response_body = {'message': 'Followers List', 
                          'results': followers_list}
@@ -295,32 +322,27 @@ def handle_following_id(following_id):
     # busco en la base de datos el registro que tiene el follower ( del json) y el following (del endpoint)
     # si lo encuentro, borro ese registro. Sino lo encuentro es porque no se sigue a ese usuario.  
         data = request.get_json()
-        follower.following_id=data[following_id]
-        if following.id is None:
-            response_body = {'message': 'You are not following any account yet'}
+        concret_following = db.session.execute(db.select(Follower).filter_by(following_id=following_id, follower_id=data['follower_id'])).scalars()
+        if concret_following is None:
+            response_body = {'message': 'There is no following to delete'}
             return response_body, 400
-        if follower.following_id == following_id:
-            db.session.delete(follower)
-            db.session.commit()
-            response_body = {'message': 'Following deleted'}
-            return response_body, 200
-        else:
-            response_body = {'message': 'Follower with provided following ID not found'}
-            return response_body, 404
+        db.session.delete(concret_following)
+        db.session.commit()
+        response_body = {'message': 'Following deleted'}
+        return response_body, 200
 
 
 @api.route('/services', methods=['GET', 'POST']) 
 def handle_services():
     if request.method == 'GET':
-        services = db.session.execute(db.select(Services))
+        services = db.session.execute(db.select(Services)).scalars()
         services_list = [service.serialize() for service in services]
         response_body = {'message': 'Services', 
                          'results': services_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        service = Services(id=data['id'],
-                           name=data['name'], 
+        service = Services(name=data['name'], 
                            starting_date=data['starting_date'], 
                            final_date=data['final_date'], 
                            is_available=data['is_available'],  
@@ -336,7 +358,7 @@ def handle_services():
 
 @api.route('/services/<int:service_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_service_id(service_id):
-    service = db.one_or_404(db.select(Services).filter_by(id=service_id), 
+    service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
                             description=f"service not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Service', 
@@ -373,15 +395,14 @@ def handle_service_id(service_id):
 @api.route('/category-services', methods=['GET', 'POST']) # Nombre compuesto
 def handle_category_services():
     if request.method == 'GET':
-        category_services = db.session.execute(db.select(CategoryServices))
+        category_services = db.session.execute(db.select(CategoryServices)).scalars()
         category_services_list = [category_service.serialize() for category_service in category_services]
         response_body = {'message': 'Category Services', 
                          'results': category_services_list}
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        category_service = CategoryServices(id=data['id'],
-                                            name=data['name'], 
+        category_service = CategoryServices(name=data['name'], 
                                             description=data['description'],
                                             is_active=data['is_active'])  
         db.session.add(category_service)
@@ -425,15 +446,14 @@ def handle_category_service_id(category_service_id):
 @api.route('/shopping-carts', methods=['GET', 'POST'])  # Nombre compuesto
 def handle_shopping_carts():
     if request.method == 'GET':
-        shopping_carts = db.session.execute(db.select(ShoppingCarts))
+        shopping_carts = db.session.execute(db.select(ShoppingCarts)).scalars()
         shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
         response_body = {'message': 'Shopping Carts', 
                          'results': shopping_cart_list}
         return response_body, 200 
     if request.method == 'POST':  
         data = request.get_json()
-        shopping_cart = ShoppingCart(id=data['id'],
-                                     total_amount=data['total_amount'], 
+        shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
                                      discount=data['discount'], 
                                      date=data['date'], 
                                      status=data['status'],
@@ -447,7 +467,7 @@ def handle_shopping_carts():
 
 
 @api.route('/members/<int:member_id>/shopping-carts', methods=['GET', 'DELETE'])
-def handle_shopping_cart_id(member_id):
+def handle_shopping_cart_id(shopping_cart_id):
     shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
                                   description=f"Shopping Cart not found , 404.")
     if request.method == 'GET':
@@ -496,7 +516,8 @@ def handle_posts():
                      is_published=True)  
         db.session.add(post)
         db.session.commit()
-        response_body = {post.serialize()}
+        response_body = {'message': 'Post created', 
+                         'results': post.serialize()}
         return response_body, 201
 
 
@@ -505,7 +526,8 @@ def handle_post_id(post_id):
     post = db.one_or_404(db.select(Posts).filter_by(post_id=member_id), 
                            description=f"Post not found , 404.")
     if request.method == 'GET':
-        response_body = {post.serialize()}
+        response_body = {'message': 'Post', 
+                         'results': post.serialize()}
         return response_body, 200
     if request.method == 'PUT':  
         data = request.get_json()
@@ -516,7 +538,8 @@ def handle_post_id(post_id):
         post.update_date=data['update_date']
         post.is_published=data['is_published']
         db.session.commit()
-        response_body = {post.serialize()}
+        response_body = {'message': 'Post updated', 
+                         'results': post.serialize()}
         return response_body, 200
     if request.method == 'DELETE':
         post.is_active = False
@@ -548,8 +571,7 @@ def handle_media():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        medium = Media(id=data['id'],
-                       source=data['source'], 
+        medium = Media(source=data['source'], 
                        is_active=True,
                        url=data['url'])
         db.session.add(medium)
@@ -606,8 +628,7 @@ def handle_likes():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        like = Likes(id=data['id'],
-                     is_active=True, 
+        like = Likes(is_active=True, 
                      value=['value'])
         db.session.add(like)
         db.session.commit()
@@ -674,8 +695,7 @@ def handle_comments():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        comment = Comments(id=data['id'],
-                           date=data['date'],
+        comment = Comments(date=data['date'],
                            text=data['text'],
                            is_active=True)
         db.session.add(comment)
@@ -732,8 +752,7 @@ def handle_report_posts():
         return response_body, 200 
     if request.method == 'POST':
         data = request.get_json()
-        report = Comments(id=data['id'],
-                           description=data['description'],
+        report = Comments(description=data['description'],
                            status=data['status'],
                            is_active=True)
         db.session.add(report)
@@ -742,31 +761,3 @@ def handle_report_posts():
                          'results': report.serialize()}
         return response_body, 200 
 
-
-"""    Ejemplos   """
-
-
-@api.route('/reviews', methods=['GET', 'POST'])
-def handle_reviews():
-    if request.method == 'GET':
-        reviews = db.session.execute(db.select(Reviews).order_by(Reviews.id)).scalars()
-        review_list = [review.serialize() for review in reviews]
-        response_body = {'message': 'Listado de reviews',
-                         'results': review_list}
-        return response_body, 200 
-    if request.method == 'POST':
-        response_body = {'message': 'endpoint todavia no realizado'}
-        return response_body, 200 
-
-
-@api.route('/reviews/<int:reviews_id>', methods=['GET', 'PUT', 'DELETE'])
-def reviews(reviews_id):
-    if request.method == 'GET':
-        response_body = {'message': 'endpoint todavia no realizado'}
-        return response_body, 200  
-    if request.method == 'PUT':
-        response_body = {'message': 'endpoint todavia no realizado'}
-        return response_body, 200 
-    if request.method == 'DELETE':
-        response_body = {'message': 'endpoint todavia no realizado'}
-        return respons
