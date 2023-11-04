@@ -79,6 +79,19 @@ def handle_user_id(user_id):
         return response_body, 200
        
 
+# Ruta para probar AUTENTICACION
+@api.route('/pruebas', methods=['GET'])
+@jwt_required() 
+def handle_prueba_autentication():
+    current_identity = get_jwt_identity()
+    print(current_user_id)
+    user = Users.filter.get(current_identity)
+
+    response_body = {'message': 'Advisor validated',
+                     'results': {"id": user.id, 
+                                 "email": user.email}}
+
+
 @api.route('/authors', methods=['GET', 'POST']) 
 def handle_authors():
     if request.method == 'GET':
@@ -198,8 +211,10 @@ def handle_member_id(member_id):
 @api.route('/advisors', methods=['GET', 'POST']) 
 @jwt_required() 
 def handle_advisors():
-    current_user_id = get_jwt_identity()
-    user = Users.filter.get(current_user_id)
+    current_identity = get_jwt_identity()
+    print(current_user_id)
+    user = Users.filter.get(current_identity)
+
     response_body = {'message': 'Advisor validated',
                      'results': {"id": user.id, 
                                  "email": user.email}}
