@@ -175,7 +175,7 @@ class Services(db.Model):
                 "advisor_id": self.advisor_id}
 
 
-class ShoppingCart(db.Model):
+class ShoppingCarts(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     total_amount = db.Column(db.Float)
     discount = db.Column(db.Float)

@@ -1,6 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
+import os
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
@@ -9,9 +10,6 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 
 
 api = Blueprint('api', __name__)
-
-api.config["JWT_SECRET_KEY"] = "secret-key" 
-jwt = JWTManager(api)
 
 
 @api.route("/login", methods=["POST"])
