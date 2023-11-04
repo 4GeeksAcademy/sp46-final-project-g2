@@ -1,6 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
+import os
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
@@ -10,21 +11,15 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 
 api = Blueprint('api', __name__)
 
-api.config["JWT_SECRET_KEY"] = "secret-key" 
-jwt = JWTManager(api)
-
 
 @api.route("/login", methods=["POST"])
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    """user = db.one_or_404(db.select(Users).filter_by(email=email, password=password), 
-                           description=f"Bad username or password , 404.")"""
-    if email != "test" or email != "test":
-        response_body = {'message': "Bad username or password"}
-        return response_body, 401
+    user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
+                           description=f"Bad email or password.")
     # crea un nuevo token con el id de usuario dentro
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=[user.id, user.is_admin])
     response_body = {'message': 'Token created',
                      'results': {'token': access_token, 
                                  'user_id': user.id}}

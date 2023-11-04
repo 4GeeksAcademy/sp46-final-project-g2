@@ -1,11 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-""" from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base """
 
 
 db = SQLAlchemy()
-# base = declarative_base()
 
 
 class Users(db.Model):
@@ -175,7 +171,7 @@ class Services(db.Model):
                 "advisor_id": self.advisor_id}
 
 
-class ShoppingCart(db.Model):
+class ShoppingCarts(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     total_amount = db.Column(db.Float)
     discount = db.Column(db.Float)
