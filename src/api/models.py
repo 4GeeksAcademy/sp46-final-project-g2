@@ -228,9 +228,11 @@ class Bills(db.Model):
     paying_method = db.Column(db.String(100), nullable = False)  # Dependiendo de Stripe
     total_amount = db.Float(db.Float)
     date = db.Column(db.Date)
-    status = db.Column(db.Enum('Paid', 'Declined', 'Pending', name='status'), nullable = False)
-    member_id = db.Column(db.ForeignKey(Members.id), nullable = False)
-    Members = db.relationship('Members')
+    status = db.Column(db.Enum('Paid', 'Declined', 'Pending', name='status'), nullable=False)
+    member_id = db.Column(db.ForeignKey(Members.id), nullable=False)
+    shopping_cart_id = db.Column(db.ForeignKey(ShoppingCarts.id), nullable=False)
+    members = db.relationship('Members', foreign_keys=[member_id])
+    shopping_carts = db.relationship('ShoppingCarts', foreign_keys=[shopping_cart_id]) 
     
     def __repr__(self):
         return f'<Bills {self.billing_id_number}>'
@@ -241,7 +243,8 @@ class Bills(db.Model):
                 "total_amount": self.total_amount,
                 "date": self.date,
                 "status": self.status,
-                "member_id": self.member_id}
+                "member_id": self.member_id,
+                "shopping_cart_id": self.shopping_cart_id}
 
 
 class BillItems(db.Model):
