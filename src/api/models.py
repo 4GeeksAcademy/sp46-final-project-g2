@@ -14,8 +14,7 @@ class Users(db.Model):
     password = db.Column(db.String(10), unique = False, nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     is_admin = db.Column(db.Boolean, unique = False, nullable = False)
-    # author = db.relationship('Authors', uselist = False, backref = 'user')
-    # advisor = db.relationship('Advisors', uselist = False, backref = 'user')
+
     
     def __repr__(self):
         return f'<Users {self.email}>'
@@ -36,7 +35,8 @@ class Authors(db.Model):
     country = db.Column(db.String(120))
     quote = db.Column(db.String(120))
     about_me = db.Column(db.String(1500))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
     users = db.relationship('Users')
     # followers = db.relationship('Followers', foreign_keys = [Followers.following_id], backref = 'following_author')
     # following = db.relationship('Followers', foreign_keys = [Followers.follower_id], backref = 'follower_author')
@@ -52,6 +52,7 @@ class Authors(db.Model):
                 "country": self.country,
                 "quote": self.quote,
                 "about_me": self.about_me,
+                "is_active": self.is_active,
                 "user_id": self.user_id}
 
 
@@ -68,6 +69,7 @@ class Members(db.Model):
     reviews_expiring_date = db.Column(db.Date)
     status = db.Column(db.Enum('Active', 'Inactive', 'Pending', name='status'), nullable = False)
     awards = db.Column(db.String(1000))
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), nullable = False)
     autors = db.relationship('Authors')
     
@@ -87,6 +89,7 @@ class Members(db.Model):
                 "reviews_expiring_date": self.reviews_expiring_date,
                 "status": self.status,
                 "awards": self.awards,
+                "is_active": self.is_active,
                 "author_id": self.author_id}
 
 
@@ -130,13 +133,15 @@ class Followers(db.Model):
         return f'<Followers {self.id}>'
     
     def serialize(self):
-        return {"follower_id": self.follower_id,
+        return {"id": self.id,
+                "follower_id": self.follower_id,
                 "following_id": self.following_id,}
 
 
 class CategoryServices(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String, nullable = False)  # Mentorship, Review
+    is_active = db.Column(db.Boolean,  nullable = False)
     description = db.Column(db.String(1500), unique = False)
         
     def __repr__(self):
@@ -145,6 +150,7 @@ class CategoryServices(db.Model):
     def serialize(self):
         return {"id": self.id,
                 "name": self.name,
+                "is_active": self.is_active,
                 "description": self.description}
 
 
@@ -155,6 +161,7 @@ class Services(db.Model):
     final_date = db.Column(db.Date)
     is_available = db.Column(db.Boolean(), unique = False, nullable = False)
     price = db.Column(db.Float)
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
     category_id = db.Column(db.Integer, db.ForeignKey(CategoryServices.id))
     advisor_id = db.Column(db.ForeignKey(Advisors.id))
     categories = db.relationship('CategoryServices', foreign_keys=[category_id])
@@ -171,6 +178,7 @@ class Services(db.Model):
                 "final_date": self.final_date,
                 "is_available": self.is_available,
                 "price": self.price,
+                "is_active": self.is_active,
                 "category_id": self.category_id,
                 "advisor_id": self.advisor_id}
 
@@ -180,7 +188,8 @@ class ShoppingCarts(db.Model):
     total_amount = db.Column(db.Float)
     discount = db.Column(db.Float)
     date = db.Column(db.Date)
-    status = db.Column(db.Enum('Active', 'Inactive', 'Pending', name='status'), nullable = False)
+    status = db.Column(db.Enum('Paid', 'Droped', 'Pending', name='status'), nullable = False)
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
     member_id = db.Column(db.ForeignKey(Members.id), nullable = False, unique=False)
     members = db.relationship('Members')
     
@@ -193,6 +202,7 @@ class ShoppingCarts(db.Model):
                 "discount": self.discount,
                 "date": self.date,
                 "status": self.status,
+                "is_active": self.is_active,
                 "member_id": self.member_id}
 
 
@@ -207,7 +217,8 @@ class ShoppingCartItems(db.Model):
         return f'<ShoppingCartItems {self.quantity}>'
     
     def serialize(self):
-        return {"quantity": self.quantity,
+        return {"id": self.id,
+                "quantity": self.quantity,
                 "price": self.price,
                 "service_id": self.service_id}
 
@@ -265,6 +276,7 @@ class BillingIssues(db.Model):
         return {"id": self.id,
                 "description": self.description,
                 "status": self.status,
+                "log": self.log,
                 "bill_id": self.bill_id} 
 
 
@@ -277,8 +289,9 @@ class Posts(db.Model):
     created_date = db.Column(db.Date)
     update_date = db.Column(db.Date)
     is_published = db.Column(db.Boolean(), unique = False, nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
-    users = db.relationship('Users')
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
+    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), nullable = False)
+    authors = db.relationship('Authors')
     
     def __repr__(self):
         return f'<Posts {self.title}>'
@@ -292,13 +305,15 @@ class Posts(db.Model):
                 "created_date": self.created.date,
                 "update_date": self.update_date,
                 "is_published": self.is_published,
-                "user_id": self.user_id}
+                "is_active": self.is_active,
+                "author_id": self.author_id}
 
 
 class Media(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     source = db.Column(db.String(100), nullable = False)
     url = db.Column(db.String(250), unique = True, nullable = False)
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable = False)
     posts = db.relationship('Posts')
     
@@ -309,15 +324,17 @@ class Media(db.Model):
         return {"id": self.id,
                 "type": self.type,
                 "url": self.url,
+                "is_active": self.url,
                 "post_id": self.post_id}
 
 
 class Likes(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    user_id = db.Column(db.ForeignKey('users.id'), nullable = False)
+    author_id = db.Column(db.ForeignKey('authors.id'), nullable = False)
     post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
     value = db.Column(db.Integer, nullable = False)
-    users = db.relationship('Users', foreign_keys=[user_id])
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
+    authors = db.relationship('Authors', foreign_keys=[author_id])
     posts = db.relationship('Posts', foreign_keys=[post_id])
     
     def __repr__(self):
@@ -325,15 +342,18 @@ class Likes(db.Model):
     
     def serialize(self):
         # do not serialize the password, its a security breach
-        return {"user_id": self.user_id,
+        return {"id": self.id,
+                "author_id": self.author_id,
                 "post_id": self.post_id,
-                "value": self.value}
+                "value": self.value,
+                "is_active": self.is_active}
 
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     date = db.Column(db.Date)
     text = db.Column(db.String(255), nullable = False)
+    is_active = db.Column(db.Boolean, unique = False, nullable = False)
     post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
     author_id = db.Column(db.ForeignKey('authors.id'), nullable = False)
     posts = db.relationship('Posts', foreign_keys=[post_id])
@@ -347,6 +367,7 @@ class Comments(db.Model):
         return {"id": self.id,
                 "date": self.date,
                 "text": self.text,
+                "is_active": self.is_active,
                 "post_id": self.post_id,
                 "author_id": self.author_id}
 
@@ -370,6 +391,8 @@ class ReportPosts(db.Model):
         return {"id": self.id,
                 "description": self.description,
                 "status": self.status,
+                "log": self.log,
                 "is_active": self.is_active,
-                "user_id": self.user_id,
+                "author_id": self.author_id,
                 "post_id": self.post_id}
+
