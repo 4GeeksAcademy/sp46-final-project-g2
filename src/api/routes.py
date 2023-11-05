@@ -18,15 +18,17 @@ def create_token():
     password = request.json.get("password", None)
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
                            description=f"Bad email or password.")
-    # crea un nuevo token con el id de usuario dentro
     author_id = None
     advisor_id = None
-    # Buscar si user.id es author. True o False y traer el author.id
-    # author_id = author.id 
-    # is_author = True
-    # Buscar si es advisor y traer advisor.id
-    # advisor_id = advisor.id 
-    # is_author = False
+    # Busco si user.id es author. True o False y traer el author.id
+    if user.id == author.id :
+        is_author = True
+        author_id = author.id 
+    # Busco si es advisor y traer advisor.id
+    if user.id == advisor.id : 
+        is_author = False
+        advisor_id = advisor.id 
+    # crea un nuevo token con el id de usuario dentro:
     access_token = create_access_token(identity=[user.id, user.is_admin, author_id, advisor_id])
     response_body = {'message': 'Token created',
                      'results': {'token': access_token, 
@@ -38,9 +40,49 @@ def create_token():
                                  }}
     return response_body, 200
 
+"""    user.id es identity[0]
+    user.is_admin es identity[1]
+    author_id es identity[2]
+    advisor_id es identity[3]"""
+
 # SIGN UP:
 
-""" Taído del post advisors
+""" Traido del post de users:
+
+    if request.method == 'POST':
+        data = request.get_json()
+        user = Users(email=data['email'], 
+                     password=data['password'], 
+                     is_active=True, 
+                     is_admin=True)
+        # Aca se debe crear Advisor o Author asociado según los datos que vienen en el JSON
+        db.session.add(user)
+        db.session.commit()
+        response_body = {'message': 'User created', 
+                         'results': user.serialize()}
+        return response_body, 201
+
+
+Traído de post Authors:
+
+ if request.method == 'POST':
+        data = request.get_json()
+        author = Authors(alias=data['alias'], 
+                         birth_date=data['birth_date'], 
+                         city=data['city'], 
+                         country=data['country'], 
+                         quote=data['quote'], 
+                         about_me=data['about_me'], 
+                         is_active=True,
+                         user_id=data['user_id'])
+        db.session.add(author)
+        db.session.commit()
+        response_body = {'message': 'Author created', 
+                         'results': author.serialize()}
+        return response_body, 201
+
+
+Taído del post advisors
 
 if request.method == 'POST':
         data = request.get_json()
@@ -59,135 +101,119 @@ if request.method == 'POST':
                          'results': advisor.serialize()}
         return response_body, 201"""
 
+                     
 
-
-@api.route('/users', methods=['GET', 'POST']) 
+@api.route('/users', methods=['GET']) # El POST se hace en el sign up 
+@jwt_required() 
 def handle_users():
-    if request.method == 'GET':
+    current_identity = get_jwt_identity()
+    # Valido si es admin
+    if current_identity[1] :
         users = db.session.execute(db.select(Users)).scalars()
         users_list = [user.serialize() for user in users]
         response_body = {'message': 'User List', 
                          'results': users_list}
         return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        user = Users(email=data['email'], 
-                     password=data['password'], 
-                     is_active=True, 
-                     is_admin=True)
-        # Aca se debe crear Advisor o Author asociado según los datos que vienen en el JSON
-        db.session.add(user)
-        db.session.commit()
-        response_body = {'message': 'User created', 
-                         'results': user.serialize()}
-        return response_body, 201
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/users/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_user_id(user_id):
-    # User = db.session.execute(db.select(Users).filter_by(user_id=user_id)).scalar_one() 
-    # if user is None:
-    #    response_body = {'message': 'User not found'}
-    #    return response_body, 404
-    user = db.one_or_404(db.select(Users).filter_by(id=user_id), 
-                         description=f"User not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'User', 
-                         'results': user.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        user.email = data['email']
-        user.password = data['password']
-        # si el is_active es false, no lo dejo modificar y le aviso ue tiene que hacerlo a través del método DELETE. Caso contrario, lo activo. A resolver en AUTENTICACION
-        user.is_active = data['is_active']
-        # esto sólo lo puede hacer otro usuario que sea admin. A resolver en AUTENTICACION
-        user.is_admin = data['is_admin']
-        db.session.commit()
-        response_body = {'message': 'User updated', 
-                         'results': user.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        user.is_active = False
-        db.session.commit()
-        response_body = {'message': 'User inactived'}
-        return response_body, 200
-       
-
-# Ruta para probar AUTENTICACION
-@api.route('/pruebas', methods=['GET'])
 @jwt_required() 
-def handle_prueba_autentication():
+def handle_user_id(user_id):
     current_identity = get_jwt_identity()
-    print(current_user_id)
-    user = Users.filter.get(current_identity)
-    response_body = {'message': 'User validated',
-                     'results': {"id": user.id, 
-                                 "email": user.email}}
-
-
-@api.route('/authors', methods=['GET', 'POST']) 
+    # Valido si es admin
+    if current_identity[1] :
+        user = db.one_or_404(db.select(Users).filter_by(id=user_id), 
+                             description=f"User not found , 404.")
+        if request.method == 'GET':
+            response_body = {'message': 'User', 
+                             'results': user.serialize()}
+            return response_body, 200
+        if request.method == 'PUT':
+            data = request.get_json()
+            user.email = data['email']
+            user.password = data['password']
+            # si el is_active es false, no lo dejo modificar y le aviso que tiene que hacerlo a través del método DELETE. Caso contrario, lo activo. A resolver en AUTENTICACION
+            user.is_active = data['is_active']
+            # esto sólo lo puede hacer otro usuario que sea admin. A resolver en AUTENTICACION
+            user.is_admin = data['is_admin']
+            db.session.commit()
+            response_body = {'message': 'User updated', 
+                             'results': user.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            user.is_active = False
+            db.session.commit()
+            response_body = {'message': 'User inactived'}
+            return response_body, 200
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
+       
+    
+@api.route('/authors', methods=['GET']) # El POST se hace en el sign up 
 def handle_authors():
-    if request.method == 'GET':
-        authors = db.session.execute(db.select(Authors)).scalars()
-        authors_list = [author.serialize() for author in authors]
-        response_body = {'message': 'Author list', 
-                         'results': author_list}
-        return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        author = Authors(alias=data['alias'], 
-                         birth_date=data['birth_date'], 
-                         city=data['city'], 
-                         country=data['country'], 
-                         quote=data['quote'], 
-                         about_me=data['about_me'], 
-                         is_active=True,
-                         user_id=data['user_id'])
-        db.session.add(author)
-        db.session.commit()
-        response_body = {'message': 'Author created', 
-                         'results': author.serialize()}
-        return response_body, 201
+    authors = db.session.execute(db.select(Authors)).scalars()
+    authors_list = [author.serialize() for author in authors]
+    response_body = {'message': 'Author list', 
+                     'results': author_list}
+    return response_body, 200 
+   
 
-
-@api.route('/authors/<int:author_id>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/authors/<int:author_id>', methods=['GET'])
 def handle_author_id(author_id):
     author = db.one_or_404(db.select(Authors).filter_by(id=author_id), 
                            description=f"Author not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Author', 
-                         'results': author.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        author.alias = data['alias']
-        author.birth_date = data['birth_date']
-        author.city = data['city']
-        author.country = data['country']
-        author.quote = data['quote']
-        author.about_me = data['about_me']
-        author.is_active = data['is_active']
-        db.session.commit()
-        response_body = {'message': 'Author updated', 
-                         'results': author.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        author.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Author inactived'}
-        return response_body, 200
+    response_body = {'message': 'Author', 
+                     'results': author.serialize()}
+    return response_body, 200
+  
+
+@api.route('/authors/<int:author_id>', methods=['PUT', 'DELETE'])
+@jwt_required() 
+def handle_author_id(author_id):
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        author = db.one_or_404(db.select(Authors).filter_by(id=author_id), 
+                               description=f"Author not found , 404.")
+        if request.method == 'PUT':
+            data = request.get_json()
+            author.alias = data['alias']
+            author.birth_date = data['birth_date']
+            author.city = data['city']
+            author.country = data['country']
+            author.quote = data['quote']
+            author.about_me = data['about_me']
+            author.is_active = data['is_active']
+            db.session.commit()
+            response_body = {'message': 'Author updated', 
+                             'results': author.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            uthor.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Author inactived'}
+            return response_body, 200
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
     
     
-@api.route('/members', methods=['GET', 'POST']) 
+@api.route('/members', methods=['GET']) 
 def handle_members():
-    if request.method == 'GET':
         members = db.session.execute(db.select(Members)).scalars()
         members_list = [member.serialize() for member in members]
         response_body = {'message': 'Members', 
                          'results': members_list}
         return response_body, 200 
-    if request.method == 'POST':
+    
+
+@api.route('/members', methods=['POST']) 
+@jwt_required() 
+def handle_members():
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
         data = request.get_json()
         member = Members(name=data['name'], 
                          nif=data['nif'], 
@@ -207,166 +233,205 @@ def handle_members():
         response_body = {'message': 'Member created', 
                          'results': member.serialize()}
         return response_body, 201
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
-
-@api.route('/members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/members/<int:member_id>', methods=['GET'])
 def handle_member_id(member_id):
     member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
                            description=f"Member not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Member', 
+    response_body = {'message': 'Member', 
                          'results': member.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':  # Revisar cuando tengamos la Autenticación
-        data = request.get_json()
-        member.name = data['name']
-        member.nif = data['nif']
-        member.address = data['address']
-        member.starting_date = data['starting_date']
-        member.current_date = data['current_date']
-        member.final_date = data['final_date']
-        member.current_discount = data['current_discount']
-        member.remaining_reviews = data['remaining_reviews']
-        member.reviews_expiring_date = data['reviews_expiring_date']
-        member.status = data['status']
-        member.awards = data['awards']
-        member.is_active = data['is_active']
-        db.session.commit()
-        response_body = {'message': 'Member updated', 
-                         'results': member.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        member.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Member inactived'}
-        return response_body, 200
+    return response_body, 200
 
 
-@api.route('/advisors', methods=['GET'])  # El POST se hace en el sign up 
+@api.route('/members/<int:member_id>', methods=['PUT', 'DELETE'])
 @jwt_required() 
-def handle_advisors():
+def handle_member_id(member_id):
     current_identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin o advisor:
-    if current_identity[1] or current_identity[3]:
-        advisors = db.session.execute(db.select(Advisors)).scalars()
-        advisors_list = [advisor.serialize() for advisor in advisors]
-        response_body = {'message': 'Advisors List', 
-                         'results': advisors_list}
-        return response_body, 200 
-    response_body = {'message': 'Declined access'}
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
+                               description=f"Member not found , 404.")
+        if request.method == 'PUT':  # Revisar cuando tengamos la Autenticación
+            data = request.get_json()
+            member.nif = data['nif']
+            member.address = data['address']
+            member.starting_date = data['starting_date']
+            member.current_date = data['current_date']
+            member.final_date = data['final_date']
+            member.current_discount = data['current_discount']
+            member.remaining_reviews = data['remaining_reviews']
+            member.reviews_expiring_date = data['reviews_expiring_date']
+            member.status = data['status']
+            member.awards = data['awards']
+            member.is_active = data['is_active']
+            db.session.commit()
+            response_body = {'message': 'Member updated', 
+                             'results': member.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            member.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Member inactived'}
+            return response_body, 200
+    response_body = {'message': "Restricted access"}
     return response_body, 401
-                     
-    
 
-@api.route('/advisors/<int:advisor_id>', methods=['GET', 'PUT', 'DELETE'])
+
+@api.route('/advisors', methods=['GET']) # El POST se hace en el sign up 
+def handle_advisors():
+    advisors = db.session.execute(db.select(Advisors)).scalars()
+    advisors_list = [advisor.serialize() for advisor in advisors]
+    response_body = {'message': 'Advisors List', 
+                         'results': advisors_list}
+    return response_body, 200 
+                         
+
+@api.route('/advisors/<int:advisor_id>', methods=['GET'])
 def handle_advisor_id(advisor_id):
     advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
                             description=f"Advisor not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Advisor', 
-                         'results': advisor.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        advisor.name = data['name']
-        advisor.nif = data['nif']
-        advisor.category = data['category']
-        advisor.address = data['address']
-        advisor.city = data['city']
-        advisor.country = data['country']
-        advisor.about_me = data['about_me']
-        advisor.is_active = data['is_active']
-        db.session.commit()
-        response_body = {'message': 'Advisor updated', 
-                         'results': advisor.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        advisor.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Advisor inactived'}
-        return response_body, 200
+    response_body = {'message': 'Advisor', 
+                     'results': advisor.serialize()}
+    return response_body, 200
+
+
+@api.route('/advisors/<int:advisor_id>', methods=['PUT', 'DELETE'])
+@jwt_required() 
+def handle_advisor_id(advisor_id):
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o advisor:
+    if current_identity[1] or current_identity[3]:
+        advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
+                                description=f"Advisor not found , 404.")
+        if request.method == 'PUT':
+            data = request.get_json()
+            advisor.name = data['name']
+            advisor.nif = data['nif']
+            advisor.category = data['category']
+            advisor.address = data['address']
+            advisor.city = data['city']
+            advisor.country = data['country']
+            advisor.about_me = data['about_me']
+            advisor.is_active = data['is_active']
+            db.session.commit()
+            response_body = {'message': 'Advisor updated', 
+                             'results': advisor.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            advisor.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Advisor inactived'}
+            return response_body, 200
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/followers', methods=['GET', 'POST']) 
+@jwt_required() 
 def handle_followers():
-    if request.method == 'GET':
-        followers = db.session.execute(db.select(Followers)).scalars()
-        followers_list = [follower.serialize() for follower in followers]
-        response_body = {'message': 'Followers List', 
-                         'results': followers_list}
-        return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        follower = Followers(follower_id=data['follower_id'], 
-                             following_id=data['following_id'])
-        db.session.add(follower)
-        db.session.commit()
-        response_body = {'message': 'Follower created', 
-                         'results': follower.serialize()}
-        return response_body, 201
+    current_identity = get_jwt_identity()
+    # Valido si es admin:
+    if current_identity[1]:
+        if request.method == 'GET':
+            followers = db.session.execute(db.select(Followers)).scalars()
+            followers_list = [follower.serialize() for follower in followers]
+            response_body = {'message': 'Followers List', 
+                            'results': followers_list}
+            return response_body, 200 
+        if request.method == 'POST':
+            data = request.get_json()
+            follower = Followers(follower_id=data['follower_id'], 
+                                 following_id=data['following_id'])
+            db.session.add(follower)
+            db.session.commit()
+            response_body = {'message': 'Follower created', 
+                             'results': follower.serialize()}
+            return response_body, 201
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/followers/<int:follower_id>', methods=['GET', 'DELETE'])  
-def handle_follower_id(follower_id):
-    follower = db.session.execute(db.select(Follower).filter_by(follower_id=follower_id)).scalars()
-    if follower is None:
-        response_body = {'message': 'You do not have any followers yet'}
-        return response_body, 404
-    if request.method == 'GET':
-        response_body = {'message': 'Follower', 
-                         'results': follower.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        # Delete: quiero eliminar a alguien que me sigue
-        # JSON: recibo el id del que me sigue (following)
-        # Busco en la base de datos (modelo) el registro que tiene el follower (del endpoint) y el following (del json)
-        # si lo encuentro, borro ese registro. Sino lo encuentro es porque no me sigue ese usuario.  
-        data = request.get_json()
-        concret_follower = db.session.execute(db.select(Follower).filter_by(follower_id=follower_id, following_id=data['following_id'])).scalars()
-        if concret_follower is None:
-            response_body = {'message': 'There is no follower to delete'}
-            return response_body, 400
-        db.session.delete(concret_follower)
-        db.session.commit()
-        response_body = {'message': 'Follower deleted'}
-        return response_body, 200
+@jwt_required() 
+def handle_follower_id(follower_id): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        follower = db.session.execute(db.select(Follower).filter_by(follower_id=follower_id)).scalars()
+        if follower is None:
+            response_body = {'message': 'You do not have any followers yet'}
+            return response_body, 404
+        if request.method == 'GET':
+            response_body = {'message': 'Follower', 
+                             'results': follower.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            # Delete: quiero eliminar a alguien que me sigue
+            # JSON: recibo el id del que me sigue (following)
+            # Busco en la base de datos (modelo) el registro que tiene el follower (del endpoint) y el following (del json)
+            # si lo encuentro, borro ese registro. Sino lo encuentro es porque no me sigue ese usuario.  
+            data = request.get_json()
+            concret_follower = db.session.execute(db.select(Follower).filter_by(follower_id=follower_id, following_id=data['following_id'])).scalars()
+            if concret_follower is None:
+                response_body = {'message': 'There is no follower to delete'}
+                return response_body, 400
+            db.session.delete(concret_follower)
+            db.session.commit()
+            response_body = {'message': 'Follower deleted'}
+            return response_body, 200
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/followings/<int:following_id>', methods=['GET'])  
-def handle_following_id(following_id):
-    followings = db.session.execute(db.select(Follower).filter_by(following_id=following_id)).scalars()
-    if followings is None:
-        response_body = {'message': 'You are not following to anyone yet'}
-        return response_body, 404
-    if request.method == 'GET':
-        response_body = {'message': 'Following', 
-                         'results': follower.serialize()} 
-        return response_body, 200
-    if request.method == 'DELETE':
-    # Delete: un seguidor quiere dejar de seguir a alguien 
-    # JSON: recibe el follower, 
-    # busco en la base de datos el registro que tiene el follower ( del json) y el following (del endpoint)
-    # si lo encuentro, borro ese registro. Sino lo encuentro es porque no se sigue a ese usuario.  
-        data = request.get_json()
-        concret_following = db.session.execute(db.select(Follower).filter_by(following_id=following_id, follower_id=data['follower_id'])).scalars()
-        if concret_following is None:
-            response_body = {'message': 'There is no following to delete'}
-            return response_body, 400
-        db.session.delete(concret_following)
-        db.session.commit()
-        response_body = {'message': 'Following deleted'}
-        return response_body, 200
+@api.route('/followings/<int:following_id>', methods=['GET', 'DELETE'])  
+@jwt_required() 
+def handle_following_id(following_id): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        followings = db.session.execute(db.select(Follower).filter_by(following_id=following_id)).scalars()
+        if followings is None:
+            response_body = {'message': 'You are not following to anyone yet'}
+            return response_body, 404
+        if request.method == 'GET':
+            response_body = {'message': 'Following', 
+                             'results': follower.serialize()} 
+            return response_body, 200
+        if request.method == 'DELETE':
+        # Delete: un seguidor quiere dejar de seguir a alguien 
+        # JSON: recibe el follower, 
+        # busco en la base de datos el registro que tiene el follower ( del json) y el following (del endpoint)
+        # si lo encuentro, borro ese registro. Sino lo encuentro es porque no se sigue a ese usuario.  
+            data = request.get_json()
+            concret_following = db.session.execute(db.select(Follower).filter_by(following_id=following_id, follower_id=data['follower_id'])).scalars()
+            if concret_following is None:
+                response_body = {'message': 'There is no following to delete'}
+                return response_body, 400
+            db.session.delete(concret_following)
+            db.session.commit()
+            response_body = {'message': 'Following deleted'}
+            return response_body, 200
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/services', methods=['GET', 'POST']) 
+@api.route('/services', methods=['GET']) 
 def handle_services():
-    if request.method == 'GET':
-        services = db.session.execute(db.select(Services)).scalars()
-        services_list = [service.serialize() for service in services]
-        response_body = {'message': 'Services', 
-                         'results': services_list}
-        return response_body, 200 
-    if request.method == 'POST':
+    services = db.session.execute(db.select(Services)).scalars()
+    services_list = [service.serialize() for service in services]
+    response_body = {'message': 'Services', 
+                     'results': services_list}
+    return response_body, 200 
+
+
+@api.route('/services', methods=['POST']) 
+@jwt_required()
+def handle_services():
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:
         data = request.get_json()
         service = Services(name=data['name'], 
                            starting_date=data['starting_date'], 
@@ -379,54 +444,73 @@ def handle_services():
         db.session.commit()
         response_body = {'message': 'Service created', 
                          'results': service.serialize()}
-        return response_body, 201
+        return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/services/<int:service_id>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/services/<int:service_id>', methods=['GET'])
 def handle_service_id(service_id):
     service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
                             description=f"service not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Service', 
-                         'results': service.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        service.name = data['name']
-        service.starting_date = data['starting_date']
-        service.final_date = data['final_date']
-        service.is_available = data['is_available']
-        service.price = data['price']
-        service.category_id = data['category_id']
-        service.advisor_id = data['advisor_id']
-        db.session.commit()
-        response_body = {'message': 'Service updated', 
-                         'results': service.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        # Si el taller aún no inició se borra. Y si ya se dió, lo deshabilitamos. 
-        current_date = datetime.now()
-        if service.starting_date <= current_date:
-            service.is_available = False  
+    response_body = {'message': 'Service', 
+                     'results': service.serialize()}
+    return response_body, 200
+
+
+@api.route('/services/<int:service_id>', methods=['PUT', 'DELETE'])
+@jwt_required()
+def handle_service_id(service_id):
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:
+        service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
+                                description=f"service not found , 404.")
+        if request.method == 'PUT':
+            data = request.get_json()
+            service.name = data['name']
+            service.starting_date = data['starting_date']
+            service.final_date = data['final_date']
+            service.is_available = data['is_available']
+            service.price = data['price']
+            service.category_id = data['category_id']
+            service.advisor_id = data['advisor_id']
             db.session.commit()
-            response_body = {'message': 'Service is now unavailable'}
+            response_body = {'message': 'Service updated', 
+                             'results': service.serialize()}
             return response_body, 200
-        db.session.delete(service)
-        db.session.commit()
-        # FIX: NO lo haremos en esta versión. Deberíamos avisar a los que han contratado el servicio 
-        response_body = {'message': 'Service deleted'}
-        return response_body, 200
+        if request.method == 'DELETE':
+            # Si el taller aún no inició se borra. Y si ya se dió, lo deshabilitamos. 
+            current_date = datetime.now()
+            if service.starting_date <= current_date:
+                service.is_available = False  
+                db.session.commit()
+                response_body = {'message': 'Service is now unavailable'}
+                return response_body, 200
+            db.session.delete(service)
+            db.session.commit()
+            # FIX: NO lo haremos en esta versión. Deberíamos avisar a los que han contratado el servicio 
+            response_body = {'message': 'Service deleted'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/category-services', methods=['GET', 'POST']) # Nombre compuesto
+@api.route('/category-services', methods=['GET']) 
 def handle_category_services():
-    if request.method == 'GET':
         category_services = db.session.execute(db.select(CategoryServices)).scalars()
         category_services_list = [category_service.serialize() for category_service in category_services]
         response_body = {'message': 'Category Services', 
                          'results': category_services_list}
         return response_body, 200 
-    if request.method == 'POST':
+
+    
+@api.route('/category-services', methods=['POST']) 
+@jwt_required()
+def handle_category_services():
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:
         data = request.get_json()
         category_service = CategoryServices(name=data['name'], 
                                             description=data['description'],
@@ -435,92 +519,142 @@ def handle_category_services():
         db.session.commit()
         response_body = {'message': 'Category Service created', 
                          'results': category_service.serialize()}
-        return response_body, 201
+        return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/category-services/<int:category_services_id>', methods=['GET', 'PUT', 'DELETE'])  # Nombre compuesto
+@api.route('/category-services/<int:category_services_id>', methods=['GET'])  
 def handle_category_service_id(category_service_id):
     category_service = db.one_or_404(db.select(CategoryServices).filter_by(category_service_id=category_service_id), 
                                      description=f"Category Service not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Category Service', 
-                         'results': category_service.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':  
-        data = request.get_json()
-        category_service.name=data['name'], 
-        category_service.description=data['description']
-        category_service.is_active=data['is_active']
-        db.session.commit()
-        response_body = {'message': 'Category Service updated', 
-                         'results': category_service.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        # FIX: Marcar como inactiva una categoría si se va a dejar de impartir todos los servicios de esa categoría. 
-        services = db.session.execute(db.select(Services).filter_by(category_services_id=category_services_id)).scalars()
-        if services is None:
-            response_body = {'message': 'There are no services'}
-        for service in services:
-            service.is_available = False
-            db.session.commit()  # Revisar si funciona bien!
-        category_service.is_active = False 
-        db.session.commit()
-        response_body = {'message': 'Category Service inactive'}
-        return response_body, 200
+    response_body = {'message': 'Category Service', 
+                     'results': category_service.serialize()}
+    return response_body, 200
 
 
-@api.route('/shopping-carts', methods=['GET', 'POST'])  # Nombre compuesto
+@api.route('/category-services/<int:category_services_id>', methods=['PUT', 'DELETE'])  
+@jwt_required()
+def handle_category_service_id(category_service_id):
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:
+        category_service = db.one_or_404(db.select(CategoryServices).filter_by(category_service_id=category_service_id), 
+                                         description=f"Category Service not found , 404.")
+        if request.method == 'PUT':  
+            data = request.get_json()
+            category_service.name=data['name'], 
+            category_service.description=data['description']
+            category_service.is_active=data['is_active']
+            db.session.commit()
+            response_body = {'message': 'Category Service updated', 
+                             'results': category_service.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            # FIX: Marcar como inactiva una categoría si se va a dejar de impartir todos los servicios de esa categoría. 
+            services = db.session.execute(db.select(Services).filter_by(category_services_id=category_services_id)).scalars()
+            if services is None:
+                response_body = {'message': 'There are no services'}
+            for service in services:
+                service.is_available = False
+                db.session.commit()  # Revisar si funciona bien!
+            category_service.is_active = False 
+            db.session.commit()
+            response_body = {'message': 'Category Service inactive'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
+
+
+@api.route('/shopping-carts', methods=['GET', 'POST']) 
+@jwt_required()
 def handle_shopping_carts():
-    if request.method == 'GET':
-        shopping_carts = db.session.execute(db.select(ShoppingCarts)).scalars()
-        shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
-        response_body = {'message': 'Shopping Carts', 
-                         'results': shopping_cart_list}
-        return response_body, 200 
-    if request.method == 'POST':  
-        data = request.get_json()
-        shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
-                                     discount=data['discount'], 
-                                     date=data['date'], 
-                                     status=data['status'],
-                                     member_id=data['member_id']
-                                     )
-        db.session.add(shopping_cart)
-        db.session.commit()
-        response_body = {'message': 'Shopping Cart created', 
-                         'results': shopping_cart.serialize()}
-        return response_body, 201
+    current_identity = get_jwt_identity() 
+    # Valido si es admin:
+    if current_identity[1]:
+        if request.method == 'GET':
+            shopping_carts = db.session.execute(db.select(ShoppingCarts)).scalars()
+            shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
+            response_body = {'message': 'Shopping Carts', 
+                             'results': shopping_cart_list}
+            return response_body, 200 
+        if request.method == 'POST':  
+            data = request.get_json()
+            shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
+                                         discount=data['discount'], 
+                                         date=data['date'], 
+                                         status=data['status'],
+                                         member_id=data['member_id']
+                                         )
+            db.session.add(shopping_cart)
+            db.session.commit()
+            response_body = {'message': 'Shopping Cart created', 
+                             'results': shopping_cart.serialize()}
+            return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/members/<int:member_id>/shopping-carts', methods=['GET', 'DELETE'])
+@jwt_required()
 def handle_shopping_cart_id(shopping_cart_id):
-    shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
-                                  description=f"Shopping Cart not found , 404.")
-    if request.method == 'GET':
-        current_date = datetime.now()
-        expired_items = []
-        shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=shopping_cart.id)).scalars()
-        for item in shopping_cart_items:
-            if item.starting_date <= current_date:
-                expired_items.append(item)
-        if expired_items:
-            for item in expired_items:
-                db.session.delete(item)
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
+                                      description=f"Shopping Cart not found , 404.")
+        if request.method == 'GET':
+            current_date = datetime.now()
+            expired_items = []
+            shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=shopping_cart.id)).scalars()
+            for item in shopping_cart_items:
+                if item.starting_date <= current_date:
+                    expired_items.append(item)
+            if expired_items:
+                for item in expired_items:
+                    db.session.delete(item)
+                db.session.commit()
+            shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=shopping_cart.id)).scalars()  # Lista actualizada
+            shopping_cart_items_list = [item.serialize() for item in shopping_cart_items]
+            response_body = {'message': 'Shopping Cart',
+                             'results': {'cart': shopping_cart.serialize(),
+                                         'items': shopping_cart_items_list}}
+            return response_body, 200
+        if request.method == 'DELETE':
+            #  Borrar items y luego el shopping Cart
+            db.session.delete(shopping_cart_items)
+            db.session.delete(shopping_cart)
             db.session.commit()
-        shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=shopping_cart.id)).scalars()  # Lista actualizada
-        shopping_cart_items_list = [item.serialize() for item in shopping_cart_items]
-        response_body = {'message': 'Shopping Cart',
-                         'results': {'cart': shopping_cart.serialize(),
-                                     'items': shopping_cart_items_list}}
-        return response_body, 200
-    if request.method == 'DELETE':
-        #  Borrar items y luego el shopping Cart
-        db.session.delete(shopping_cart_items)
-        db.session.delete(shopping_cart)
-        db.session.commit()
-        response_body = {'message': 'Shopping Cart deleted'}
-        return response_body, 200
+            response_body = {'message': 'Shopping Cart deleted'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
    
+
+@api.route('/posts', methods=['GET', 'POST']) 
+def handle_posts():
+    if request.method == 'GET':
+        posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
+        posts_list = [post.serialize() for post in posts]
+        response_body = {'message': 'Posts List', 
+                         'results': posts_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        post = Posts(title=data['title'], 
+                     abstract=data['abstract'],
+                     tag=data['tag'],
+                     text=data['text'],
+                     created_date=data['created_date'],
+                     update_date=data['update_date'],
+                     is_active=True,
+                     is_published=True)  
+        db.session.add(post)
+        db.session.commit()
+        response_body = {'message': 'Post created', 
+                         'results': post.serialize()}
+        return response_body, 201
+
 
 @api.route('/posts', methods=['GET', 'POST']) 
 def handle_posts():
