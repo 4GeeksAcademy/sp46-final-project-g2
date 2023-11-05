@@ -19,11 +19,46 @@ def create_token():
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
                            description=f"Bad email or password.")
     # crea un nuevo token con el id de usuario dentro
-    access_token = create_access_token(identity=[user.id, user.is_admin])
+    author_id = None
+    advisor_id = None
+    # Buscar si user.id es author. True o False y traer el author.id
+    # author_id = author.id 
+    # is_author = True
+    # Buscar si es advisor y traer advisor.id
+    # advisor_id = advisor.id 
+    # is_author = False
+    access_token = create_access_token(identity=[user.id, user.is_admin, author_id, advisor_id])
     response_body = {'message': 'Token created',
                      'results': {'token': access_token, 
-                                 'user_id': user.id}}
+                                 'user_id': user.id, 
+                                 'is_admin': user.is_admin,
+                                 'is_author': is_author,
+                                 'author_id': author_id,
+                                 'advisor_id': advisor_id
+                                 }}
     return response_body, 200
+
+# SIGN UP:
+
+""" Taído del post advisors
+
+if request.method == 'POST':
+        data = request.get_json()
+        advisor = Advisor(name=data['name'], 
+                          nif=data['nif'], 
+                          category=data['category'], 
+                          address=data['address'], 
+                          city=data['city'], 
+                          country=data['country'], 
+                          about_me=data['about_me'], 
+                          is_active=True,
+                          user_id=data['user_id'])
+        db.session.add(advisor)
+        db.session.commit()
+        response_body = {'message': 'Advisor created', 
+                         'results': advisor.serialize()}
+        return response_body, 201"""
+
 
 
 @api.route('/users', methods=['GET', 'POST']) 
@@ -86,8 +121,7 @@ def handle_prueba_autentication():
     current_identity = get_jwt_identity()
     print(current_user_id)
     user = Users.filter.get(current_identity)
-
-    response_body = {'message': 'Advisor validated',
+    response_body = {'message': 'User validated',
                      'results': {"id": user.id, 
                                  "email": user.email}}
 
@@ -208,39 +242,21 @@ def handle_member_id(member_id):
         return response_body, 200
 
 
-@api.route('/advisors', methods=['GET', 'POST']) 
+@api.route('/advisors', methods=['GET'])  # El POST se hace en el sign up 
 @jwt_required() 
 def handle_advisors():
-    current_identity = get_jwt_identity()
-    print(current_user_id)
-    user = Users.filter.get(current_identity)
-
-    response_body = {'message': 'Advisor validated',
-                     'results': {"id": user.id, 
-                                 "email": user.email}}
-    if request.method == 'GET':
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o advisor:
+    if current_identity[1] or current_identity[3]:
         advisors = db.session.execute(db.select(Advisors)).scalars()
         advisors_list = [advisor.serialize() for advisor in advisors]
         response_body = {'message': 'Advisors List', 
                          'results': advisors_list}
         return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        advisor = Advisor(name=data['name'], 
-                          nif=data['nif'], 
-                          category=data['category'], 
-                          address=data['address'], 
-                          city=data['city'], 
-                          country=data['country'], 
-                          about_me=data['about_me'], 
-                          is_active=True,
-                          user_id=data['user_id'])
-        db.session.add(advisor)
-        db.session.commit()
-        response_body = {'message': 'Advisor created', 
-                         'results': advisor.serialize()}
-        return response_body, 201
-
+    response_body = {'message': 'Declined access'}
+    return response_body, 401
+                     
+    
 
 @api.route('/advisors/<int:advisor_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_advisor_id(advisor_id):
