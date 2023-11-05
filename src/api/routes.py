@@ -161,7 +161,7 @@ def handle_authors():
    
 
 @api.route('/authors/<int:author_id>', methods=['GET'])
-def handle_author_id(author_id):
+def handle_get_author_id(author_id):
     author = db.one_or_404(db.select(Authors).filter_by(id=author_id), 
                            description=f"Author not found , 404.")
     response_body = {'message': 'Author', 
@@ -200,7 +200,7 @@ def handle_author_id(author_id):
     
     
 @api.route('/members', methods=['GET']) 
-def handle_members():
+def handle_get_members():
         members = db.session.execute(db.select(Members)).scalars()
         members_list = [member.serialize() for member in members]
         response_body = {'message': 'Members', 
@@ -237,7 +237,7 @@ def handle_members():
     return response_body, 401
 
 @api.route('/members/<int:member_id>', methods=['GET'])
-def handle_member_id(member_id):
+def handle_get_member_id(member_id):
     member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
                            description=f"Member not found , 404.")
     response_body = {'message': 'Member', 
@@ -289,7 +289,7 @@ def handle_advisors():
                          
 
 @api.route('/advisors/<int:advisor_id>', methods=['GET'])
-def handle_advisor_id(advisor_id):
+def handle_get_advisor_id(advisor_id):
     advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
                             description=f"Advisor not found , 404.")
     response_body = {'message': 'Advisor', 
@@ -418,7 +418,7 @@ def handle_following_id(following_id):
 
 
 @api.route('/services', methods=['GET']) 
-def handle_services():
+def handle_get_services():
     services = db.session.execute(db.select(Services)).scalars()
     services_list = [service.serialize() for service in services]
     response_body = {'message': 'Services', 
@@ -450,7 +450,7 @@ def handle_services():
 
 
 @api.route('/services/<int:service_id>', methods=['GET'])
-def handle_service_id(service_id):
+def handle_get_service_id(service_id):
     service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
                             description=f"service not found , 404.")
     response_body = {'message': 'Service', 
@@ -497,7 +497,7 @@ def handle_service_id(service_id):
 
 
 @api.route('/category-services', methods=['GET']) 
-def handle_category_services():
+def handle_get_category_services():
         category_services = db.session.execute(db.select(CategoryServices)).scalars()
         category_services_list = [category_service.serialize() for category_service in category_services]
         response_body = {'message': 'Category Services', 
@@ -525,7 +525,7 @@ def handle_category_services():
 
 
 @api.route('/category-services/<int:category_services_id>', methods=['GET'])  
-def handle_category_service_id(category_service_id):
+def handle_get_category_service_id(category_service_id):
     category_service = db.one_or_404(db.select(CategoryServices).filter_by(category_service_id=category_service_id), 
                                      description=f"Category Service not found , 404.")
     response_body = {'message': 'Category Service', 
@@ -631,15 +631,21 @@ def handle_shopping_cart_id(shopping_cart_id):
     return response_body, 401
    
 
-@api.route('/posts', methods=['GET', 'POST']) 
+@api.route('/posts', methods=['GET']) 
+def handle_get_posts():
+    posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
+    posts_list = [post.serialize() for post in posts]
+    response_body = {'message': 'Posts List', 
+                     'results': posts_list}
+    return response_body, 200 
+
+
+@api.route('/posts', methods=['POST']) 
+@jwt_required()
 def handle_posts():
-    if request.method == 'GET':
-        posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
-        posts_list = [post.serialize() for post in posts]
-        response_body = {'message': 'Posts List', 
-                         'results': posts_list}
-        return response_body, 200 
-    if request.method == 'POST':
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
         data = request.get_json()
         post = Posts(title=data['title'], 
                      abstract=data['abstract'],
@@ -653,83 +659,85 @@ def handle_posts():
         db.session.commit()
         response_body = {'message': 'Post created', 
                          'results': post.serialize()}
-        return response_body, 201
+        return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/posts', methods=['GET', 'POST']) 
-def handle_posts():
-    if request.method == 'GET':
-        posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
-        posts_list = [post.serialize() for post in posts]
-        response_body = {'message': 'Posts List', 
-                         'results': posts_list}
-        return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        post = Posts(title=data['title'], 
-                     abstract=data['abstract'],
-                     tag=data['tag'],
-                     text=data['text'],
-                     created_date=data['created_date'],
-                     update_date=data['update_date'],
-                     is_active=True,
-                     is_published=True)  
-        db.session.add(post)
-        db.session.commit()
-        response_body = {'message': 'Post created', 
-                         'results': post.serialize()}
-        return response_body, 201
-
-
-@api.route('/posts/<int:post_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_post_id(post_id):
+@api.route('/posts/<int:post_id>', methods=['GET'])
+def handle_get_post_id(post_id):
     post = db.one_or_404(db.select(Posts).filter_by(post_id=member_id), 
-                           description=f"Post not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Post', 
-                         'results': post.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':  
-        data = request.get_json()
-        post.abstract=data['abstract']
-        post.tag=data['tag']
-        post.text=data['text']
-        post.created_date=data['created_date']
-        post.update_date=data['update_date']
-        post.is_published=data['is_published']
-        db.session.commit()
-        response_body = {'message': 'Post updated', 
-                         'results': post.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        post.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Post inactived'}
-        return response_body, 200
+                         description=f"Post not found , 404.")
+    response_body = {'message': 'Post', 
+                     'results': post.serialize()}
+    return response_body, 200
+   
+
+@api.route('/posts/<int:post_id>', methods=['PUT', 'DELETE'])
+@jwt_required()
+def handle_post_id(post_id):
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        post = db.one_or_404(db.select(Posts).filter_by(post_id=member_id), 
+                             description=f"Post not found , 404.")
+        if request.method == 'PUT':  
+            data = request.get_json()
+            post.abstract=data['abstract']
+            post.tag=data['tag']
+            post.text=data['text']
+            post.created_date=data['created_date']
+            post.update_date=data['update_date']
+            post.is_published=data['is_published']
+            db.session.commit()
+            response_body = {'message': 'Post updated', 
+                             'results': post.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            post.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Post inactived'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/users/<int:user_id>/posts', methods=['GET', 'DELETE'])
-def handle_post_by_user_id(user_id):   
-    if request.method == 'GET':
+@api.route('/users/<int:user_id>/posts', methods=['GET'])
+def handle_get_post_by_user_id(user_id):   
         posts = db.session.execute(db.select(Posts).filter_by(user_id=user_id)).scalars()
         posts_list = [post.serialize() for post in posts]
         response_body = {'message': 'Posts List', 
                          'results': posts_list}
         return response_body, 200 
-    if request.method == 'DELETE':
+
+
+@api.route('/users/<int:user_id>/posts', methods=['DELETE'])  # ¿Por qué in not available??
+@jwt_required()
+def handle_post_by_user_id(user_id):   
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
         response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
-        return response_body, 200
+        return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/media', methods=['GET', 'POST']) 
-def handle_media():
-    if request.method == 'GET':
+@api.route('/media', methods=['GET']) 
+def handle_get_media():
         media = db.session.execute(db.select(Media).order_by(Media.id)).scalars()
         media_list = [medium.serialize() for medium in media]
         response_body = {'message': 'Media List', 
                          'results': media_list}
         return response_body, 200 
-    if request.method == 'POST':
+
+
+@api.route('/media', methods=['POST']) 
+@jwt_required()
+def handle_media():
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
         data = request.get_json()
         medium = Media(source=data['source'], 
                        is_active=True,
@@ -738,55 +746,83 @@ def handle_media():
         db.session.commit()
         response_body = {'message': 'Media created', 
                          'results': medium.serialize()}
-        return response_body, 201
+        return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/media/<int:media_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_media_id(media_id):
+@api.route('/media/<int:media_id>', methods=['GET'])
+def handle_get_media_id(media_id):
     medium = db.one_or_404(db.select(Media).filter_by(media_id=media_id), 
                          description=f"Media not found , 404.")
     if request.method == 'GET':
         response_body = {'message': 'Media', 
                          'results': medium.serialize()}
         return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        medium.source = data['source']        
-        medium.is_active = data['is_active']
-        medium.url = data['url']
-        db.session.commit()
-        response_body = {'message': 'Media updated', 
-                         'results': medium.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        medium.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Media inactived'}
-        return response_body, 200
 
 
-@api.route('/posts/<int:post_id>/media', methods=['GET', 'DELETE'])
-def handle_media_by_post_id(post_id):   
-    if request.method == 'GET':
+@api.route('/media/<int:media_id>', methods=['PUT', 'DELETE'])
+@jwt_required()
+def handle_media_id(media_id): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        medium = db.one_or_404(db.select(Media).filter_by(media_id=media_id), 
+                             description=f"Media not found , 404.")
+        if request.method == 'PUT':
+            data = request.get_json()
+            medium.source = data['source']        
+            medium.is_active = data['is_active']
+            medium.url = data['url']
+            db.session.commit()
+            response_body = {'message': 'Media updated', 
+                             'results': medium.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            medium.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Media inactived'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
+
+
+@api.route('/posts/<int:post_id>/media', methods=['GET'])
+def handle_get_media_by_post_id(post_id):   
         media = db.session.execute(db.select(Media).filter_by(post_id=post_id)).scalars()
         media_list = [medium.serialize() for medium in media]
         response_body = {'message': 'Media List sorted by post id', 
                          'results': media_list}
         return response_body, 200 
-    if request.method == 'DELETE':
-        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
-        return response_body, 200
 
 
-@api.route('/likes', methods=['GET', 'POST']) 
-def handle_likes():
-    if request.method == 'GET':
+@api.route('/posts/<int:post_id>/media', methods=['DELETE'])
+@jwt_required()
+def handle_media_by_post_id(post_id):       
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:
+        if request.method == 'DELETE':
+            response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
+
+@api.route('/likes', methods=['GET']) 
+def handle_get_likes():
         likes = db.session.execute(db.select(Likes).order_by(Likes.id)).scalars()
         likes_list = [like.serialize() for like in likes]
         response_body = {'message': 'Likes List', 
                          'results': likes_list}
         return response_body, 200 
-    if request.method == 'POST':
+
+
+@api.route('/likes', methods=['POST'])  # Pueden los tres 
+@jwt_required()
+def handle_likes(): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:
         data = request.get_json()
         like = Likes(is_active=True, 
                      value=['value'])
@@ -794,66 +830,94 @@ def handle_likes():
         db.session.commit()
         response_body = {'message': 'Like created', 
                          'results': like.serialize()}
-        return response_body, 201
+        return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/likes/<int:like_id>', methods=['GET', 'PUT', 'DELETE'])
+@jwt_required()
 def handle_likes_id(like_id):
-    like = db.one_or_404(db.select(Likes).filter_by(like_id=like_id), 
-                         description=f"Like not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Like', 
-                         'results': like.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        like.value = data['value']
-        db.session.commit()
-        response_body = {'message': 'Like updated', 
-                         'results': like.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        like.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Like inactived'}
-        return response_body, 200
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:
+        like = db.one_or_404(db.select(Likes).filter_by(like_id=like_id), 
+                             description=f"Like not found , 404.")
+        if request.method == 'GET':
+            response_body = {'message': 'Like', 
+                             'results': like.serialize()}
+            return response_body, 200
+        if request.method == 'PUT':
+            data = request.get_json()
+            like.value = data['value']
+            db.session.commit()
+            response_body = {'message': 'Like updated', 
+                             'results': like.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            like.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Like inactived'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/posts/<int:post_id>/likes', methods=['GET', 'DELETE'])
-def handle_like_by_post_id(post_id):   
-    if request.method == 'GET':
+@api.route('/posts/<int:post_id>/likes', methods=['GET'])
+def handle_get_like_by_post_id(post_id):   
         likes = db.session.execute(db.select(Likes).filter_by(post_id=post_id)).scalars()
         likes_list = [like.serialize() for like in likes]
         response_body = {'message': 'Likes List sorted by post id', 
                          'results': likes_list}
         return response_body, 200 
-    if request.method == 'DELETE':
+
+
+@api.route('/posts/<int:post_id>/likes', methods=['DELETE'])
+@jwt_required()
+def handle_like_by_post_id(post_id): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:
         response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
-        return response_body, 200
+        return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/users/<int:user_id>/likes', methods=['GET', 'DELETE'])
+@jwt_required()
 def handle_like_by_user_id(user_id):   
-    if request.method == 'GET':
-        likes = db.session.execute(db.select(Likes).filter_by(user_id=user_id)).scalars()
-        likes_list = [like.serialize() for like in likes]
-        response_body = {'message': 'Likes list sorted by user id', 
-                         'results': likes_list}
-        return response_body, 200 
-    if request.method == 'DELETE':
-        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
-        return response_body, 200
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:
+        if request.method == 'GET':
+            likes = db.session.execute(db.select(Likes).filter_by(user_id=user_id)).scalars()
+            likes_list = [like.serialize() for like in likes]
+            response_body = {'message': 'Likes list sorted by user id', 
+                             'results': likes_list}
+            return response_body, 200 
+        if request.method == 'DELETE':
+            response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/comments', methods=['GET', 'POST'])
-def handle_comments():
+@api.route('/comments', methods=['GET'])
+def handle_get_comments():
     if request.method == 'GET':
         comments = db.session.execute(db.select(Comments).order_by(Comments.id)).scalars()
         comment_list = [comment.serialize() for comment in comments]
         response_body = {'message': 'Comment List',
                          'results': comment_list}
         return response_body, 200 
-    if request.method == 'POST':
+
+@api.route('/comments', methods=['POST'])
+@jwt_required()
+def handle_comments(): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:   
         data = request.get_json()
         comment = Comments(date=data['date'],
                            text=data['text'],
@@ -863,43 +927,62 @@ def handle_comments():
         response_body = {'message': 'Comment created', 
                          'results': comment.serialize()}
         return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
-@api.route('/comments/<int:comment_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_comment_id(media_id):
+@api.route('/comments/<int:comment_id>', methods=['GET'])
+def handle_get_comment_id(media_id):
     comment = db.one_or_404(db.select(Comments).filter_by(coment_id=comment_id), 
                          description=f"Comment not found , 404.")
-    if request.method == 'GET':
-        response_body = {'message': 'Comment', 
-                         'results': comment.serialize()}
-        return response_body, 200
-    if request.method == 'PUT':
-        data = request.get_json()
-        comment.date = data['date']
-        comment.text = data['text']
-        comment.is_active = data['is_active']
-        db.session.commit()
-        response_body = {'message': 'Comment updated', 
-                         'results': comment.serialize()}
-        return response_body, 200
-    if request.method == 'DELETE':
-        comment.is_active = False
-        db.session.commit()
-        response_body = {'message': 'Comment inactived'}
-        return response_body, 200
+    response_body = {'message': 'Comment', 
+                     'results': comment.serialize()}
+    return response_body, 200
+
+
+@api.route('/comments/<int:comment_id>', methods=['PUT', 'DELETE'])
+@jwt_required()
+def handle_comment_id(media_id):    
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:   
+        comment = db.one_or_404(db.select(Comments).filter_by(coment_id=comment_id), 
+                             description=f"Comment not found , 404.")
+        if request.method == 'PUT':
+            data = request.get_json()
+            comment.date = data['date']
+            comment.text = data['text']
+            comment.is_active = data['is_active']
+            db.session.commit()
+            response_body = {'message': 'Comment updated', 
+                             'results': comment.serialize()}
+            return response_body, 200
+        if request.method == 'DELETE':
+            comment.is_active = False
+            db.session.commit()
+            response_body = {'message': 'Comment inactived'}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/post/<int:post_id>/comments', methods=['GET', 'DELETE'])
-def handle_comments_by_post_id(post_id):   
-    if request.method == 'GET':
-        comments = db.session.execute(db.select(Comments).filter_by(post_id=post_id)).scalars()
-        comments_list = [post.serialize() for post in posts]
-        response_body = {'message': 'Comments list sorted by post id', 
-                         'results': comments_list}
-        return response_body, 200 
-    if request.method == 'DELETE':
-        response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
-        return response_body, 200
+@jwt_required()
+def handle_comments_by_post_id(post_id): 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin:
+    if current_identity[1]:     
+        if request.method == 'GET':
+            comments = db.session.execute(db.select(Comments).filter_by(post_id=post_id)).scalars()
+            comments_list = [post.serialize() for post in posts]
+            response_body = {'message': 'Comments list sorted by post id', 
+                             'results': comments_list}
+            return response_body, 200 
+        if request.method == 'DELETE':
+            response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/report-posts', methods=['GET', 'POST'])
@@ -920,4 +1003,3 @@ def handle_report_posts():
         response_body = {'message': 'Report Post created', 
                          'results': report.serialize()}
         return response_body, 200 
-
