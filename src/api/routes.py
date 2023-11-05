@@ -494,6 +494,73 @@ def handle_shopping_cart_id(shopping_cart_id):
         return response_body, 200
    
 
+@api.route('/bills', methods=['GET', 'POST'])
+def handle_bills():
+    if request.method == 'GET':
+        bills = db.session.execute(db.select(Bills)).scalars()
+        bills_list = [bill.serialize() for bill in bills]
+        response_body = {'message': 'Bills List', 
+                         'results': bills_list}
+        return response_body, 200 
+    if request.method == 'POST':  
+        data = request.get_json()
+        bill = Bills(paying_method=data['paying_method'], 
+                     total_amount=data['total_amount'], 
+                     date=data['date'], 
+                     status=data['status'],
+                     member_id=data['member_id'],
+                     shopping_cart_id=data['shopping_cart_id'])
+        db.session.add(bill)
+        db.session.commit()
+        response_body = {'message': 'Bill created', 
+                         'results': bill.serialize()}
+        return response_body, 201
+
+
+@api.route('/members/<int:member_id>/bills', methods=['GET'])
+def handle_bill_by_member_id(member_id):   
+    if request.method == 'GET':
+        bills = db.session.execute(db.select(Bills).filter_by(member_id=member_id)).scalars()
+        bills_list = [bill.serialize() for bill in bills]
+        response_body = {'message': 'Bills List', 
+                         'results': bills_list}
+        return response_body, 200 
+
+
+@api.route('/bills/<int:bill_id>', methods=['GET'])
+def handle_bill_by_id(bill_id):   
+    if request.method == 'GET':
+        bills = db.one_or_404(db.select(Bills).filter_by(id=bill_id),
+                              description=f"Post not found , 404.")
+        bill_items = db.session.execute(db.select(BillItems).filter_by(bill_id=bill_id)).scalars()
+        bill_items_list = [item.serialize() for item in bill_items]
+        response_body = {'message': 'Bills List', 
+                         'results': {'bill': bills.serialize(),
+                                     'items': bill_items_list}}
+        return response_body, 200 
+
+
+@api.route('/billing-issues', methods=['GET', 'POST'])
+def handle_billing_issues():
+    if request.method == 'GET':
+        issues = db.session.execute(db.select(BillingIssues)).scalars()
+        issues_list = [issue.serialize() for issue in issues]
+        response_body = {'message': 'Billing Issues List',
+                         'results': issues_list}
+        return response_body, 200 
+    if request.method == 'POST':
+        data = request.get_json()
+        issue = BillingIssues(description=data['description'],
+                              status=data['status'],
+                              log=data['log'],
+                              bill_id=data['bill_id'])
+        db.session.add(issue)
+        db.session.commit()
+        response_body = {'message': 'Billing Issue created', 
+                         'results': issue.serialize()}
+        return response_body, 200 
+
+
 @api.route('/posts', methods=['GET', 'POST']) 
 def handle_posts():
     if request.method == 'GET':
