@@ -254,6 +254,7 @@ class BillingIssues(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(300), nullable = False)
     status = db.Column(db.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable = False)
+    log = db.Column(db.String(1500))
     bill_id = db.Column(db.ForeignKey(Bills.id), nullable = False)
     bills = db.relationship('Bills')
     
@@ -354,6 +355,7 @@ class ReportPosts(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(255), nullable = False)
     status = db.Column(db.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable = False)
+    log = db.Column(db.String(1500))
     is_active = db.Column(db.Boolean(), unique=False, nullable = False)
     author_id = db.Column(db.ForeignKey('authors.id'), nullable = False)
     post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
