@@ -1,0 +1,34 @@
+AUTHOR
+{
+    "email": "email@gmail.com", 
+    "pasword": "1234",
+    "is_author": True,
+    "author": {
+        "alias": "email",
+        "member": {}
+        },
+    "advisor": {}
+}
+
+MEMBER
+{
+    "user_id": user.id, // porque tiene que estar ya logeado
+    "token": "token", // El identity[0] tiene que ser igual al user_id
+    "author_id": author.id,
+    "member": {
+            ...
+        }
+}
+
+ADVISOR
+{
+    "email": "email@empresa.com", 
+    "pasword": "1234",
+    "is_author": False,
+    "author": {},
+    "advisor": {
+        "nif": "5648",
+        "cp": ,
+        ...
+        }
+}
