@@ -1,7 +1,11 @@
 import React, { useContext } from "react";
 import { Context } from "../store/appContext";
 
+
 export const Login = () => {
+    // No utilizar useContext. Utilizar useState
+    // Realizar el fetch (al enpoint login) dentro de la función de handleOnSubmit (igual será para el SignUp signup advisor)
+
     const { store, actions } = useContext(Context);
 
     return (
@@ -25,7 +29,7 @@ export const Login = () => {
                     <button type="submit" className="btn btn-primary btn-block">Log in</button>
                 </div>
             <div className="dropdown-divider"></div>
-            <a className="dropdown-item" href="#">New around here? Sign up</a>
+            <a className="dropdown-item" href="/signup">New around here? Sign up</a>
             <a className="dropdown-item" href="#">Forgot password?</a>
             </form>
         </div>

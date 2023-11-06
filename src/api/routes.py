@@ -61,7 +61,6 @@ def handle_signup():
                  is_active=True, 
                  is_admin=False)
     db.session.add(user)
-    db.session.commit()
     if is_author:  # Creamos Author
         author = Authors(alias=data['alias'], 
                          birth_date=data['birth_date'], 
@@ -72,9 +71,9 @@ def handle_signup():
                          is_active=True,
                          user_id=user.id)
         db.session.add(author)
-        response_body = {'message': 'Author created', 
-                         'results': author.serialize()}
-        return response_body, 201
+        #  response_body = {'message': 'Author created', 
+        #                  'results': author.serialize()}
+        #  return response_body, 201
     else:  # Creamos Advisor
         advisor = Advisors(name=data['name'], 
                           nif=data['nif'], 
@@ -86,23 +85,21 @@ def handle_signup():
                           is_active=True,
                           user_id=user.id)
         db.session.add(advisor)
-        response_body = {'message': 'Advisor created', 
-                         'results': advisor.serialize()}
-        return response_body, 201
+        #response_body = {'message': 'Advisor created', 
+        #                 'results': advisor.serialize()}
+        # return response_body, 201
+    db.session.commit()
     access_token = create_access_token(identity=[user.id, 
                                        user.is_admin, 
                                        author.id if is_author else None, 
                                        advisor.id if not is_author else None])
     response_body = {'message': 'User created',
-                     'results': {
-                         'token': access_token,
-                         'user_id': user.id,
-                         'is_admin': user.is_admin,
-                         'is_author': is_author,
-                         'author_id': author.id if is_author else None,
-                         'advisor_id': advisor.id if not is_author else None
-                     }}
-    db.session.commit()
+                     'results': {'token': access_token,
+                                 'user_id': user.id,
+                                 'is_admin': user.is_admin,
+                                 'is_author': is_author,
+                                 'author_id': author.id if is_author else None,
+                                 'advisor_id': advisor.id if not is_author else None}}
     return response_body, 201
   
 
@@ -110,8 +107,7 @@ def handle_signup():
 @jwt_required()
 def handle_logout():
     user_id = get_jwt_identity()[0]  # Obtén el ID del usuario a partir del token
-    # Revoca el token actual para deshabilitarlo
-    unset_jwt_cookies()
+    unset_jwt_cookies()  # Revoca el token actual para deshabilitarlo
     response_body = {'message': 'Logout successful'}
     return response_body, 200
                      
@@ -121,7 +117,7 @@ def handle_logout():
 def handle_users():
     current_identity = get_jwt_identity()
     # Valido si es admin
-    if current_identity[1] :
+    if current_identity[1]:
         users = db.session.execute(db.select(Users)).scalars()
         users_list = [user.serialize() for user in users]
         response_body = {'message': 'User List', 
@@ -136,7 +132,7 @@ def handle_users():
 def handle_user_id(user_id):
     current_identity = get_jwt_identity()
     # Valido si es admin
-    if current_identity[1] :
+    if current_identity[1]:
         user = db.one_or_404(db.select(Users).filter_by(id=user_id), 
                              description=f"User not found , 404.")
         if request.method == 'GET':
@@ -147,7 +143,6 @@ def handle_user_id(user_id):
             data = request.get_json()
             user.email = data['email']
             user.password = data['password']
-            # si el is_active es false, no lo dejo modificar y le aviso que tiene que hacerlo a través del método DELETE. Caso contrario, lo activo. A resolver en AUTENTICACION
             user.is_active = data['is_active']
             user.is_admin = data['is_admin']
             db.session.commit()
@@ -283,7 +278,7 @@ def handle_member_id(member_id):
     member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
                            description=f"Member not found , 404.")
     # Valido si es admin o author:
-    if current_identity[1] and request.method == 'PUT':  # Revisar cuando tengamos la Autenticación
+    if request.method == 'PUT' and current_identity[1]:  
         data = request.get_json()
         member.nif = data['nif']
         member.address = data['address']
@@ -300,7 +295,7 @@ def handle_member_id(member_id):
         response_body = {'message': 'Member updated', 
                          'results': member.serialize()}
         return response_body, 200
-    if current_identity[2] and request.method == 'PUT': 
+    if request.method == 'PUT' and current_identity[2]: 
         data = request.get_json()
         member.nif = data['nif']
         member.address = data['address']

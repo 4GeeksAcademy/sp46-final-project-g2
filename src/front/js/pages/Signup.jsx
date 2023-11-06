@@ -17,19 +17,19 @@ export const Signup = () => {
                 </div>
                 <div className="form-group">
                     <div className="form-check">
-                        <input type="checkbox" className="form-check-input" id="dropdownCheck" />
-                        <label className="form-check-label" htmlFor="dropdownCheck">
+                        <input type="radio" className="form-check-input" id="author" name="userType" />
+                        <label className="form-check-label" htmlFor="author">
                             Sign up as author
                         </label>
                     </div>
                     <div className="form-check">
-                    <input type="checkbox" className="form-check-input" id="dropdownCheck" />
-                    <label className="form-check-label" htmlFor="dropdownCheck">
-                        Sign up as advisor
-                    </label>
+                        <input type="radio" className="form-check-input" id="advisor" name="userType" />
+                        <label className="form-check-label" htmlFor="advisor">
+                            Sign up as advisor
+                        </label>
+                    </div>
+                    <button type="submit" className="btn btn-primary btn-block">Sign up</button>
                 </div>
-                <button type="submit" className="btn btn-primary btn-block">Sign up</button>
-        </div>
             </form >
         </div >
     );
