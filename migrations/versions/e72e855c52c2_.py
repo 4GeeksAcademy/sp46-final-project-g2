@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 88529fd01e30
+Revision ID: e72e855c52c2
 Revises: 
-Create Date: 2023-11-04 11:33:13.851977
+Create Date: 2023-11-06 21:24:01.420829
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '88529fd01e30'
+revision = 'e72e855c52c2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,6 +21,7 @@ def upgrade():
     op.create_table('category_services',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('description', sa.String(length=1500), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -57,33 +58,11 @@ def upgrade():
     sa.Column('country', sa.String(length=120), nullable=True),
     sa.Column('quote', sa.String(length=120), nullable=True),
     sa.Column('about_me', sa.String(length=1500), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('alias')
-    )
-    op.create_table('posts',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=50), nullable=False),
-    sa.Column('abstract', sa.String(length=80), nullable=True),
-    sa.Column('tag', sa.String(length=50), nullable=True),
-    sa.Column('text', sa.String(length=50), nullable=False),
-    sa.Column('created_date', sa.Date(), nullable=True),
-    sa.Column('update_date', sa.Date(), nullable=True),
-    sa.Column('is_published', sa.Boolean(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('comments',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=True),
-    sa.Column('text', sa.String(length=255), nullable=False),
-    sa.Column('post_id', sa.Integer(), nullable=False),
-    sa.Column('author_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
-    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('followers',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -92,24 +71,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['follower_id'], ['authors.id'], ),
     sa.ForeignKeyConstraint(['following_id'], ['authors.id'], ),
     sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('likes',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('post_id', sa.Integer(), nullable=False),
-    sa.Column('value', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('media',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('source', sa.String(length=100), nullable=False),
-    sa.Column('url', sa.String(length=250), nullable=False),
-    sa.Column('post_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('url')
     )
     op.create_table('members',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -124,20 +85,24 @@ def upgrade():
     sa.Column('reviews_expiring_date', sa.Date(), nullable=True),
     sa.Column('status', sa.Enum('Active', 'Inactive', 'Pending', name='status'), nullable=False),
     sa.Column('awards', sa.String(length=1000), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('author_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('nif')
     )
-    op.create_table('report_posts',
+    op.create_table('posts',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('description', sa.String(length=255), nullable=False),
-    sa.Column('status', sa.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable=False),
+    sa.Column('title', sa.String(length=50), nullable=False),
+    sa.Column('abstract', sa.String(length=80), nullable=True),
+    sa.Column('tag', sa.String(length=50), nullable=True),
+    sa.Column('text', sa.String(length=50), nullable=False),
+    sa.Column('created_date', sa.Date(), nullable=True),
+    sa.Column('update_date', sa.Date(), nullable=True),
+    sa.Column('is_published', sa.Boolean(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('author_id', sa.Integer(), nullable=False),
-    sa.Column('post_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('services',
@@ -147,6 +112,7 @@ def upgrade():
     sa.Column('final_date', sa.Date(), nullable=True),
     sa.Column('is_available', sa.Boolean(), nullable=False),
     sa.Column('price', sa.Float(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.Column('advisor_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['advisor_id'], ['advisors.id'], ),
@@ -161,13 +127,47 @@ def upgrade():
     sa.ForeignKeyConstraint(['service_id'], ['services.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('bills',
+    op.create_table('comments',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('paying_method', sa.String(length=100), nullable=False),
     sa.Column('date', sa.Date(), nullable=True),
-    sa.Column('status', sa.Enum('Paid', 'Declined', 'Pending', name='status'), nullable=False),
-    sa.Column('member_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['member_id'], ['members.id'], ),
+    sa.Column('text', sa.String(length=255), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('post_id', sa.Integer(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('likes',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=False),
+    sa.Column('post_id', sa.Integer(), nullable=False),
+    sa.Column('value', sa.Integer(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('media',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('source', sa.String(length=100), nullable=False),
+    sa.Column('url', sa.String(length=250), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('post_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('url')
+    )
+    op.create_table('report_posts',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('description', sa.String(length=255), nullable=False),
+    sa.Column('status', sa.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable=False),
+    sa.Column('log', sa.String(length=1500), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=False),
+    sa.Column('post_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('shopping_cart_items',
@@ -183,15 +183,28 @@ def upgrade():
     sa.Column('total_amount', sa.Float(), nullable=True),
     sa.Column('discount', sa.Float(), nullable=True),
     sa.Column('date', sa.Date(), nullable=True),
-    sa.Column('status', sa.Enum('Active', 'Inactive', 'Pending', name='status'), nullable=False),
+    sa.Column('status', sa.Enum('Paid', 'Droped', 'Pending', name='status'), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('member_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['member_id'], ['members.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('bills',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('paying_method', sa.String(length=100), nullable=False),
+    sa.Column('date', sa.Date(), nullable=True),
+    sa.Column('status', sa.Enum('Paid', 'Declined', 'Pending', name='status'), nullable=False),
+    sa.Column('member_id', sa.Integer(), nullable=False),
+    sa.Column('shopping_cart_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['member_id'], ['members.id'], ),
+    sa.ForeignKeyConstraint(['shopping_cart_id'], ['shopping_carts.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('billing_issues',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=300), nullable=False),
     sa.Column('status', sa.Enum('Resolved', 'Rejected', 'Pending', name='status'), nullable=False),
+    sa.Column('log', sa.String(length=1500), nullable=True),
     sa.Column('bill_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['bill_id'], ['bills.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -202,18 +215,18 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('billing_issues')
+    op.drop_table('bills')
     op.drop_table('shopping_carts')
     op.drop_table('shopping_cart_items')
-    op.drop_table('bills')
-    op.drop_table('bill_items')
-    op.drop_table('services')
     op.drop_table('report_posts')
-    op.drop_table('members')
     op.drop_table('media')
     op.drop_table('likes')
-    op.drop_table('followers')
     op.drop_table('comments')
+    op.drop_table('bill_items')
+    op.drop_table('services')
     op.drop_table('posts')
+    op.drop_table('members')
+    op.drop_table('followers')
     op.drop_table('authors')
     op.drop_table('advisors')
     op.drop_table('users')
