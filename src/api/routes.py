@@ -6,18 +6,18 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies
 
 
 api = Blueprint('api', __name__)
 
 
 @api.route("/login", methods=["POST"])
-def create_token():
+def handle_login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
-                           description=f"Bad email or password.")
+                         description=f"Bad email or password.")
     author_id = None
     advisor_id = None
     # Busco si user.id es author. True o False y traer el author.id
@@ -29,7 +29,10 @@ def create_token():
         is_author = False
         advisor_id = advisor.id 
     # crea un nuevo token con el id de usuario dentro:
-    access_token = create_access_token(identity=[user.id, user.is_admin, author_id, advisor_id])
+    access_token = create_access_token(identity=[user.id, 
+                                                 user.is_admin, 
+                                                 author_id, 
+                                                 advisor_id])
     response_body = {'message': 'Token created',
                      'results': {'token': access_token, 
                                  'user_id': user.id, 
@@ -45,28 +48,21 @@ def create_token():
     author_id es identity[2]
     advisor_id es identity[3]"""
 
-# SIGN UP:
 
-""" Traido del post de users:
-
-    if request.method == 'POST':
-        data = request.get_json()
-        user = Users(email=data['email'], 
-                     password=data['password'], 
-                     is_active=True, 
-                     is_admin=True)
-        # Aca se debe crear Advisor o Author asociado según los datos que vienen en el JSON
-        db.session.add(user)
-        db.session.commit()
-        response_body = {'message': 'User created', 
-                         'results': user.serialize()}
-        return response_body, 201
-
-
-Traído de post Authors:
-
- if request.method == 'POST':
-        data = request.get_json()
+@api.route('/signup', methods=["POST"])
+def handle_signup():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    is_author = data.get('is_author', False) # Importante añadir esta "casilla" en el FRONT!
+      # Creamos User 
+    user = Users(email=data['email'], 
+                 password=data['password'], 
+                 is_active=True, 
+                 is_admin=False)
+    db.session.add(user)
+    db.session.commit()
+    if is_author:  # Creamos Author
         author = Authors(alias=data['alias'], 
                          birth_date=data['birth_date'], 
                          city=data['city'], 
@@ -74,19 +70,13 @@ Traído de post Authors:
                          quote=data['quote'], 
                          about_me=data['about_me'], 
                          is_active=True,
-                         user_id=data['user_id'])
+                         user_id=user.id)
         db.session.add(author)
-        db.session.commit()
         response_body = {'message': 'Author created', 
                          'results': author.serialize()}
         return response_body, 201
-
-
-Taído del post advisors
-
-if request.method == 'POST':
-        data = request.get_json()
-        advisor = Advisor(name=data['name'], 
+    else:  # Creamos Advisor
+        advisor = Advisors(name=data['name'], 
                           nif=data['nif'], 
                           category=data['category'], 
                           address=data['address'], 
@@ -94,13 +84,36 @@ if request.method == 'POST':
                           country=data['country'], 
                           about_me=data['about_me'], 
                           is_active=True,
-                          user_id=data['user_id'])
+                          user_id=user.id)
         db.session.add(advisor)
-        db.session.commit()
         response_body = {'message': 'Advisor created', 
                          'results': advisor.serialize()}
-        return response_body, 201"""
+        return response_body, 201
+    access_token = create_access_token(identity=[user.id, 
+                                       user.is_admin, 
+                                       author.id if is_author else None, 
+                                       advisor.id if not is_author else None])
+    response_body = {'message': 'User created',
+                     'results': {
+                         'token': access_token,
+                         'user_id': user.id,
+                         'is_admin': user.is_admin,
+                         'is_author': is_author,
+                         'author_id': author.id if is_author else None,
+                         'advisor_id': advisor.id if not is_author else None
+                     }}
+    db.session.commit()
+    return response_body, 201
+  
 
+@api.route('/logout', methods=["POST"])
+@jwt_required()
+def handle_logout():
+    user_id = get_jwt_identity()[0]  # Obtén el ID del usuario a partir del token
+    # Revoca el token actual para deshabilitarlo
+    unset_jwt_cookies()
+    response_body = {'message': 'Logout successful'}
+    return response_body, 200
                      
 
 @api.route('/users', methods=['GET']) # El POST se hace en el sign up 
@@ -136,7 +149,6 @@ def handle_user_id(user_id):
             user.password = data['password']
             # si el is_active es false, no lo dejo modificar y le aviso que tiene que hacerlo a través del método DELETE. Caso contrario, lo activo. A resolver en AUTENTICACION
             user.is_active = data['is_active']
-            # esto sólo lo puede hacer otro usuario que sea admin. A resolver en AUTENTICACION
             user.is_admin = data['is_admin']
             db.session.commit()
             response_body = {'message': 'User updated', 
@@ -212,9 +224,12 @@ def handle_get_members():
 @jwt_required() 
 def handle_members():
     current_identity = get_jwt_identity()  # Aquí llega el token
+    data = request.get_json()
+    if not current_identity[1] and not current_identity[2]:
+        response_body = {'message': "Restricted access"}
+        return response_body, 401
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
-        data = request.get_json()
+    if current_identity[1]:
         member = Members(name=data['name'], 
                          nif=data['nif'], 
                          address=data['address'], 
@@ -228,13 +243,26 @@ def handle_members():
                          awards=data['awards'], 
                          author_id=data['author_id'],
                          is_active=True)
-        db.session.add(member)
-        db.session.commit()
-        response_body = {'message': 'Member created', 
-                         'results': member.serialize()}
-        return response_body, 201
-    response_body = {'message': "Restricted access"}
-    return response_body, 401
+    if current_identity[2]:  # Lo que no tiene data no se puede cambiar
+        member = Members(name=data['name'], 
+                         nif=data['nif'], 
+                         address=data['address'], 
+                         starting_date=member.starting_date, 
+                         current_date=member.current_date, 
+                         final_date=member.final_date, 
+                         current_discount=member.current_discount, 
+                         remaining_reviews=member.remaining_reviews, 
+                         reviews_expiring_date=member.reviews_expiring_date, 
+                         status=member.status, 
+                         awards=data['awards'], 
+                         author_id=member.author_id,
+                         is_active=True)
+    db.session.add(member)
+    db.session.commit()
+    response_body = {'message': 'Member created', 
+                     'results': member.serialize()}
+    return response_body, 201
+
 
 @api.route('/members/<int:member_id>', methods=['GET'])
 def handle_get_member_id(member_id):
@@ -249,34 +277,51 @@ def handle_get_member_id(member_id):
 @jwt_required() 
 def handle_member_id(member_id):
     current_identity = get_jwt_identity()  # Aquí llega el token
+    if not current_identity[1] and not current_identity[2]:
+        response_body = {'message': "Restricted access"}
+        return response_body, 401
+    member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
+                           description=f"Member not found , 404.")
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
-        member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
-                               description=f"Member not found , 404.")
-        if request.method == 'PUT':  # Revisar cuando tengamos la Autenticación
-            data = request.get_json()
-            member.nif = data['nif']
-            member.address = data['address']
-            member.starting_date = data['starting_date']
-            member.current_date = data['current_date']
-            member.final_date = data['final_date']
-            member.current_discount = data['current_discount']
-            member.remaining_reviews = data['remaining_reviews']
-            member.reviews_expiring_date = data['reviews_expiring_date']
-            member.status = data['status']
-            member.awards = data['awards']
-            member.is_active = data['is_active']
-            db.session.commit()
-            response_body = {'message': 'Member updated', 
-                             'results': member.serialize()}
-            return response_body, 200
-        if request.method == 'DELETE':
-            member.is_active = False
-            db.session.commit()
-            response_body = {'message': 'Member inactived'}
-            return response_body, 200
-    response_body = {'message': "Restricted access"}
-    return response_body, 401
+    if current_identity[1] and request.method == 'PUT':  # Revisar cuando tengamos la Autenticación
+        data = request.get_json()
+        member.nif = data['nif']
+        member.address = data['address']
+        member.starting_date = data['starting_date']
+        member.current_date = data['current_date']
+        member.final_date = data['final_date']
+        member.current_discount = data['current_discount']
+        member.remaining_reviews = data['remaining_reviews']
+        member.reviews_expiring_date = data['reviews_expiring_date']
+        member.status = data['status']
+        member.awards = data['awards']
+        member.is_active = data['is_active']
+        db.session.commit()
+        response_body = {'message': 'Member updated', 
+                         'results': member.serialize()}
+        return response_body, 200
+    if current_identity[2] and request.method == 'PUT': 
+        data = request.get_json()
+        member.nif = data['nif']
+        member.address = data['address']
+        member.starting_date = member.starting_date
+        member.current_date = member.current_date 
+        member.final_date = member.final_date
+        member.current_discount = member.current_discount
+        member.remaining_reviews = member.remaining_reviews
+        member.reviews_expiring_date = member.reviews_expiring_date 
+        member.status = member.status
+        member.awards = data['awards']
+        member.is_active = data['is_active']
+        db.session.commit()
+        response_body = {'message': 'Member updated', 
+                         'results': member.serialize()}
+        return response_body, 200
+    if request.method == 'DELETE':
+        member.is_active = False
+        db.session.commit()
+        response_body = {'message': 'Member inactived'}
+        return response_body, 200
 
 
 @api.route('/advisors', methods=['GET']) # El POST se hace en el sign up 
@@ -686,7 +731,7 @@ def handle_post_id(post_id):
             post.abstract=data['abstract']
             post.tag=data['tag']
             post.text=data['text']
-            post.created_date=data['created_date']
+            post.created_date=post.created_date
             post.update_date=data['update_date']
             post.is_published=data['is_published']
             db.session.commit()
@@ -950,7 +995,7 @@ def handle_comment_id(media_id):
                              description=f"Comment not found , 404.")
         if request.method == 'PUT':
             data = request.get_json()
-            comment.date = data['date']
+            comment.date = comment.date
             comment.text = data['text']
             comment.is_active = data['is_active']
             db.session.commit()
