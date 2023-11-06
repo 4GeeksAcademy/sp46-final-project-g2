@@ -49,7 +49,7 @@ def handle_login():
     advisor_id es identity[3]"""
 
 
-@api.route('/signup', methods=["POST"])
+@api.route('/signup', methods=["POST"])  # Mensajes en JSON?
 def handle_signup():
     data = request.get_json()
     email = data.get('email')
@@ -852,6 +852,7 @@ def handle_media_by_post_id(post_id):
             return response_body, 200 
     response_body = {'message': "Restricted access"}
     return response_body, 401
+
 
 @api.route('/likes', methods=['GET']) 
 def handle_get_likes():
