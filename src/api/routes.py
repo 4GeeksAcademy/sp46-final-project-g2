@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
 
 
 api = Blueprint('api', __name__)
@@ -16,6 +16,7 @@ api = Blueprint('api', __name__)
 def handle_login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
+    remember_me = request.json.get("remember_me", False)
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
                          description=f"Bad email or password.")
     author_id = None
@@ -32,7 +33,8 @@ def handle_login():
     access_token = create_access_token(identity=[user.id, 
                                                  user.is_admin, 
                                                  author_id, 
-                                                 advisor_id])
+                                                 advisor_id], 
+                                       fresh=remember_me)
     response_body = {'message': 'Token created',
                      'results': {'token': access_token, 
                                  'user_id': user.id, 
@@ -41,6 +43,8 @@ def handle_login():
                                  'author_id': author_id,
                                  'advisor_id': advisor_id
                                  }}
+    if remember_me:
+        set_access_cookies(response_body, access_token)
     return response_body, 200
 
 """    user.id es identity[0]
@@ -54,7 +58,7 @@ def handle_signup():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    is_author = data.get('is_author', False) # Importante añadir esta "casilla" en el FRONT!
+    is_author = data.get('is_author', True) # Importante añadir esta "casilla" en el FRONT!
       # Creamos User 
     user = Users(email=data['email'], 
                  password=data['password'], 
@@ -71,9 +75,6 @@ def handle_signup():
                          is_active=True,
                          user_id=user.id)
         db.session.add(author)
-        #  response_body = {'message': 'Author created', 
-        #                  'results': author.serialize()}
-        #  return response_body, 201
     else:  # Creamos Advisor
         advisor = Advisors(name=data['name'], 
                           nif=data['nif'], 
@@ -85,9 +86,6 @@ def handle_signup():
                           is_active=True,
                           user_id=user.id)
         db.session.add(advisor)
-        #response_body = {'message': 'Advisor created', 
-        #                 'results': advisor.serialize()}
-        # return response_body, 201
     db.session.commit()
     access_token = create_access_token(identity=[user.id, 
                                        user.is_admin, 
@@ -99,7 +97,9 @@ def handle_signup():
                                  'is_admin': user.is_admin,
                                  'is_author': is_author,
                                  'author_id': author.id if is_author else None,
-                                 'advisor_id': advisor.id if not is_author else None}}
+                                 'advisor_id': advisor.id if not is_author else None}, 
+                                 'author': author.serialize(), 
+                                 'advisor': advisor.serialize()}
     return response_body, 201
   
 
@@ -111,6 +111,14 @@ def handle_logout():
     response_body = {'message': 'Logout successful'}
     return response_body, 200
                      
+
+@api.route('/forgot-password', methods=["POST"])
+def handle_forgot_password():
+    email = request.json.get('email')  
+    # WORK IN PROGRESS: validar email, generar un token, enviar un correo electrónico (biblioteca Flask-Mail)
+    response_body = {'message': 'Password reset instructions sent to your email'}
+    return jsonify(response_body), 200
+
 
 @api.route('/users', methods=['GET']) # El POST se hace en el sign up 
 @jwt_required() 
@@ -672,70 +680,94 @@ def handle_shopping_cart_id(shopping_cart_id):
    
 
 @api.route('/bills', methods=['GET', 'POST'])
+@jwt_required()
 def handle_bills():
-    if request.method == 'GET':
-        bills = db.session.execute(db.select(Bills)).scalars()
-        bills_list = [bill.serialize() for bill in bills]
-        response_body = {'message': 'Bills List', 
-                         'results': bills_list}
-        return response_body, 200 
-    if request.method == 'POST':  
-        data = request.get_json()
-        bill = Bills(paying_method=data['paying_method'], 
-                     total_amount=data['total_amount'], 
-                     date=data['date'], 
-                     status=data['status'],
-                     member_id=data['member_id'],
-                     shopping_cart_id=data['shopping_cart_id'])
-        db.session.add(bill)
-        db.session.commit()
-        response_body = {'message': 'Bill created', 
-                         'results': bill.serialize()}
-        return response_body, 201
-
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:
+        if request.method == 'GET':
+            bills = db.session.execute(db.select(Bills)).scalars()
+            bills_list = [bill.serialize() for bill in bills]
+            response_body = {'message': 'Bills List', 
+                             'results': bills_list}
+            return response_body, 200 
+        if request.method == 'POST':  
+            data = request.get_json()
+            bill = Bills(paying_method=data['paying_method'], 
+                         total_amount=data['total_amount'], 
+                         date=data['date'], 
+                         status=data['status'],
+                         member_id=data['member_id'],
+                         shopping_cart_id=data['shopping_cart_id'])
+            db.session.add(bill)
+            db.session.commit()
+            response_body = {'message': 'Bill created', 
+                             'results': bill.serialize()}
+            return response_body, 201 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
+    
 
 @api.route('/members/<int:member_id>/bills', methods=['GET'])
+@jwt_required()
 def handle_bill_by_member_id(member_id):   
-    if request.method == 'GET':
-        bills = db.session.execute(db.select(Bills).filter_by(member_id=member_id)).scalars()
-        bills_list = [bill.serialize() for bill in bills]
-        response_body = {'message': 'Bills List', 
-                         'results': bills_list}
-        return response_body, 200 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:
+        if request.method == 'GET':
+            bills = db.session.execute(db.select(Bills).filter_by(member_id=member_id)).scalars()
+            bills_list = [bill.serialize() for bill in bills]
+            response_body = {'message': 'Bills List', 
+                             'results': bills_list}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/bills/<int:bill_id>', methods=['GET'])
+@jwt_required()
 def handle_bill_by_id(bill_id):   
-    if request.method == 'GET':
-        bills = db.one_or_404(db.select(Bills).filter_by(id=bill_id),
-                              description=f"Post not found , 404.")
-        bill_items = db.session.execute(db.select(BillItems).filter_by(bill_id=bill_id)).scalars()
-        bill_items_list = [item.serialize() for item in bill_items]
-        response_body = {'message': 'Bills List', 
-                         'results': {'bill': bills.serialize(),
-                                     'items': bill_items_list}}
-        return response_body, 200 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:
+        if request.method == 'GET':
+            bills = db.one_or_404(db.select(Bills).filter_by(id=bill_id),
+                                  description=f"Post not found , 404.")
+            bill_items = db.session.execute(db.select(BillItems).filter_by(bill_id=bill_id)).scalars()
+            bill_items_list = [item.serialize() for item in bill_items]
+            response_body = {'message': 'Bills List', 
+                             'results': {'bill': bills.serialize(),
+                                         'items': bill_items_list}}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/billing-issues', methods=['GET', 'POST'])
+@jwt_required()
 def handle_billing_issues():
-    if request.method == 'GET':
-        issues = db.session.execute(db.select(BillingIssues)).scalars()
-        issues_list = [issue.serialize() for issue in issues]
-        response_body = {'message': 'Billing Issues List',
-                         'results': issues_list}
-        return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        issue = BillingIssues(description=data['description'],
-                              status=data['status'],
-                              log=data['log'],
-                              bill_id=data['bill_id'])
-        db.session.add(issue)
-        db.session.commit()
-        response_body = {'message': 'Billing Issue created', 
-                         'results': issue.serialize()}
-        return response_body, 200 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author o advisor:
+    if current_identity[1] or current_identity[2] or current_identity[3]:
+        if request.method == 'GET':
+            issues = db.session.execute(db.select(BillingIssues)).scalars()
+            issues_list = [issue.serialize() for issue in issues]
+            response_body = {'message': 'Billing Issues List',
+                             'results': issues_list}
+            return response_body, 200 
+        if request.method == 'POST':
+            data = request.get_json()
+            issue = BillingIssues(description=data['description'],
+                                  status=data['status'],
+                                  log=data['log'],
+                                  bill_id=data['bill_id'])
+            db.session.add(issue)
+            db.session.commit()
+            response_body = {'message': 'Billing Issue created', 
+                             'results': issue.serialize()}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
 @api.route('/posts', methods=['GET']) 
@@ -1094,22 +1126,28 @@ def handle_comments_by_post_id(post_id):
 
 
 @api.route('/report-posts', methods=['GET', 'POST'])
+@jwt_required()
 def handle_report_posts():
-    if request.method == 'GET':
-        reports = db.session.execute(db.select(ReportPosts).order_by(ReportPosts.id)).scalars()
-        reports_list = [report.serialize() for report in reports]
-        response_body = {'message': 'Report Posts List',
-                         'results': reports_list}
-        return response_body, 200 
-    if request.method == 'POST':
-        data = request.get_json()
-        report = Comments(description=data['description'],
-                           status=data['status'],
-                           is_active=True)
-        db.session.add(report)
-        db.session.commit()
-        response_body = {'message': 'Report Post created', 
-                         'results': report.serialize()}
-        return response_body, 200 
+    current_identity = get_jwt_identity()  # Aquí llega el token
+    # Valido si es admin o author:
+    if current_identity[1] or current_identity[2]:   
+        if request.method == 'GET':
+            reports = db.session.execute(db.select(ReportPosts).order_by(ReportPosts.id)).scalars()
+            reports_list = [report.serialize() for report in reports]
+            response_body = {'message': 'Report Posts List',
+                             'results': reports_list}
+            return response_body, 200 
+        if request.method == 'POST':
+            data = request.get_json()
+            report = Comments(description=data['description'],
+                               status=data['status'],
+                               is_active=True)
+            db.session.add(report)
+            db.session.commit()
+            response_body = {'message': 'Report Post created', 
+                             'results': report.serialize()}
+            return response_body, 200 
+    response_body = {'message': "Restricted access"}
+    return response_body, 401
 
 
