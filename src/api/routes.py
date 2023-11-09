@@ -16,41 +16,61 @@ api = Blueprint('api', __name__)
 def handle_login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    remember_me = request.json.get("remember_me", False)
-    user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
+    # remember_me = request.json.get("remember_me", False)
+    user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True),
                          description=f"Bad email or password.")
+    print(user)
     author_id = None
     advisor_id = None
+    member_id = None
+    """  author = db.session.execute(db.select(Authors).filter_by(user_id=user.id)).scalars()
+    # author = db.select(Authors).filter_by(user_id=user.id).scalar()
+    # advisor = db.select(Advisors).filter_by(user_id=user.id).scalars()
+    print(author)
+    if author:
+        author_id = author[0].id
+        member = db.session.execute(db.select(Members).filter_by(author_id=author.id)).scalars()
+        if memeber:
+            member_id = memeber.id
+    advisor = db.session.execute(db.select(Advisors).filter_by(user_id=user.id)).scalars()
+    advisor_id = advisor.id if advisor else None
+    # member = db.select(Members).filter_by(user_id=user.id).scalars()
     # Busco si user.id es author. True o False y traer el author.id
-    if user.id == author.id :
+    if user.id == author.id:
         is_author = True
-        author_id = author.id 
+        author_id = author.id
     # Busco si es advisor y traer advisor.id
-    if user.id == advisor.id : 
+    if user.id == advisor.id:
         is_author = False
-        advisor_id = advisor.id 
+        advisor_id = advisor.id
     # crea un nuevo token con el id de usuario dentro:
-    access_token = create_access_token(identity=[user.id, 
-                                                 user.is_admin, 
-                                                 author_id, 
-                                                 advisor_id], 
-                                       fresh=remember_me)
+    access_token = create_access_token(identity=[user.id,
+                                                 user.is_admin,
+                                                 author_id,
+                                                 advisor_id])
+                                                 # , fresh=remember_me
     response_body = {'message': 'Token created',
-                     'results': {'token': access_token, 
-                                 'user_id': user.id, 
+                     'results': {'token': access_token,
+                                 'user_id': user.id,
                                  'is_admin': user.is_admin,
                                  'is_author': is_author,
                                  'author_id': author_id,
                                  'advisor_id': advisor_id
-                                 }}
-    if remember_me:
-        set_access_cookies(response_body, access_token)
+                                 }}"""
+    """if remember_me:
+        set_access_cookies(response_body, access_token)"""
+    response_body = {"message": user.serialize()}
     return response_body, 200
-
 """    user.id es identity[0]
     user.is_admin es identity[1]
     author_id es identity[2]
     advisor_id es identity[3]"""
+
+
+
+
+
+
 
 
 @api.route('/signup', methods=["POST"])  # Mensajes en JSON?
