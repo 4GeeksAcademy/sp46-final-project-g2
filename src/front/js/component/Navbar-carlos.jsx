@@ -32,13 +32,13 @@ export const Navbar = () => {
 							</li>
 
 							<li className="nav-item">
-								<a class="nav-link" aria-current="page" href="/authors"> Categorias </a>
+								<a class="nav-link" aria-current="page" href="/categories"> Categorias </a>
 							</li>
 
 							<li className="nav-item">
 								<a class="nav-link" aria-current="page" href="/authors"> Autores </a>
 							</li>
-							
+
 							<li className="nav-item dropdown">
 								<a className="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Servicios</a>
 								<ul className="dropdown-menu">
@@ -49,7 +49,7 @@ export const Navbar = () => {
 							</li>
 
 							<li className="nav-item">
-								<Link to="/">
+								<Link to="/login">
 									<button className="btn btn-warning"> Ingresa </button>
 								</Link>
 							</li>
