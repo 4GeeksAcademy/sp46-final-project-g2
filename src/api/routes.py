@@ -17,6 +17,7 @@ def handle_login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     # remember_me = request.json.get("remember_me", False)
+
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True),
                          description=f"Bad email or password.")
     results = {'user': user.serialize(),
@@ -42,6 +43,7 @@ def handle_login():
                      'results': results}
     """ if remember_me:
         set_access_cookies(response_body, access_token) """
+
     return response_body, 200
 
 
