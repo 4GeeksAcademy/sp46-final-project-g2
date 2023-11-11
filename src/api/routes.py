@@ -17,55 +17,43 @@ def handle_login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     # remember_me = request.json.get("remember_me", False)
-    user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True), 
+
+    user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True),
                          description=f"Bad email or password.")
-    print(user)
-    author_id = None
-    advisor_id = None
-    member_id = None
-    """  author = db.session.execute(db.select(Authors).filter_by(user_id=user.id)).scalars()
-    # author = db.select(Authors).filter_by(user_id=user.id).scalar()
-    # advisor = db.select(Advisors).filter_by(user_id=user.id).scalars()
-    print(author)
+    results = {'user': user.serialize(),
+               'author': None,
+               'member': None,
+               'advisor': None}
+    author = db.session.execute(db.select(Authors).where(Authors.user_id == user.id)).scalar()
     if author:
-        author_id = author[0].id
-        member = db.session.execute(db.select(Members).filter_by(author_id=author.id)).scalars()
-        if memeber:
-            member_id = memeber.id
-    advisor = db.session.execute(db.select(Advisors).filter_by(user_id=user.id)).scalars()
-    advisor_id = advisor.id if advisor else None
-    # member = db.select(Members).filter_by(user_id=user.id).scalars()
-    # Busco si user.id es author. True o False y traer el author.id
-    if user.id == author.id:
-        is_author = True
-        author_id = author.id 
-    # Busco si es advisor y traer advisor.id
-    if user.id == advisor.id: 
-        is_author = False
-        advisor_id = advisor.id 
-    # crea un nuevo token con el id de usuario dentro:
-    access_token = create_access_token(identity=[user.id, 
-                                                 user.is_admin, 
-                                                 author_id, 
-                                                 advisor_id])
+        results['author'] = author.serialize()
+        member = db.session.execute(db.select(Members).where(Members.author_id == author.id)).scalar()
+        results['member'] = member.serialize() if member else None
+    advisor = db.session.execute(db.select(Advisors).where(Advisors.user_id == user.id)).scalar()
+    results['advisor'] = advisor.serialize() if advisor else None
+    print(results)
+    access_token = create_access_token(identity=[user.id,
+                                                 user.is_admin,
+                                                 author.id if author else None,
+                                                 member.id if member else None,
+                                                 advisor.id if advisor else None])
                                                  # , fresh=remember_me
     response_body = {'message': 'Token created',
-                     'results': {'token': access_token, 
-                                 'user_id': user.id, 
-                                 'is_admin': user.is_admin,
-                                 'is_author': is_author,
-                                 'author_id': author_id,
-                                 'advisor_id': advisor_id
-                                 }}"""
-    """if remember_me:
-        set_access_cookies(response_body, access_token)"""
-    response_body = {"message": user.serialize()}
+                     'token': access_token,
+                     'results': results}
+    """ if remember_me:
+        set_access_cookies(response_body, access_token) """
+
     return response_body, 200
 
-"""    user.id es identity[0]
-    user.is_admin es identity[1]
-    author_id es identity[2]
-    advisor_id es identity[3]"""
+
+""" 
+    identity[0] es user.id
+    identity[1] es user.is_admin
+    identity[2] es author_id
+    identity[3] es member_id 
+    identity[4] es advisor_id
+"""
 
 
 @api.route('/signup', methods=["POST"])  # Mensajes en JSON?
@@ -365,7 +353,7 @@ def handle_get_advisor_id(advisor_id):
 def handle_advisor_id(advisor_id):
     current_identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o advisor:
-    if current_identity[1] or current_identity[3]:
+    if current_identity[1] or current_identity[4]:
         advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
                                 description=f"Advisor not found , 404.")
         if request.method == 'PUT':
