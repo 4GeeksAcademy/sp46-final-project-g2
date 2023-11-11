@@ -3,41 +3,46 @@ import React from "react";
 export const PrivacyPolicyView = () => {
     return (
         <div className="container bg-dark text-light">
-            <h2>Privacy Policy</h2>
-            <p>Last updated: 10.11.2023</p>
-            <p>Your privacy is important to us. It is LiteraryInk's policy to respect your privacy regarding any information we may collect from you across our website.</p>
-            <h3>Information We Collect</h3>
-            <ul>
-                <li>We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we're collecting it and how it will be used.</li>
-                <li>We only retain collected information for as long as necessary to provide you with your requested service. What data we store, we'll protect within commercially acceptable means to prevent loss and theft, as well as unauthorized access, disclosure, copying, use, or modification.</li>
-            </ul>
-            <h3>Information You Provide</h3>
-            <ul>
-                <li>We collect your name, email address, and other information you provide when you contact us or sign up for our services.</li>
-            </ul>
-            <h3>Log Data</h3>
-            <ul>
-                <li>We log information that your browser sends whenever you visit our website. This may include information such as your computer's Internet Protocol ("IP") address, browser type, browser version, the pages of our website that you visit, the time and date of your visit, the time spent on those pages, and other statistics.</li>
-            </ul>
-            <h3>Cookies</h3>
-            <ul>
-                <li>Cookies are files with a small amount of data that are commonly used as anonymous unique identifiers. These are sent to your browser from the website that you visit and are stored on your computer's hard drive.</li>
-                <li>You have the option to either accept or refuse these cookies and know when a cookie is being sent to your computer. If you choose to refuse our cookies, you may not be able to use some portions of our website.</li>
-            </ul>
-            <h3>Service Providers</h3>
-            <ul>
-                <li>We may employ third-party companies and individuals to facilitate our service, to provide the service on our behalf, to perform service-related services, or to assist us in analyzing how our service is used.</li>
-                <li>These third parties have access to your personal information only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.</li>
-            </ul>
-            <h3>Changes to This Privacy Policy</h3>
-            <ul>
-                <li>We may update our Privacy Policy from time to time. Thus, we advise you to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately after they are posted on this page.</li>
-            </ul>
-            <h3>Contact Us</h3>
-            <ul>
-                <li>If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us.</li>
-            </ul>
-        </div>
+        <h2>Política de Privacidad</h2>
+        <p>Tu privacidad es importante para nosotros. Es la política de LiteraryInk respetar tu privacidad con respecto a cualquier información que podamos recopilar de ti a través de nuestro sitio web.</p>
+        <ul>
+            <li>
+                <strong>Información que Recopilamos</strong>
+            </li>
+            <p>Solicitamos información personal solo cuando realmente la necesitamos para brindarte un servicio. La recopilamos de manera justa y legal, con tu conocimiento y consentimiento. También te informamos por qué la estamos recopilando y cómo se utilizará.</p>
+            <li>
+                <strong>Información que Proporcionas</strong>
+            </li>
+            <p>Recopilamos tu nombre, dirección de correo electrónico y otra información que proporciones cuando nos contactas o te registras para nuestros servicios.</p>
+            <li>
+                <strong>Datos de Registro</strong>
+            </li>
+            <p>Registramos la información que tu navegador envía cada vez que visitas nuestro sitio web. Esto puede incluir información como la dirección de Protocolo de Internet ("IP") de tu computadora, tipo de navegador, versión del navegador, las páginas de nuestro sitio web que visitas, la fecha y hora de tu visita, el tiempo que pasas en esas páginas y otras estadísticas.</p>
+            <li>
+                <strong>Cookies</strong>
+            </li>
+            <p>Las cookies son archivos con una pequeña cantidad de datos que se utilizan comúnmente como identificadores únicos anónimos. Estos se envían a tu navegador desde el sitio web que visitas y se almacenan en el disco duro de tu computadora.</p>
+            <p>Tienes la opción de aceptar o rechazar estas cookies y de saber cuándo se está enviando una cookie a tu computadora. Si eliges rechazar nuestras cookies, es posible que no puedas utilizar algunas partes de nuestro sitio web.</p>
+            <li>
+                <strong>Proveedores de Servicios</strong>
+            </li>
+            <p>Podemos contratar a empresas e individuos de terceros para facilitar nuestro servicio, brindar el servicio en nuestro nombre, realizar servicios relacionados con el servicio o ayudarnos a analizar cómo se utiliza nuestro servicio.</p>
+            <p>Estos terceros tienen acceso a tu información personal solo para realizar estas tareas en nuestro nombre y están obligados a no divulgarla ni usarla para ningún otro propósito.</p>
+            <li>
+                <strong>Cambios en esta Política de Privacidad</strong>
+            </li>
+            <p>Podemos actualizar nuestra Política de Privacidad de vez en cuando. Por lo tanto, te recomendamos que revises esta página periódicamente para cualquier cambio. Te notificaremos de cualquier cambio mediante la publicación de la nueva Política de Privacidad en esta página. Estos cambios son efectivos inmediatamente después de su publicación en esta página.</p>
+            <li>
+                <strong>Contacto</strong>
+            </li>
+            <p>Si tienes alguna pregunta o sugerencia sobre nuestra Política de Privacidad, no dudes en contactarnos.</p>
+        </ul>
+        <p>Última actualización: 10.11.2023</p>
+    </div>
+    
+    
+    
+    
 
     );
 };

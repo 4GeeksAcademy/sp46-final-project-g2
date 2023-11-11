@@ -3,51 +3,51 @@ import React from "react";
 export const DisclaimerView = () => {
     return (
         <div className="container bg-dark text-light">
-            <h2>Terms and Conditions</h2>
-            <p>
-                These Terms and Conditions govern the use of LiteraryInk and all its content and services. By accessing and using the Website, you agree to comply with and be bound by these Terms. If you do not agree with these Terms, we recommend that you do not use the Website.
-            </p>
+            <h2>Términos y Condiciones</h2>
+            <p>Estos Términos y Condiciones rigen el uso de LiteraryInk y todo su contenido y servicios. Al acceder y utilizar el Sitio web, aceptas cumplir y quedar sujeto a estos Términos. Si no estás de acuerdo con estos Términos, te recomendamos que no utilices el Sitio web.</p>
             <ul>
                 <li>
-                    <strong>1. Use of the Website</strong>
+                    <strong>Uso del Sitio web</strong>
                 </li>
-                <p>You agree to use the Website only for legal purposes and in accordance with these Terms.</p>
+                <p>Aceptas utilizar el Sitio web solo con fines legales y de acuerdo con estos Términos.</p>
                 <li>
-                    <strong>2. Intellectual Property</strong>
+                    <strong>Propiedad Intelectual</strong>
                 </li>
-                <p>The content of the Website, including text, images, graphics, logos, and other materials, is protected by copyright and other intellectual property laws.</p>
+                <p>El contenido del Sitio web, incluyendo texto, imágenes, gráficos, logotipos y otros materiales, está protegido por derechos de autor y otras leyes de propiedad intelectual.</p>
                 <li>
-                    <strong>3. Third-Party Links</strong>
+                    <strong>Enlaces de Terceros</strong>
                 </li>
-                <p>The Website may contain links to third-party websites. We have no control over the content of these sites and are not responsible for them.</p>
+                <p>El Sitio web puede contener enlaces a sitios web de terceros. No tenemos control sobre el contenido de estos sitios y no somos responsables de ellos.</p>
                 <li>
-                    <strong>4. Modifications</strong>
+                    <strong>Modificaciones</strong>
                 </li>
-                <p>We reserve the right to modify, update, or discontinue the Website at any time and without prior notice.</p>
+                <p>Nos reservamos el derecho de modificar, actualizar o discontinuar el Sitio web en cualquier momento y sin previo aviso.</p>
                 <li>
-                    <strong>5. Privacy</strong>
+                    <strong>Privacidad</strong>
                 </li>
-                <p>The collection and use of personal data are subject to our Privacy Policy, which is part of these Terms.</p>
+                <p>La recopilación y uso de datos personales están sujetos a nuestra Política de Privacidad, que forma parte de estos Términos.</p>
                 <li>
-                    <strong>6. Limitation of Liability</strong>
+                    <strong>Limitación de Responsabilidad</strong>
                 </li>
-                <p>We are not responsible for any direct, indirect, incidental, special, or consequential damages resulting from the use or inability to use the Website.</p>
+                <p>No somos responsables de daños directos, indirectos, incidentales, especiales o consecuentes que resulten del uso o la incapacidad de usar el Sitio web.</p>
                 <li>
-                    <strong>7. Applicable Law</strong>
+                    <strong>Ley Aplicable</strong>
                 </li>
-                <p>These Terms are governed by the laws of Spain, and any dispute arising in connection with these Terms will be resolved in the courts of [city or jurisdiction].</p>
+                <p>Estos Términos están regidos por las leyes de España, y cualquier disputa que surja en relación con estos Términos se resolverá en los tribunales nacionales.</p>
                 <li>
-                    <strong>8. Changes to the Terms</strong>
+                    <strong>Cambios en los Términos</strong>
                 </li>
-                <p>We reserve the right to modify these Terms at any time. The updated version of the Terms will be published on the Website.</p>
+                <p>Nos reservamos el derecho de modificar estos Términos en cualquier momento. La versión actualizada de los Términos se publicará en el Sitio web.</p>
                 <li>
-                    <strong>9. Contact Us</strong>
+                    <strong>Contáctanos</strong>
                 </li>
-                <p>If you have any questions or concerns about these Terms, you can contact us through the contact information provided on the Website.</p>
+                <p>Si tienes alguna pregunta o inquietud sobre estos Términos, puedes contactarnos a través de la información de contacto proporcionada en el Sitio web.</p>
             </ul>
             <p>
-                Last updated: 10.11.2023
+                Última actualización: 10.11.2023
             </p>
         </div>
     );
-};
+    };
+
+
