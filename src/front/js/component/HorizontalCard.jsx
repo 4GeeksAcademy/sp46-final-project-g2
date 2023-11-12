@@ -1,25 +1,54 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import pic from "../../img/edgar.png"
+//import pic from "../../img/camus.jpeg"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
+import { faAlignJustify } from "@fortawesome/free-solid-svg-icons";
+import { faBookOpenReader } from "@fortawesome/free-solid-svg-icons";
 
 
 export const HorizontalCard = () => {
   return (
-    <div className="card mb-3 w-100"  >
+    <div className="card mb-3 w-100" style={{ maxWidth: '' }}  >
       <div className="row g-0">
-        <div className="col-5 col-md-2 col-lg-2 col-xl-1 col-xxl-1 ">
-        <div className="d-flex justify-content-center">
-          <img src={pic} className="img-fluid rounded-start " alt="..."  />
+        <div className="col-6 col-md-3 col-lg-2 col-xl-2 col-xxl-2 ">
+
+          <div className=" ">
+            <Link to="/author-profile">
+              <img src={pic} className="img-fluid rounded-start" alt="..." />
+            </Link>
           </div>
+
         </div>
-        <div className="col-7 col-md-10 col-lg-10 col-xl-11 col-xxl-11">
+
+        <div className="col-6 col-md-9 col-lg-10 col-xl-10 col-xxl-10">
           <div className="card-body">
-            <h5 className="card-title">Card title</h5>
-            <p className="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-            <p className="card-text"><small className="text-body-secondary">Last updated 3 mins ago</small></p>
+            <Link to="/author-profile">
+              <h5 className="card-title pb-3">Edgar Allan Poe</h5>
+            </Link>
+            <p className="card-text text-truncate pb-4"> Much I marveled this ungainly fowl to hear discourse so plainly,
+              Though its answer little meaning— little relevancy bore;
+              For we cannot help agreeing that no living human being
+              Ever yet was blest with seeing bird above his chamber door —
+              Bird or beast upon the sculptured bust above his chamber door,
+              With such name as "Nevermore. </p>
+            <div className="">
+              <h6 className="card-text"><small className="text-body-secondary">Last updated 3 mins ago</small></h6>
+              <h6 className="card-text text-body-secondary"><small className="text-body-secondary"> <FontAwesomeIcon icon={faBookOpenReader} />
+                <span className="text-light"> 153 </span> seguidores </small></h6>
+              <h6 className="card-text text-body-secondary"> <small className="text-body-secondary"><FontAwesomeIcon icon={faAlignJustify} />
+                <span className="text-light"> 75 </span> posts </small></h6>
+              <h6 className="card-subtitle fw-lighter"> <small className="text-body-secondary"><FontAwesomeIcon icon={faStar} size="sm" />
+                <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStar} size="sm" />
+                <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStarHalfStroke} size="sm" /> - 4,5  </small>
+              </h6>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
 
   );
 };
