@@ -7,13 +7,18 @@ import { BackendURL } from "./component/BackendURL.jsx";
 import { Demo } from "./pages/demo";
 import { Single } from "./pages/single";
 import { Home } from "./pages/Home.jsx";
-import { Navbar } from "./component/Navbar.jsx";
+import { Navbarcarlos } from "./component/Navbarcarlos.jsx";
 import { Footer } from "./component/Footer.jsx";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup.jsx"
 import { Form } from "./pages/Form.jsx";
 import { DisclaimerView } from "./pages/DisclimerView.jsx";
 import { PrivacyPolicyView } from "./pages/PrivacyPolicyView.jsx";
+import { HorizontalCard } from "./component/HorizontalCard.jsx";
+import { List } from "./pages/List.jsx";
+import { PostEdit } from "./pages/PostEdit.jsx";
+import { PostView } from "./pages/PostView.jsx";
+
 
 
 // Create your first component
@@ -27,13 +32,17 @@ const Layout = () => {
         <div>
             <BrowserRouter basename={basename}>
                 <ScrollToTop>
-                    <Navbar />
+                    <Navbarcarlos />
                     <Routes>
                         <Route element={<Home />} path="/" />
                         <Route element={<Form/>} path="/form" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
                         <Route element={<Demo />} path="/demo" />
+                        <Route element={<List />} path="/list" />
+                        <Route element={<PostEdit />} path="/post-edit" />
+                        <Route element={<PostView />} path="/post-view" />
+                        <Route element={<HorizontalCard />} path="/horizontal-card" />
                         <Route element={<DisclaimerView />} path="/disclaimer-view" />
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
