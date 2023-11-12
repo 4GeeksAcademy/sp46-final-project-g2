@@ -14,8 +14,10 @@ api = Blueprint('api', __name__)
 
 @api.route("/login", methods=["POST"])
 def handle_login():
-    email = request.json.get("email", None)
-    password = request.json.get("password", None)
+    data = request.get_json()
+    email = data.get("email", None)
+    email = email.lower() if email else None
+    password = data.get("password", None)
     # remember_me = request.json.get("remember_me", False)
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True),
                          description=f"Bad email or password.")
@@ -30,7 +32,6 @@ def handle_login():
         results['member'] = member.serialize() if member else None
     advisor = db.session.execute(db.select(Advisors).where(Advisors.user_id == user.id)).scalar()
     results['advisor'] = advisor.serialize() if advisor else None
-    print(results)
     access_token = create_access_token(identity=[user.id,
                                                  user.is_admin,
                                                  author.id if author else None,
@@ -42,67 +43,89 @@ def handle_login():
                      'results': results}
     """ if remember_me:
         set_access_cookies(response_body, access_token) """
-    return response_body, 200
+    return response_body, 201
 
 
 """ 
     identity[0] es user.id
     identity[1] es user.is_admin
-    identity[2] es author_id
-    identity[3] es member_id 
-    identity[4] es advisor_id
+    identity[2] es author.id
+    identity[3] es member.id 
+    identity[4] es advisor.id
 """
 
 
 @api.route('/signup', methods=["POST"])  # Mensajes en JSON?
 def handle_signup():
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    is_author = data.get('is_author', True) # Importante añadir esta "casilla" en el FRONT!
-      # Creamos User 
-    user = Users(email=data['email'], 
-                 password=data['password'], 
-                 is_active=True, 
-                 is_admin=False)
-    db.session.add(user)
-    if is_author:  # Creamos Author
-        author = Authors(alias=data['alias'], 
-                         birth_date=data['birth_date'], 
-                         city=data['city'], 
-                         country=data['country'], 
-                         quote=data['quote'], 
-                         about_me=data['about_me'], 
-                         is_active=True,
-                         user_id=user.id)
-        db.session.add(author)
-    else:  # Creamos Advisor
-        advisor = Advisors(name=data['name'], 
-                          nif=data['nif'], 
-                          category=data['category'], 
-                          address=data['address'], 
-                          city=data['city'], 
-                          country=data['country'], 
-                          about_me=data['about_me'], 
-                          is_active=True,
-                          user_id=user.id)
-        db.session.add(advisor)
-    db.session.commit()
-    access_token = create_access_token(identity=[user.id, 
-                                       user.is_admin, 
-                                       author.id if is_author else None, 
-                                       advisor.id if not is_author else None])
-    response_body = {'message': 'User created',
-                     'results': {'token': access_token,
-                                 'user_id': user.id,
-                                 'is_admin': user.is_admin,
-                                 'is_author': is_author,
-                                 'author_id': author.id if is_author else None,
-                                 'advisor_id': advisor.id if not is_author else None}, 
-                                 'author': author.serialize(), 
-                                 'advisor': advisor.serialize()}
+    response_body = {}
+    try: 
+        email = data['user']['email'].lower()
+    except:
+        response_body['message'] = 'user.email is empty or wrong'
+        return response_body, 400
+    # Verificamos si el usuario ya existe
+    is_user = db.session.execute(db.select(Users).where(Users.email == email)).scalar()
+    if is_user:
+        response_body['message'] = 'The email is registered'
+        return response_body, 403
+    # Si la estructura del JSON es incorrecta, no se podrán cargar los datos
+    try:
+        data_user = data['user']
+        data_author = data.get('author', None)
+        data_advisor = data.get('advisor', None)
+        if not data_author and not data_advisor:
+            response_body['message'] = 'The user must to be author or advisor'
+            return response_body, 420
+        user = Users(email=data_user['email'], 
+                     password=data_user['password'], 
+                     is_active=True, 
+                     is_admin=False)
+        db.session.add(user)
+        db.session.commit()
+        results = {'user': user.serialize(),
+                   'author': None,
+                   'member': None,
+                   'advisor': None}
+        if data_author:
+            author = Authors(alias=data_author['alias'], 
+                             birth_date=data_author.get('birth_date', None),
+                             city=data_author.get('city', None), 
+                             country=data_author.get('country', None), 
+                             quote=data_author.get('quote', None), 
+                             about_me=data_author.get('about_me', None), 
+                             is_active=True,
+                             user_id=user.id)
+            db.session.add(author)
+            db.session.commit()
+            results['author'] = author.serialize()
+        if data_advisor:
+            advisor = Advisors(name=data_advisor['name'], 
+                               nif=data_advisor['nif'], 
+                               category=data_advisor.get('category'), 
+                               address=data_advisor.get('address'), 
+                               city=data_advisor.get('city'), 
+                               country=data_advisor.get('country'), 
+                               about_me=data_advisor.get('about_me'), 
+                               is_active=True,
+                               user_id=user.id)
+            db.session.add(advisor)
+            db.session.commit()
+            results['advisor'] = advisor.serialize()
+        access_token = create_access_token(identity=[user.id,
+                                                     user.is_admin,
+                                                     author.id if data_author else None,
+                                                     None,
+                                                     advisor.id if data_advisor else None])
+        response_body = {'message': 'User created',
+                         'token': access_token,
+                         'results': results}
+    except:
+        response_body['message'] = "Bad JSON structure"
+        print("except:", response_body)
+        return response_body, 400
     return response_body, 201
-  
+
 
 @api.route('/logout', methods=["POST"])
 @jwt_required()
