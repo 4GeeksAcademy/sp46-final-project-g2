@@ -6,10 +6,31 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
+from sqlalchemy import func
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
 
 
 api = Blueprint('api', __name__)
+
+
+""" 
+    identity[0] es user.id
+    identity[1] es user.is_admin
+    identity[2] es author.id
+    identity[3] es member.id 
+    identity[4] es advisor.id
+"""
+
+
+@api.route('/test', methods=["POST"])  # Mensajes en JSON?
+def handle_test():
+    data = request.get_json()
+    response_body = {}
+    alias = data['author']['alias'].lower()
+    is_alias = db.session.execute(db.select(Authors).where(func.lower(Authors.alias) == alias)).scalar()
+    print(is_alias)
+    response_body['results'] = data
+    return response_body, 200
 
 
 @api.route("/login", methods=["POST"])
@@ -34,9 +55,9 @@ def handle_login():
     results['advisor'] = advisor.serialize() if advisor else None
     access_token = create_access_token(identity=[user.id,
                                                  user.is_admin,
-                                                 author.id if author else None,
-                                                 member.id if member else None,
-                                                 advisor.id if advisor else None])
+                                                 author.id if results['author'] else None,
+                                                 member.id if results['member'] else None,
+                                                 advisor.id if results['advisor'] else None])
                                                  # , fresh=remember_me
     response_body = {'message': 'Token created',
                      'token': access_token,
@@ -44,15 +65,6 @@ def handle_login():
     """ if remember_me:
         set_access_cookies(response_body, access_token) """
     return response_body, 201
-
-
-""" 
-    identity[0] es user.id
-    identity[1] es user.is_admin
-    identity[2] es author.id
-    identity[3] es member.id 
-    identity[4] es advisor.id
-"""
 
 
 @api.route('/signup', methods=["POST"])  # Mensajes en JSON?
@@ -69,14 +81,40 @@ def handle_signup():
     if is_user:
         response_body['message'] = 'The email is registered'
         return response_body, 403
+    # Almacenamos en momoria los datos de user, author, y advisor (member, se debe crear desde POST /member)
+    data_user = data['user']
+    data_author = data.get('author', None)
+    data_advisor = data.get('advisor', None)
+    # Validamos que el user sea author o advisor o ambos.
+    if not data_author and not data_advisor:
+        response_body['message'] = 'The user must to be author or advisor'
+        return response_body, 420
+    # Si es author, verificamos si enviaron el alias y si alias ya existe.
+    if data_author:
+        try:
+            alias = data['author']['alias'].lower()
+        except:
+            response_body['message'] = ' author.alias is empty or wrong'
+            return response_body, 400
+        is_alias = db.session.execute(db.select(Authors).where(func.lower(Authors.alias) == alias)).scalar()
+        if is_alias:
+            response_body['message'] = 'The alias is registered'
+            return response_body, 403
+    # Si es advisor, verificamos que no exista
+    if data_advisor:
+        try:
+            name = data['advisor']['name'].lower()
+            nif = data['advisor']['nif']
+        except:
+            response_body['message'] = ' advisor.name o advisor.nif is empty or wrong'
+            return response_body, 400
+        is_name = db.session.execute(db.select(Advisors).where(func.lower(Advisors.name) == name)).scalar()
+        is_nif = db.session.execute(db.select(Advisors).where(func.lower(Advisors.nif) == nif)).scalar()
+        if is_name or is_nif:
+            response_body['message'] = 'The name or nif is registered'
+            return response_body, 403
     # Si la estructura del JSON es incorrecta, no se podrán cargar los datos
     try:
-        data_user = data['user']
-        data_author = data.get('author', None)
-        data_advisor = data.get('advisor', None)
-        if not data_author and not data_advisor:
-            response_body['message'] = 'The user must to be author or advisor'
-            return response_body, 420
         user = Users(email=data_user['email'], 
                      password=data_user['password'], 
                      is_active=True, 
@@ -121,8 +159,7 @@ def handle_signup():
                          'token': access_token,
                          'results': results}
     except:
-        response_body['message'] = "Bad JSON structure"
-        print("except:", response_body)
+        response_body = {'message': "Bad JSON structure"}
         return response_body, 400
     return response_body, 201
 
@@ -136,20 +173,21 @@ def handle_logout():
     return response_body, 200
                      
 
+""" 
+# TODO: validar email, generar un token, enviar un correo electrónico (biblioteca Flask-Mail)
 @api.route('/forgot-password', methods=["POST"])
 def handle_forgot_password():
     email = request.json.get('email')  
-    # WORK IN PROGRESS: validar email, generar un token, enviar un correo electrónico (biblioteca Flask-Mail)
     response_body = {'message': 'Password reset instructions sent to your email'}
     return jsonify(response_body), 200
+"""
 
-
-@api.route('/users', methods=['GET']) # El POST se hace en el sign up 
+@api.route('/users', methods=['GET'])  # El POST se realiza en /signup
 @jwt_required() 
 def handle_users():
-    current_identity = get_jwt_identity()
+    identity = get_jwt_identity()
     # Valido si es admin
-    if current_identity[1]:
+    if identity[1]:
         users = db.session.execute(db.select(Users)).scalars()
         users_list = [user.serialize() for user in users]
         response_body = {'message': 'User List', 
@@ -162,9 +200,9 @@ def handle_users():
 @api.route('/users/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required() 
 def handle_user_id(user_id):
-    current_identity = get_jwt_identity()
+    identity = get_jwt_identity()
     # Valido si es admin
-    if current_identity[1]:
+    if identity[1]:
         user = db.one_or_404(db.select(Users).filter_by(id=user_id), 
                              description=f"User not found , 404.")
         if request.method == 'GET':
@@ -190,12 +228,12 @@ def handle_user_id(user_id):
     return response_body, 401
        
     
-@api.route('/authors', methods=['GET']) # El POST se hace en el sign up 
+@api.route('/authors', methods=['GET'])  # El POST se realiza en /signup
 def handle_authors():
-    authors = db.session.execute(db.select(Authors)).scalars()
+    authors = db.session.execute(db.select(Authors).where(Authors.is_active)).scalars()
     authors_list = [author.serialize() for author in authors]
     response_body = {'message': 'Author list', 
-                     'results': author_list}
+                     'results': authors_list}
     return response_body, 200 
    
 
@@ -211,9 +249,9 @@ def handle_get_author_id(author_id):
 @api.route('/authors/<int:author_id>', methods=['PUT', 'DELETE'])
 @jwt_required() 
 def handle_author_id(author_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2] == author_id:
         author = db.one_or_404(db.select(Authors).filter_by(id=author_id), 
                                description=f"Author not found , 404.")
         if request.method == 'PUT':
@@ -230,7 +268,7 @@ def handle_author_id(author_id):
                              'results': author.serialize()}
             return response_body, 200
         if request.method == 'DELETE':
-            uthor.is_active = False
+            author.is_active = False
             db.session.commit()
             response_body = {'message': 'Author inactived'}
             return response_body, 200
@@ -240,7 +278,7 @@ def handle_author_id(author_id):
     
 @api.route('/members', methods=['GET']) 
 def handle_get_members():
-        members = db.session.execute(db.select(Members)).scalars()
+        members = db.session.execute(db.select(Members).where(Members.is_active)).scalars()
         members_list = [member.serialize() for member in members]
         response_body = {'message': 'Members', 
                          'results': members_list}
@@ -250,13 +288,14 @@ def handle_get_members():
 @api.route('/members', methods=['POST']) 
 @jwt_required() 
 def handle_members():
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     data = request.get_json()
-    if not current_identity[1] and not current_identity[2]:
+    if not identity[2]:
         response_body = {'message': "Restricted access"}
         return response_body, 401
     # Valido si es admin o author:
-    if current_identity[1]:
+    """ Un admin no debe crear members 
+    if identity[1]:
         member = Members(name=data['name'], 
                          nif=data['nif'], 
                          address=data['address'], 
@@ -270,23 +309,30 @@ def handle_members():
                          awards=data['awards'], 
                          author_id=data['author_id'],
                          is_active=True)
-    if current_identity[2]:  # Lo que no tiene data no se puede cambiar
-        member = Members(name=data['name'], 
-                         nif=data['nif'], 
-                         address=data['address'], 
-                         starting_date=member.starting_date, 
-                         current_date=member.current_date, 
-                         final_date=member.final_date, 
-                         current_discount=member.current_discount, 
-                         remaining_reviews=member.remaining_reviews, 
-                         reviews_expiring_date=member.reviews_expiring_date, 
-                         status=member.status, 
-                         awards=data['awards'], 
-                         author_id=member.author_id,
+    """
+    if identity[2] and not identity[3]:  # Es usuario, pero no es member, entonces puede crearlo
+        member = Members(name=data['name'],
+                         nif=data['nif'],
+                         address=data['address'],
+                         starting_date=data['starting_date'],
+                         current_date=data['current_date'],
+                         final_date=None,
+                         current_discount=data['current_discount'],
+                         remaining_reviews=data['remaining_reviews'],
+                         reviews_expiring_date=data['reviews_expiring_date'],
+                         status='Active',
+                         awards=data['awards'],
+                         author_id=identity[2],
                          is_active=True)
     db.session.add(member)
     db.session.commit()
-    response_body = {'message': 'Member created', 
+    access_token = create_access_token(identity=[identity[0],
+                                                 identity[1],
+                                                 identity[2],
+                                                 member.id,
+                                                 identity[4]])
+    response_body = {'message': 'Member created',
+                     'token': access_token,
                      'results': member.serialize()}
     return response_body, 201
 
@@ -296,22 +342,23 @@ def handle_get_member_id(member_id):
     member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
                            description=f"Member not found , 404.")
     response_body = {'message': 'Member', 
-                         'results': member.serialize()}
+                     'results': member.serialize()}
     return response_body, 200
 
 
 @api.route('/members/<int:member_id>', methods=['PUT', 'DELETE'])
 @jwt_required() 
 def handle_member_id(member_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
-    if not current_identity[1] and not current_identity[2]:
+    identity = get_jwt_identity()
+    if not identity[1] and not identity[3]:
         response_body = {'message': "Restricted access"}
         return response_body, 401
     member = db.one_or_404(db.select(Members).filter_by(id=member_id), 
                            description=f"Member not found , 404.")
     # Valido si es admin o author:
-    if request.method == 'PUT' and current_identity[1]:  
-        data = request.get_json()
+    data = request.get_json()
+    if request.method == 'PUT' and identity[1]:  
+        member.name = data['name']
         member.nif = data['nif']
         member.address = data['address']
         member.starting_date = data['starting_date']
@@ -327,19 +374,11 @@ def handle_member_id(member_id):
         response_body = {'message': 'Member updated', 
                          'results': member.serialize()}
         return response_body, 200
-    if request.method == 'PUT' and current_identity[2]: 
-        data = request.get_json()
+    if request.method == 'PUT' and identity[3] == member.id:
+        member.name = data['name']
         member.nif = data['nif']
         member.address = data['address']
-        member.starting_date = member.starting_date
-        member.current_date = member.current_date 
-        member.final_date = member.final_date
-        member.current_discount = member.current_discount
-        member.remaining_reviews = member.remaining_reviews
-        member.reviews_expiring_date = member.reviews_expiring_date 
-        member.status = member.status
         member.awards = data['awards']
-        member.is_active = data['is_active']
         db.session.commit()
         response_body = {'message': 'Member updated', 
                          'results': member.serialize()}
@@ -351,7 +390,7 @@ def handle_member_id(member_id):
         return response_body, 200
 
 
-@api.route('/advisors', methods=['GET']) # El POST se hace en el sign up 
+@api.route('/advisors', methods=['GET'])
 def handle_advisors():
     advisors = db.session.execute(db.select(Advisors)).scalars()
     advisors_list = [advisor.serialize() for advisor in advisors]
@@ -372,9 +411,9 @@ def handle_get_advisor_id(advisor_id):
 @api.route('/advisors/<int:advisor_id>', methods=['PUT', 'DELETE'])
 @jwt_required() 
 def handle_advisor_id(advisor_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o advisor:
-    if current_identity[1] or current_identity[4]:
+    if identity[1] or identity[4] == advisor_id:
         advisor = db.one_or_404(db.select(Advisors).filter_by(advisor_id=advisor_id), 
                                 description=f"Advisor not found , 404.")
         if request.method == 'PUT':
@@ -386,7 +425,6 @@ def handle_advisor_id(advisor_id):
             advisor.city = data['city']
             advisor.country = data['country']
             advisor.about_me = data['about_me']
-            advisor.is_active = data['is_active']
             db.session.commit()
             response_body = {'message': 'Advisor updated', 
                              'results': advisor.serialize()}
@@ -400,12 +438,13 @@ def handle_advisor_id(advisor_id):
     return response_body, 401
 
 
+""" TODO: Si hay tiempo
 @api.route('/followers', methods=['GET', 'POST']) 
 @jwt_required() 
 def handle_followers():
-    current_identity = get_jwt_identity()
+    identity = get_jwt_identity()
     # Valido si es admin:
-    if current_identity[1]:
+    if identity[1]:
         if request.method == 'GET':
             followers = db.session.execute(db.select(Followers)).scalars()
             followers_list = [follower.serialize() for follower in followers]
@@ -428,9 +467,9 @@ def handle_followers():
 @api.route('/followers/<int:follower_id>', methods=['GET', 'DELETE'])  
 @jwt_required() 
 def handle_follower_id(follower_id): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         follower = db.session.execute(db.select(Follower).filter_by(follower_id=follower_id)).scalars()
         if follower is None:
             response_body = {'message': 'You do not have any followers yet'}
@@ -460,9 +499,9 @@ def handle_follower_id(follower_id):
 @api.route('/followings/<int:following_id>', methods=['GET', 'DELETE'])  
 @jwt_required() 
 def handle_following_id(following_id): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         followings = db.session.execute(db.select(Follower).filter_by(following_id=following_id)).scalars()
         if followings is None:
             response_body = {'message': 'You are not following to anyone yet'}
@@ -487,6 +526,7 @@ def handle_following_id(following_id):
             return response_body, 200
     response_body = {'message': "Restricted access"}
     return response_body, 401
+"""
 
 
 @api.route('/services', methods=['GET']) 
@@ -501,9 +541,8 @@ def handle_get_services():
 @api.route('/services', methods=['POST']) 
 @jwt_required()
 def handle_services():
-    current_identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin:
-    if current_identity[1]:
+    identity = get_jwt_identity()
+    if identity[1]:
         data = request.get_json()
         service = Services(name=data['name'], 
                            starting_date=data['starting_date'], 
@@ -533,9 +572,8 @@ def handle_get_service_id(service_id):
 @api.route('/services/<int:service_id>', methods=['PUT', 'DELETE'])
 @jwt_required()
 def handle_service_id(service_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin:
-    if current_identity[1]:
+    identity = get_jwt_identity()
+    if identity[1]:
         service = db.one_or_404(db.select(Services).filter_by(service_id=service_id), 
                                 description=f"service not found , 404.")
         if request.method == 'PUT':
@@ -543,26 +581,19 @@ def handle_service_id(service_id):
             service.name = data['name']
             service.starting_date = data['starting_date']
             service.final_date = data['final_date']
-            service.is_available = data['is_available']
             service.price = data['price']
             service.category_id = data['category_id']
             service.advisor_id = data['advisor_id']
+            # Si el taller se carga con fecha de inicio anterior, lo deshabilitamos. 
+            service.is_available = False if data['starting_date'] <= datetime.now() else True
             db.session.commit()
             response_body = {'message': 'Service updated', 
                              'results': service.serialize()}
             return response_body, 200
         if request.method == 'DELETE':
-            # Si el taller aún no inició se borra. Y si ya se dió, lo deshabilitamos. 
-            current_date = datetime.now()
-            if service.starting_date <= current_date:
-                service.is_available = False  
-                db.session.commit()
-                response_body = {'message': 'Service is now unavailable'}
-                return response_body, 200
-            db.session.delete(service)
+            service.is_available = False 
             db.session.commit()
-            # FIX: NO lo haremos en esta versión. Deberíamos avisar a los que han contratado el servicio 
-            response_body = {'message': 'Service deleted'}
+            response_body = {'message': 'Service is now unavailable'}
             return response_body, 200 
     response_body = {'message': "Restricted access"}
     return response_body, 401
@@ -577,21 +608,20 @@ def handle_get_category_services():
         return response_body, 200 
 
     
-@api.route('/category-services', methods=['POST']) 
+@api.route('/category-services', methods=['POST'])
 @jwt_required()
 def handle_category_services():
-    current_identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin:
-    if current_identity[1]:
+    identity = get_jwt_identity()
+    if identity[1]:
         data = request.get_json()
-        category_service = CategoryServices(name=data['name'], 
+        category_service = CategoryServices(name=data['name'],
                                             description=data['description'],
-                                            is_active=data['is_active'])  
+                                            is_active=True)
         db.session.add(category_service)
         db.session.commit()
-        response_body = {'message': 'Category Service created', 
+        response_body = {'message': 'Category Service created',
                          'results': category_service.serialize()}
-        return response_body, 201 
+        return response_body, 201
     response_body = {'message': "Restricted access"}
     return response_body, 401
 
@@ -608,31 +638,28 @@ def handle_get_category_service_id(category_service_id):
 @api.route('/category-services/<int:category_services_id>', methods=['PUT', 'DELETE'])  
 @jwt_required()
 def handle_category_service_id(category_service_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin:
-    if current_identity[1]:
+    identity = get_jwt_identity()
+    if identity[1]:
         category_service = db.one_or_404(db.select(CategoryServices).filter_by(category_service_id=category_service_id), 
                                          description=f"Category Service not found , 404.")
         if request.method == 'PUT':  
             data = request.get_json()
             category_service.name=data['name'], 
             category_service.description=data['description']
-            category_service.is_active=data['is_active']
             db.session.commit()
             response_body = {'message': 'Category Service updated', 
                              'results': category_service.serialize()}
             return response_body, 200
         if request.method == 'DELETE':
-            # FIX: Marcar como inactiva una categoría si se va a dejar de impartir todos los servicios de esa categoría. 
-            services = db.session.execute(db.select(Services).filter_by(category_services_id=category_services_id)).scalars()
-            if services is None:
-                response_body = {'message': 'There are no services'}
-            for service in services:
-                service.is_available = False
-                db.session.commit()  # Revisar si funciona bien!
             category_service.is_active = False 
             db.session.commit()
-            response_body = {'message': 'Category Service inactive'}
+            services = db.session.execute(db.select(Services).filter_by(category_services_id=category_services_id)).scalars()
+            if services:
+                count_services = len(services)
+                for service in services:
+                    service.is_available = False
+                    db.session.commit()
+            response_body = {'message': 'Category service and {} services inactive'.format(count_services)}
             return response_body, 200 
     response_body = {'message': "Restricted access"}
     return response_body, 401
@@ -641,28 +668,33 @@ def handle_category_service_id(category_service_id):
 @api.route('/shopping-carts', methods=['GET', 'POST']) 
 @jwt_required()
 def handle_shopping_carts():
-    current_identity = get_jwt_identity() 
-    # Valido si es admin:
-    if current_identity[1]:
-        if request.method == 'GET':
-            shopping_carts = db.session.execute(db.select(ShoppingCarts)).scalars()
-            shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
-            response_body = {'message': 'Shopping Carts', 
-                             'results': shopping_cart_list}
-            return response_body, 200 
-        if request.method == 'POST':  
-            data = request.get_json()
-            shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
-                                         discount=data['discount'], 
-                                         date=data['date'], 
-                                         status=data['status'],
-                                         member_id=data['member_id']
-                                         )
-            db.session.add(shopping_cart)
-            db.session.commit()
-            response_body = {'message': 'Shopping Cart created', 
-                             'results': shopping_cart.serialize()}
-            return response_body, 201 
+    identity = get_jwt_identity()
+    if request.method == 'GET' and identity[1]:
+        shopping_carts = db.session.execute(db.select(ShoppingCarts)).scalars()
+        shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
+        response_body = {'message': 'Shopping Carts',
+                         'results': shopping_cart_list}
+        return response_body, 200
+
+
+
+@api.route('/shopping-cart-items', methods=['GET', 'POST']) 
+@jwt_required()
+def handle_shopping_cart_items():
+    identity = get_jwt_identity()
+    if request.method == 'POST' and identity[3]:
+        data = request.get_json()
+        # Verificamos si ya tiene un carrito
+        shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
+                                     discount=data['discount'], 
+                                     date=data['date'], 
+                                     status=data['status'],
+                                     member_id=data['member_id'])
+        db.session.add(shopping_cart)
+        db.session.commit()
+        response_body = {'message': 'Shopping Cart created', 
+                            'results': shopping_cart.serialize()}
+        return response_body, 201 
     response_body = {'message': "Restricted access"}
     return response_body, 401
 
@@ -670,9 +702,9 @@ def handle_shopping_carts():
 @api.route('/members/<int:member_id>/shopping-carts', methods=['GET', 'DELETE'])
 @jwt_required()
 def handle_shopping_cart_id(shopping_cart_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[3]:
         shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
                                       description=f"Shopping Cart not found , 404.")
         if request.method == 'GET':
@@ -706,9 +738,9 @@ def handle_shopping_cart_id(shopping_cart_id):
 @api.route('/bills', methods=['GET', 'POST'])
 @jwt_required()
 def handle_bills():
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:
+    if identity[1] or identity[2] or identity[3]:
         if request.method == 'GET':
             bills = db.session.execute(db.select(Bills)).scalars()
             bills_list = [bill.serialize() for bill in bills]
@@ -735,9 +767,9 @@ def handle_bills():
 @api.route('/members/<int:member_id>/bills', methods=['GET'])
 @jwt_required()
 def handle_bill_by_member_id(member_id):   
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:
+    if identity[1] or identity[2] or identity[3]:
         if request.method == 'GET':
             bills = db.session.execute(db.select(Bills).filter_by(member_id=member_id)).scalars()
             bills_list = [bill.serialize() for bill in bills]
@@ -751,9 +783,9 @@ def handle_bill_by_member_id(member_id):
 @api.route('/bills/<int:bill_id>', methods=['GET'])
 @jwt_required()
 def handle_bill_by_id(bill_id):   
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:
+    if identity[1] or identity[2] or identity[3]:
         if request.method == 'GET':
             bills = db.one_or_404(db.select(Bills).filter_by(id=bill_id),
                                   description=f"Post not found , 404.")
@@ -770,9 +802,9 @@ def handle_bill_by_id(bill_id):
 @api.route('/billing-issues', methods=['GET', 'POST'])
 @jwt_required()
 def handle_billing_issues():
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:
+    if identity[1] or identity[2] or identity[3]:
         if request.method == 'GET':
             issues = db.session.execute(db.select(BillingIssues)).scalars()
             issues_list = [issue.serialize() for issue in issues]
@@ -794,6 +826,7 @@ def handle_billing_issues():
     return response_body, 401
 
 
+"""  TODO: Si ya tiempo
 @api.route('/posts', methods=['GET']) 
 def handle_get_posts():
     posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
@@ -806,9 +839,9 @@ def handle_get_posts():
 @api.route('/posts', methods=['POST']) 
 @jwt_required()
 def handle_posts():
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         data = request.get_json()
         post = Posts(title=data['title'], 
                      abstract=data['abstract'],
@@ -839,9 +872,9 @@ def handle_get_post_id(post_id):
 @api.route('/posts/<int:post_id>', methods=['PUT', 'DELETE'])
 @jwt_required()
 def handle_post_id(post_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         post = db.one_or_404(db.select(Posts).filter_by(post_id=member_id), 
                              description=f"Post not found , 404.")
         if request.method == 'PUT':  
@@ -877,9 +910,9 @@ def handle_get_post_by_user_id(user_id):
 @api.route('/users/<int:user_id>/posts', methods=['DELETE'])  # ¿Por qué in not available??
 @jwt_required()
 def handle_post_by_user_id(user_id):   
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
         return response_body, 200 
     response_body = {'message': "Restricted access"}
@@ -898,9 +931,9 @@ def handle_get_media():
 @api.route('/media', methods=['POST']) 
 @jwt_required()
 def handle_media():
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         data = request.get_json()
         medium = Media(source=data['source'], 
                        is_active=True,
@@ -927,9 +960,9 @@ def handle_get_media_id(media_id):
 @api.route('/media/<int:media_id>', methods=['PUT', 'DELETE'])
 @jwt_required()
 def handle_media_id(media_id): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         medium = db.one_or_404(db.select(Media).filter_by(media_id=media_id), 
                              description=f"Media not found , 404.")
         if request.method == 'PUT':
@@ -962,9 +995,9 @@ def handle_get_media_by_post_id(post_id):
 @api.route('/posts/<int:post_id>/media', methods=['DELETE'])
 @jwt_required()
 def handle_media_by_post_id(post_id):       
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:
+    if identity[1] or identity[2]:
         if request.method == 'DELETE':
             response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
             return response_body, 200 
@@ -984,9 +1017,9 @@ def handle_get_likes():
 @api.route('/likes', methods=['POST'])  # Pueden los tres 
 @jwt_required()
 def handle_likes(): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:
+    if identity[1] or identity[2] or identity[3]:
         data = request.get_json()
         like = Likes(is_active=True, 
                      value=['value'])
@@ -1002,9 +1035,9 @@ def handle_likes():
 @api.route('/likes/<int:like_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 def handle_likes_id(like_id):
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin:
-    if current_identity[1]:
+    if identity[1]:
         like = db.one_or_404(db.select(Likes).filter_by(like_id=like_id), 
                              description=f"Like not found , 404.")
         if request.method == 'GET':
@@ -1039,9 +1072,9 @@ def handle_get_like_by_post_id(post_id):
 @api.route('/posts/<int:post_id>/likes', methods=['DELETE'])
 @jwt_required()
 def handle_like_by_post_id(post_id): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:
+    if identity[1] or identity[2] or identity[3]:
         response_body = {'message': 'This Method is not available yet. Please send a report requesting this issue'} 
         return response_body, 200 
     response_body = {'message': "Restricted access"}
@@ -1051,9 +1084,9 @@ def handle_like_by_post_id(post_id):
 @api.route('/users/<int:user_id>/likes', methods=['GET', 'DELETE'])
 @jwt_required()
 def handle_like_by_user_id(user_id):   
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin:
-    if current_identity[1]:
+    if identity[1]:
         if request.method == 'GET':
             likes = db.session.execute(db.select(Likes).filter_by(user_id=user_id)).scalars()
             likes_list = [like.serialize() for like in likes]
@@ -1076,12 +1109,13 @@ def handle_get_comments():
                          'results': comment_list}
         return response_body, 200 
 
+
 @api.route('/comments', methods=['POST'])
 @jwt_required()
 def handle_comments(): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:   
+    if identity[1] or identity[2] or identity[3]:   
         data = request.get_json()
         comment = Comments(date=data['date'],
                            text=data['text'],
@@ -1107,9 +1141,9 @@ def handle_get_comment_id(media_id):
 @api.route('/comments/<int:comment_id>', methods=['PUT', 'DELETE'])
 @jwt_required()
 def handle_comment_id(media_id):    
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author o advisor:
-    if current_identity[1] or current_identity[2] or current_identity[3]:   
+    if identity[1] or identity[2] or identity[3]:   
         comment = db.one_or_404(db.select(Comments).filter_by(coment_id=comment_id), 
                              description=f"Comment not found , 404.")
         if request.method == 'PUT':
@@ -1133,9 +1167,9 @@ def handle_comment_id(media_id):
 @api.route('/post/<int:post_id>/comments', methods=['GET', 'DELETE'])
 @jwt_required()
 def handle_comments_by_post_id(post_id): 
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin:
-    if current_identity[1]:     
+    if identity[1]:     
         if request.method == 'GET':
             comments = db.session.execute(db.select(Comments).filter_by(post_id=post_id)).scalars()
             comments_list = [post.serialize() for post in posts]
@@ -1152,9 +1186,9 @@ def handle_comments_by_post_id(post_id):
 @api.route('/report-posts', methods=['GET', 'POST'])
 @jwt_required()
 def handle_report_posts():
-    current_identity = get_jwt_identity()  # Aquí llega el token
+    identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if current_identity[1] or current_identity[2]:   
+    if identity[1] or identity[2]:   
         if request.method == 'GET':
             reports = db.session.execute(db.select(ReportPosts).order_by(ReportPosts.id)).scalars()
             reports_list = [report.serialize() for report in reports]
@@ -1174,4 +1208,4 @@ def handle_report_posts():
     response_body = {'message': "Restricted access"}
     return response_body, 401
 
-
+"""
