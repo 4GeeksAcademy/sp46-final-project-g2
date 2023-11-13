@@ -7,7 +7,6 @@ import { BackendURL } from "./component/BackendURL.jsx";
 import { Demo } from "./pages/demo";
 import { Single } from "./pages/single";
 import { Home } from "./pages/Home.jsx";
-import { Navbarcarlos } from "./component/Navbarcarlos.jsx";
 import { Footer } from "./component/Footer.jsx";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup.jsx"
@@ -32,7 +31,7 @@ const Layout = () => {
         <div>
             <BrowserRouter basename={basename}>
                 <ScrollToTop>
-                    <Navbarcarlos />
+                    <Navbar />
                     <Routes>
                         <Route element={<Home />} path="/" />
                         <Route element={<Form/>} path="/form" />
