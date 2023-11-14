@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faInstagram, faFacebook } from '@fortawesome/free-brands-svg-icons';
-import Logo from "../../img/Logo.jpg";
+import Logo from "../../img/logo.png";
 
 export const Footer = () => {
   return (

@@ -17,6 +17,10 @@ import { HorizontalCard } from "./component/HorizontalCard.jsx";
 import { List } from "./pages/List.jsx";
 import { PostEdit } from "./pages/PostEdit.jsx";
 import { PostView } from "./pages/PostView.jsx";
+import { Navbar } from "./component/Navbar-carlos.jsx"
+import { AuthorList } from "./pages/AuthorList.jsx";
+import { AuthorProfile } from "./pages/AuthorProfile.jsx"
+import { ShoppingCart } from "./pages/ShoppingCart.jsx";
 
 
 
@@ -38,10 +42,11 @@ const Layout = () => {
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
                         <Route element={<Demo />} path="/demo" />
-                        <Route element={<List />} path="/list" />
+                        <Route element={<AuthorList />} path="/author-list" />
+                        <Route element={<AuthorProfile />} path="/author-profile" />
                         <Route element={<PostEdit />} path="/post-edit" />
                         <Route element={<PostView />} path="/post-view" />
-                        <Route element={<HorizontalCard />} path="/horizontal-card" />
+                        <Route element={<ShoppingCart />} path="/shopping-cart" />
                         <Route element={<DisclaimerView />} path="/disclaimer-view" />
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />

@@ -6,7 +6,7 @@ import { BioCard } from "../component/BioCard.jsx";
 
 export const AuthorProfile = () => {
   return (
-    <div className="container">
+    <div className="container mb-5">
       <div className="row g-0 py-3">
         <div className="col-12 col-md-3">
           <ProfileCard />
