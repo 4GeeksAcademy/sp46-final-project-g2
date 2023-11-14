@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 
 export const Reviews = () => {
     return (
@@ -44,7 +45,9 @@ export const Reviews = () => {
                                 </div>
                                 <div className="card-body">
                                     <h1 className="card-title pricing-card-title" style={{fontSize: '20px', color: 'black'}}>11,95€</h1>
+                                    <Link to="/shopping-cart">
                                     <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mt-4">Comprar</button>
+                                    </Link>
                                     </div>
                                 </div>
                                 <div className="col-md-5 m-2" style={{border: '2px solid black', borderRadius: '21px 21px 0 0'}}>

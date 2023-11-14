@@ -21,7 +21,9 @@ import { Navbar } from "./component/Navbar-carlos.jsx"
 import { AuthorList } from "./pages/AuthorList.jsx";
 import { AuthorProfile } from "./pages/AuthorProfile.jsx"
 import { ShoppingCart } from "./pages/ShoppingCart.jsx";
-
+import { Reviews } from "./pages/Reviews.jsx";
+import { Mentories } from "./pages/Mentories.jsx"
+import { PenToPrint } from "./pages/PenToPrint.jsx"
 
 
 // Create your first component
@@ -46,6 +48,9 @@ const Layout = () => {
                         <Route element={<AuthorProfile />} path="/author-profile" />
                         <Route element={<PostEdit />} path="/post-edit" />
                         <Route element={<PostView />} path="/post-view" />
+                        <Route element={<Reviews />} path="/reviews" />
+                        <Route element={<Mentories />} path="/mentories" />
+                        <Route element={<PenToPrint />} path="/pen-to-print" />
                         <Route element={<ShoppingCart />} path="/shopping-cart" />
                         <Route element={<DisclaimerView />} path="/disclaimer-view" />
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />

@@ -32,9 +32,9 @@ export const Navbar = () => {
 								Servicios
 							</a>
 							<ul class="dropdown-menu">
-								<li><a className="dropdown-item" href="/pen-to-write"> Pen to Write </a></li>
-								<li><a className="dropdown-item" href="reviews"> Reviews </a></li>
-								<li><a className="dropdown-item" href="Talleres"> Talleres </a></li>
+								<li><Link className="dropdown-item" to="/pen-to-print"> Pen to Print </Link></li>
+								<li><Link className="dropdown-item" to="/reviews"> Reviews </Link></li>
+								<li><Link className="dropdown-item" to="/mentories"> Mentorías </Link></li>
 							</ul>
 						</li>
 					</ul>
