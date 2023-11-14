@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 
 export const PenToPrint = () => {
@@ -60,7 +61,7 @@ export const PenToPrint = () => {
                             <div className="card-body">
                                 <h2 className="card-title">Te ofrecemos:</h2>
                                 <ul className="list" style={{ textAlign: 'justify', fontSize: '15px' }}>
-                                    <li>100 páginas escaneadas.</li>
+                                    <li>1000 páginas escaneadas.</li>
                                     <li>Descargar como archivos de texto o Word, o copiar al portapapeles.</li>
                                 </ul>
                             </div>

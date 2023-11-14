@@ -1,5 +1,6 @@
 import React from "react";
 import casa from "../../img/casa.jpg"
+import { Link } from "react-router-dom";
 
 export const PostView = () => {
     return (
@@ -17,7 +18,7 @@ export const PostView = () => {
                         className="img-fluid mb-4"
                     />
                                       <article className="blog-post" style={{ textAlign: 'justify' }}>
-                            <p className="blog-post-meta">13-Diciembre-2020,  de <a href="#">Lola Panizo</a></p>
+                            <p className="blog-post-meta">13-Diciembre-2020,  de <Link to="/author-profile">Albert Camus</Link></p>
                             <p> En el pequeño pueblo de Elmsworth, rodeado de colinas verdes y bosques frondosos, se alzaba una casa antigua y enigmática. La Casa de los Susurros, como la llamaban los lugareños, tenía una historia que se transmitía de generación en generación. Dicen que, en sus oscuros pasillos y habitaciones sombrías, se ocultaba un misterio que había desconcertado a los habitantes durante décadas.</p>
                             <p> Los lugareños evitaban pasar cerca de la casa cuando caía la noche, temerosos de los susurros que se decía se escuchaban entre las sombras. Se rumoreaba que las paredes tenían oídos y que, si prestabas atención, podías captar murmullos incomprensibles que parecían provenir de lo más profundo de la estructura.</p>
                             <p> Una tarde de otoño, Emily, una joven valiente y curiosa, decidió explorar la Casa de los Susurros. Armada con una linterna y su coraje, cruzó el umbral de la casa en busca de respuestas. El interior estaba envuelto en un silencio sepulcral, solo interrumpido por el eco de sus propios pasos.</p>
