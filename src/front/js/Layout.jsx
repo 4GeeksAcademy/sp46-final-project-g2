@@ -25,6 +25,7 @@ import { Mentories } from "./pages/Mentories.jsx";
 import { Reviews } from  "./pages/Reviews.jsx";
 import { PenToPrint } from "./pages/PenToPrint.jsx";
 import { PostList } from "./pages/PostList.jsx";
+import { Cover } from "./pages/Cover.jsx"; 
 
 
 
@@ -41,7 +42,7 @@ const Layout = () => {
                 <ScrollToTop>
                     <Navbar />
                     <Routes>
-                        <Route element={<Home />} path="/" />
+                        <Route element={<Cover />} path="/" />
                         <Route element={<Form/>} path="/form" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />

@@ -12,15 +12,15 @@ export const PostCard = () => {
     <div className="card mb-2 mx-1" style={{ height: '218pxpx' }}>
       <div className="row g-0">
 
-        <div className="col-5 col-md-3 col-lg-2 col-xl-2 col-xxl-2 ">
+        <div className="col-4 col-md-4 col-lg-3 col-xl-3 col-xxl-2 ">
           <div className="">
             <Link to="/post-view">
-              <img height src={pic} className="img-fluid rounded-start" alt="..." style={{ height: '217px', width: '150px' }} />
+              <img height src={pic} className="img-fluid rounded-start" alt="..." style={{ height: '217px', width: '155px' }} />
             </Link>
           </div>
         </div>
 
-        <div className="col-7 col-md-9 col-lg-10 col-xl-10 col-xxl-10">
+        <div className="col-8 col-md-8 col-lg-9 col-xl-9 col-xxl-10">
           <div className="card-body">
             <h5 className="card-title">
               <Link to="/post-view"> El mito de Sísifo </Link>
