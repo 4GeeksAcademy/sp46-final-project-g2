@@ -1,5 +1,5 @@
 import React from "react";
-import { HorizontalCard } from "../component/HorizontalCard.jsx";
+import { AuthorCard } from "../component/AuthorCard.jsx";
 
 
 export const AuthorList = () => {
@@ -7,16 +7,16 @@ export const AuthorList = () => {
         <div className="container bg-dark text-light mb-5">
             <h2 className="mt-4 text-body-primary"> AUTORES </h2>
             <div className="pt-5 border-top">
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
-                <HorizontalCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
+                <AuthorCard />
             </div>
         </div>
     );

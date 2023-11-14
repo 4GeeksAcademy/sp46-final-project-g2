@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export const BioCard = () => {
     return (
 
-        <div className="card my-1 mx-2" >
+        <div className="card mt-1 mb-3 mx-1" >
             <div className="card-body">
                 <h5 className="card-title border-bottom">Acerca de mí</h5>
                 <p className="card-text py-4 px-4">Albert Camus (Mondovi, hoy Dréan, Argelia francesa, 

@@ -5,7 +5,7 @@ import pic from "../../img/mentoria.jpg"
 
 export const ShoppingCartList = () => {
     return (
-
+        <div className="mt-2">
         <ul className="list-group ">
             <li className="list-group-item d-flex justify-content-between align-items-start list-group-item-action">
                 <div className="row mt-2">
@@ -59,6 +59,6 @@ export const ShoppingCartList = () => {
                 </div>
             </li>
         </ul>
-
+        </div>
     );
 };
