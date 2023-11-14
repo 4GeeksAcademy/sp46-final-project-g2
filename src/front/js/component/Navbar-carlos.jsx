@@ -18,12 +18,12 @@ export const Navbar = () => {
 				<div className="collapse navbar-collapse " id="navbarLiteraryInk">
 					<ul className="navbar-nav me-auto mb-2 mb-lg-0">
 						<li className="nav-item">
-							<Link to="/categories">
+							<Link to="/post-edit">
 								<button className="btn border border-0 mt-1 "> Categorías </button>
 							</Link>
 						</li>
 						<li className="nav-item">
-							<Link to="/list">
+							<Link to="/author-list">
 								<button className="btn border border-0 mt-1"> Autores </button>
 							</Link>
 						</li>
@@ -41,9 +41,12 @@ export const Navbar = () => {
 					<Link to="/">
 						<button className="btn border-0 mx-3"> <FontAwesomeIcon icon={faMagnifyingGlass} size="xl"/>  </button>
 					</Link>
+					<Link to="/shopping-cart">
+						<button className="btn btn-warning fw-bold text-dark"> Carrito </button>
+					</Link>
 					<Link to="/login">
 						<button className="btn btn-warning fw-bold text-dark"> Ingresa </button>
-					</Link>
+					</Link>					
 				</div>
 			</div>
 		</nav>
