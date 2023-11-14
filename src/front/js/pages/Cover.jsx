@@ -5,7 +5,7 @@ import pic from "../../img/logo.png"
 
 export const Cover = () => {
     return (
-        <div class="d-flex h-100 text-center text-bg-dark py-5 my-5">
+        <div class="d-flex h-100 text-center text-bg-dark py-5 my-5" style={{minHeight: '800px'}}>
             <div class="cover-container d-flex w-100 h-100 p-3 py-5 my-5 mx-auto flex-column">
                 <div class="px-3 py-5 my-5">
                     <h1><img src={pic} /></h1>

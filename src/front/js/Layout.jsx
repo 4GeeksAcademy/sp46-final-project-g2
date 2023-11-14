@@ -13,11 +13,9 @@ import { Signup } from "./pages/Signup.jsx"
 import { Form } from "./pages/Form.jsx";
 import { DisclaimerView } from "./pages/DisclimerView.jsx";
 import { PrivacyPolicyView } from "./pages/PrivacyPolicyView.jsx";
-import { HorizontalCard } from "./component/HorizontalCard.jsx";
-import { List } from "./pages/List.jsx";
 import { PostEdit } from "./pages/PostEdit.jsx";
 import { PostView } from "./pages/PostView.jsx";
-import { Navbar } from "./component/Navbar-carlos.jsx"
+import { Navbar } from "./component/Navbar.jsx"
 import { AuthorList } from "./pages/AuthorList.jsx";
 import { AuthorProfile } from "./pages/AuthorProfile.jsx"
 import { ShoppingCart } from "./pages/ShoppingCart.jsx";

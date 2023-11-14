@@ -17,7 +17,8 @@ export const AuthorCard = () => {
         <div className="col-6 col-md-3 col-lg-2 col-xl-2 col-xxl-2 ">
           <div className=" ">
             <Link to="/author-profile">
-              <img height src={pic} className="img-fluid rounded-start" alt="..." style={{ height:'217px' }}  />
+              <img height src={pic} className="img-fluid rounded-start" 
+              alt="..." style={{ height:'217px', width: '155px'  }}  />
             </Link>
           </div>
         </div>
