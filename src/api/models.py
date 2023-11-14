@@ -30,7 +30,7 @@ class Users(db.Model):
 class Authors(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     alias = db.Column(db.String(120), unique = True, nullable = False)
-    birth_date = db.Column(db.Date)
+    birth_date = db.Column(db.DateTime)
     city = db.Column(db.String(120))
     country = db.Column(db.String(120))
     quote = db.Column(db.String(120))
@@ -61,12 +61,12 @@ class Members(db.Model):
     name = db.Column(db.String(20), nullable = False)
     nif = db.Column(db.String(9), unique = True, nullable = False)
     address = db.Column(db.String(150), nullable = False)
-    starting_date = db.Column(db.Date)
-    current_date = db.Column(db.Date)
-    final_date = db.Column(db.Date)
+    starting_date = db.Column(db.DateTime)
+    current_date = db.Column(db.DateTime)
+    final_date = db.Column(db.DateTime)
     current_discount = db.Column(db.Integer)
     remaining_reviews = db.Column(db.Integer)
-    reviews_expiring_date = db.Column(db.Date)
+    reviews_expiring_date = db.Column(db.DateTime)
     status = db.Column(db.Enum('Active', 'Inactive', 'Pending', name='status'), nullable = False)
     awards = db.Column(db.String(1000))
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
@@ -157,8 +157,8 @@ class CategoryServices(db.Model):
 class Services(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(120), unique = False, nullable = False)
-    starting_date = db.Column(db.Date)
-    final_date = db.Column(db.Date)
+    starting_date = db.Column(db.DateTime)
+    final_date = db.Column(db.DateTime)
     is_available = db.Column(db.Boolean(), unique = False, nullable = False)
     price = db.Column(db.Float)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
@@ -187,8 +187,8 @@ class ShoppingCarts(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     total_amount = db.Column(db.Float)
     discount = db.Column(db.Float)
-    date = db.Column(db.Date)
-    status = db.Column(db.Enum('Paid', 'Droped', 'Pending', name='status'), nullable = False)
+    date = db.Column(db.DateTime)
+    # status = db.Column(db.Enum('Paid', 'Droped', 'Pending', name='status'), nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     member_id = db.Column(db.ForeignKey(Members.id), nullable = False, unique=False)
     members = db.relationship('Members')
@@ -201,7 +201,6 @@ class ShoppingCarts(db.Model):
                 "total_amount": self.total_amount,
                 "discount": self.discount,
                 "date": self.date,
-                "status": self.status,
                 "is_active": self.is_active,
                 "member_id": self.member_id}
 
@@ -212,6 +211,9 @@ class ShoppingCartItems(db.Model):
     price = db.Column(db.Float, nullable = False)
     service_id = db.Column(db.ForeignKey(Services.id), nullable = False)
     services = db.relationship('Services')
+    # Definimos la relación con ShoppingCarts
+    shopping_cart_id = db.Column(db.ForeignKey(ShoppingCarts.id), nullable = False)
+    shopping_carts = db.relationship('ShoppingCarts')
     
     def __repr__(self):
         return f'<ShoppingCartItems {self.quantity}>'
@@ -220,14 +222,15 @@ class ShoppingCartItems(db.Model):
         return {"id": self.id,
                 "quantity": self.quantity,
                 "price": self.price,
-                "service_id": self.service_id}
+                "service_id": self.service_id,
+                "shopping_cart_id": self.shopping_cart_id}
 
 
 class Bills(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     paying_method = db.Column(db.String(100), nullable = False)  # Dependiendo de Stripe
     total_amount = db.Float(db.Float)
-    date = db.Column(db.Date)
+    date = db.Column(db.DateTime)
     status = db.Column(db.Enum('Paid', 'Declined', 'Pending', name='status'), nullable=False)
     member_id = db.Column(db.ForeignKey(Members.id), nullable=False)
     shopping_cart_id = db.Column(db.ForeignKey(ShoppingCarts.id), nullable=False)
@@ -289,8 +292,8 @@ class Posts(db.Model):
     abstract = db.Column(db.String(80))
     tag = db.Column(db.String(50))
     text = db.Column(db.String(50), nullable = False)
-    created_date = db.Column(db.Date)
-    update_date = db.Column(db.Date)
+    created_date = db.Column(db.DateTime)
+    update_date = db.Column(db.DateTime)
     is_published = db.Column(db.Boolean(), unique = False, nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), nullable = False)
@@ -354,7 +357,7 @@ class Likes(db.Model):
 
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    date = db.Column(db.Date)
+    date = db.Column(db.DateTime)
     text = db.Column(db.String(255), nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     post_id = db.Column(db.ForeignKey('posts.id'), nullable = False)
