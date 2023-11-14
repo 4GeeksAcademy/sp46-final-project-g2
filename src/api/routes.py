@@ -67,7 +67,7 @@ def handle_login():
     return response_body, 201
 
 
-@api.route('/signup', methods=["POST"])  # Mensajes en JSON?
+@api.route('/signup', methods=["POST"])
 def handle_signup():
     data = request.get_json()
     response_body = {}
@@ -81,7 +81,7 @@ def handle_signup():
     if is_user:
         response_body['message'] = 'The email is registered'
         return response_body, 403
-    # Almacenamos en momoria los datos de user, author, y advisor (member, se debe crear desde POST /member)
+    # Almacenamos en memoria los datos de user, author, y advisor (member, se debe crear desde POST /member)
     data_user = data['user']
     data_author = data.get('author', None)
     data_advisor = data.get('advisor', None)
@@ -94,7 +94,7 @@ def handle_signup():
         try:
             alias = data['author']['alias'].lower()
         except:
-            response_body['message'] = ' author.alias is empty or wrong'
+            response_body['message'] = 'author.alias is empty or wrong'
             return response_body, 400
         is_alias = db.session.execute(db.select(Authors).where(func.lower(Authors.alias) == alias)).scalar()
         if is_alias:
@@ -395,7 +395,7 @@ def handle_advisors():
     advisors = db.session.execute(db.select(Advisors)).scalars()
     advisors_list = [advisor.serialize() for advisor in advisors]
     response_body = {'message': 'Advisors List', 
-                         'results': advisors_list}
+                     'results': advisors_list}
     return response_body, 200 
                          
 
@@ -644,20 +644,20 @@ def handle_category_service_id(category_service_id):
                                          description=f"Category Service not found , 404.")
         if request.method == 'PUT':  
             data = request.get_json()
-            category_service.name=data['name'], 
-            category_service.description=data['description']
+            category_service['name'] = data['name'], 
+            category_service['description'] = data['description']
             db.session.commit()
             response_body = {'message': 'Category Service updated', 
                              'results': category_service.serialize()}
             return response_body, 200
         if request.method == 'DELETE':
-            category_service.is_active = False 
+            category_service['is_active'] = False 
             db.session.commit()
             services = db.session.execute(db.select(Services).filter_by(category_services_id=category_services_id)).scalars()
             if services:
                 count_services = len(services)
                 for service in services:
-                    service.is_available = False
+                    service['is_available'] = False
                     db.session.commit()
             response_body = {'message': 'Category service and {} services inactive'.format(count_services)}
             return response_body, 200 
@@ -665,48 +665,48 @@ def handle_category_service_id(category_service_id):
     return response_body, 401
 
 
-@api.route('/shopping-carts', methods=['GET', 'POST']) 
+@api.route('/shopping-carts', methods=['GET'])  # El metodo POST se realiza en /cart_items
 @jwt_required()
-def handle_shopping_carts():
+def handle_carts():
     identity = get_jwt_identity()
     if request.method == 'GET' and identity[1]:
-        shopping_carts = db.session.execute(db.select(ShoppingCarts)).scalars()
-        shopping_cart_list = [shopping_cart.serialize() for shopping_cart in shopping_carts]
+        carts = db.session.execute(db.select(ShoppingCarts)).scalars()
+        cart_list = [cart.serialize() for cart in carts]
         response_body = {'message': 'Shopping Carts',
-                         'results': shopping_cart_list}
-        return response_body, 200
+                         'results': cart_list}
+        return response_body, 200 
 
 
-@api.route('/shopping-cart-items', methods=['GET', 'POST']) 
+@api.route('/shopping-cart-items', methods=['POST'])  # El métdo GET se realiza en /carts
 @jwt_required()
-def handle_shopping_cart_items():
+def handle_cart_items():
     identity = get_jwt_identity()
     if request.method == 'POST' and identity[3]:
-        shopping_cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
+        cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
         results = {}
-        if not shopping_cart:
+        if not cart:
             # Verificamos si ya tiene un carrito
-            shopping_cart = ShoppingCarts(total_amount=0, 
-                                          discount=0, 
-                                          date=datetime.utcnow(),
-                                          is_active=True,
-                                          member_id=identity[3])
-            db.session.add(shopping_cart)
+            cart = ShoppingCarts(total_amount=0, 
+                                 discount=0, 
+                                 date=datetime.utcnow(),
+                                 is_active=True,
+                                 member_id=identity[3])
+            db.session.add(cart)
             db.session.commit()
         data = request.get_json()
-        shopping_cart_item = ShoppingCartItems(price=data['price'], 
-                                               service_id=data['service_id'],
-                                               quantity=data['quantity'],
-                                               shopping_cart_id=shopping_cart.id)
-        db.session.add(shopping_cart_item)
+        cart_item = ShoppingCartItems(price=data['price'], 
+                                      service_id=data['service_id'],
+                                      quantity=data['quantity'],
+                                      shopping_cart_id=cart.id)
+        db.session.add(cart_item)
         db.session.commit()
-        results['shopping_cart'] = shopping_cart.serialize()
-        shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == shopping_cart.id)).scalars()
+        results['shopping_cart'] = cart.serialize()
+        cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalars()
         list_items = []
-        for item in shopping_cart_items:
+        for item in cart_items:
             list_items.append(item.serialize())
         results['shopping_cart_item'] = list_items
-        response_body = {'message': 'Shopping Cart created', 
+        response_body = {'message': 'Shopping Cart with all items', 
                          'results': results}
         return response_body, 201 
     response_body = {'message': "Restricted access"}
@@ -715,39 +715,56 @@ def handle_shopping_cart_items():
 
 @api.route('/members/<int:member_id>/shopping-carts', methods=['GET', 'DELETE'])
 @jwt_required()
-def handle_shopping_cart_id(shopping_cart_id):
-    identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin o author:
-    if identity[1] or identity[3]:
-        shopping_cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
-                                      description=f"Shopping Cart not found , 404.")
+def handle_cart_id(member_id):
+    identity = get_jwt_identity()
+    # Valido si es admin o member:
+    if identity[1] or member_id == identity[3]:
+        cart = db.one_or_404(db.select(ShoppingCart).filter_by(member_id=member_id), 
+                             description=f"Shopping Cart not found , 404.")
+        cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=cart.id)).scalars()
         if request.method == 'GET':
-            current_date = datetime.now()
-            expired_items = []
-            shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=shopping_cart.id)).scalars()
-            for item in shopping_cart_items:
-                if item.starting_date <= current_date:
-                    expired_items.append(item)
-            if expired_items:
-                for item in expired_items:
-                    db.session.delete(item)
-                db.session.commit()
-            shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).filter_by(shopping_cart_id=shopping_cart.id)).scalars()  # Lista actualizada
-            shopping_cart_items_list = [item.serialize() for item in shopping_cart_items]
+            cart_items_list = [item.serialize() for item in cart_items]
             response_body = {'message': 'Shopping Cart',
-                             'results': {'cart': shopping_cart.serialize(),
-                                         'items': shopping_cart_items_list}}
+                             'results': {'cart': cart.serialize(),
+                                         'items': cart_items_list}}
             return response_body, 200
         if request.method == 'DELETE':
-            #  Borrar items y luego el shopping Cart
-            db.session.delete(shopping_cart_items)
-            db.session.delete(shopping_cart)
+            for item in cart_items:
+                db.session.delete(item)
+            db.session.delete(cart)
             db.session.commit()
             response_body = {'message': 'Shopping Cart deleted'}
             return response_body, 200 
-    response_body = {'message': "Restricted access"}
+    response_body['message'] = "Restricted access"
     return response_body, 401
    
+
+@api.route('/members/<int:member_id>/shopping-cart-items/<int:cart_item_id>', methods=['PUT', 'DELETE'])  # El método GET no se define, xq se visualiza con el cart y los demás items
+@jwt_required()
+def handle_cart_items_id(member_id, cart_item_id):
+    identity = get_jwt_identity()
+    response_body = {}
+    if member_id != identity[3]:
+        response_body['message'] = "Restricted access"
+        return response_body, 401
+    try:
+        cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
+        cart_item = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id, 
+                                                                        ShoppingCartItems.id == cart_item_id)).scalar()
+        if request.method == 'PUT':
+            data = request.get_json()
+            cart_item['quantity'] = data['quantity']
+            db.session.commit()
+            response_body['message'] = "Shopping Cart Item updated"
+        if request.method == 'DELETE':
+            db.session.delete(cart_item)
+            db.session.commit()
+            response_body['message'] = "Shopping Cart Item deleted"
+        return response_body, 200 
+    except:
+        response_body['message'] = "Bad request"
+        return response_body, 403
+
 
 @api.route('/bills', methods=['GET', 'POST'])
 @jwt_required()
