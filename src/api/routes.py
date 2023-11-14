@@ -677,23 +677,37 @@ def handle_shopping_carts():
         return response_body, 200
 
 
-
 @api.route('/shopping-cart-items', methods=['GET', 'POST']) 
 @jwt_required()
 def handle_shopping_cart_items():
     identity = get_jwt_identity()
     if request.method == 'POST' and identity[3]:
+        shopping_cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
+        results = {}
+        if not shopping_cart:
+            # Verificamos si ya tiene un carrito
+            shopping_cart = ShoppingCarts(total_amount=0, 
+                                          discount=0, 
+                                          date=datetime.utcnow(),
+                                          is_active=True,
+                                          member_id=identity[3])
+            db.session.add(shopping_cart)
+            db.session.commit()
         data = request.get_json()
-        # Verificamos si ya tiene un carrito
-        shopping_cart = ShoppingCart(total_amount=data['total_amount'], 
-                                     discount=data['discount'], 
-                                     date=data['date'], 
-                                     status=data['status'],
-                                     member_id=data['member_id'])
-        db.session.add(shopping_cart)
+        shopping_cart_item = ShoppingCartItems(price=data['price'], 
+                                               service_id=data['service_id'],
+                                               quantity=data['quantity'],
+                                               shopping_cart_id=shopping_cart.id)
+        db.session.add(shopping_cart_item)
         db.session.commit()
+        results['shopping_cart'] = shopping_cart.serialize()
+        shopping_cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == shopping_cart.id)).scalars()
+        list_items = []
+        for item in shopping_cart_items:
+            list_items.append(item.serialize())
+        results['shopping_cart_item'] = list_items
         response_body = {'message': 'Shopping Cart created', 
-                            'results': shopping_cart.serialize()}
+                         'results': results}
         return response_body, 201 
     response_body = {'message': "Restricted access"}
     return response_body, 401
