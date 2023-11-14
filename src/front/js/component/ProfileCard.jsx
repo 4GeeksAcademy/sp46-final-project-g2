@@ -11,7 +11,7 @@ import { faAlignJustify } from "@fortawesome/free-solid-svg-icons";
 export const ProfileCard = () => {
     return (
 
-        <div className="card my-1 mx-2"  >
+        <div className="card my-1 mx-1"  >
             <img src= {pic} className="card-img-top " alt="..." style={{ maxHeight: 'auto' }}/>
                 <div className="card-body">
                     <h5 className="card-title my-1">Albert Camus</h5>

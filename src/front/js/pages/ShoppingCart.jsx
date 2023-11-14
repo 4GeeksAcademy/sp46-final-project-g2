@@ -9,10 +9,10 @@ export const ShoppingCart = () => {
         <div className="container bg-dark text-light mb-5">
             <h2 className="mt-4 text-body-primary"> Cesta </h2>
             <div className="row pt-5 border-top">
-                <div className="col-8">
+                <div className="col-12 col-md-8">
                     <ShoppingCartList />
                 </div>
-                <div className="col-4">
+                <div className="col-12 col-md-4">
                 <ShoppingCartCard/>
                 </div>
             </div>
