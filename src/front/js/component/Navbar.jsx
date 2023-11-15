@@ -76,7 +76,7 @@ export const Navbar = () => {
 						</button>
 					</div>
 					<div className="row g-0 ">						
-						{!login?	<BotonIngresar/> : <BotonLogged/>}
+						{login?	<BotonLogged/>: <BotonIngresar/> }
 					</div>
 
 				</div>
