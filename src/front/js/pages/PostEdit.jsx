@@ -12,9 +12,10 @@ export const PostEdit = () => {
                             <div className="form-group">
                                 <label htmlFor="title" className="font-weight-bold">Título:</label>
                                 <input
+                                    id="title"
                                     type="text"
                                     className="form-control"
-                                    id="title"
+                                    contentEditable="true"
                                     placeholder="Ingresa el título aquí"
                                     style={{
                                         backgroundColor: "#dcdcdc",
@@ -27,15 +28,19 @@ export const PostEdit = () => {
                             <label htmlFor="editor" className="font-weight-bold mt-3">Contenido:</label>
                             <div
                                 id="editor"
-                                className="form-control border-1 p-0"
+                                className="border-1"
                                 contentEditable="true"
                                 style={{
-                                    minHeight: "400px",
+                                    minHeight: "600px",
                                     minWidth: "200px",
                                     backgroundColor: "#dcdcdc",
                                     padding: "10px",
                                     border: "1px solid #b0b0b0",
                                     borderRadius: "5px",
+                                    marginTop: "10px",
+                                    color: "black",
+                                    outline: "none", 
+                                    cursor: "text" 
                                 }}
                             />
                         </div>
