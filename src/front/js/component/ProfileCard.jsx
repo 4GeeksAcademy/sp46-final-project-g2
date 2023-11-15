@@ -6,9 +6,13 @@ import { faPenNib } from "@fortawesome/free-solid-svg-icons";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faBookOpenReader } from "@fortawesome/free-solid-svg-icons";
 import { faAlignJustify } from "@fortawesome/free-solid-svg-icons";
+import { BotonSeguir } from "./BotonSeguir.jsx";
+import { BotonEditar } from "./BotonEditar.jsx";
 
 
 export const ProfileCard = () => {
+    const login = true;
+
     return (
 
         <div className="card my-1 mx-1"  >
@@ -16,7 +20,7 @@ export const ProfileCard = () => {
                 <div className="card-body">
                     <h5 className="card-title my-1">Albert Camus</h5>
                     <h6 className="card-subtitle mb-2 text-body-secondary">Sysiphus</h6>
-                    <button className="btn btn-primary w-100 py-1 my-3"> Seguir </button>
+                    {login? <BotonEditar/>: <BotonSeguir/> }
                     <p className="card-text">Every act of rebellion expresses a nostalgia for innocence and an appeal to the essence of being</p>
                 </div>
                 <ul className="list-group list-group-flush">
