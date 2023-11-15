@@ -24,6 +24,8 @@ import { Reviews } from  "./pages/Reviews.jsx";
 import { PenToPrint } from "./pages/PenToPrint.jsx";
 import { PostList } from "./pages/PostList.jsx";
 import { Cover } from "./pages/Cover.jsx"; 
+import { SignUpAdvisor } from "./pages/SignUpAdvisor.jsx";
+import { SignUpMember } from "./pages/SignUpMember.jsx";
 
 
 // Create your first component
@@ -43,6 +45,8 @@ const Layout = () => {
                         <Route element={<Form/>} path="/form" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
+                        <Route element={<SignUpAdvisor />} path="/signup-advisor" />
+                        <Route element={<SignUpMember />} path="/signup-member" />
                         <Route element={<Demo />} path="/demo" />
                         <Route element={<AuthorList />} path="/author-list" />
                         <Route element={<AuthorProfile />} path="/author-profile" />
