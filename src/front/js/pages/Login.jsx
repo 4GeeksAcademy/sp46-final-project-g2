@@ -1,37 +1,45 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
+import { Alert } from "../component/Alert.jsx";
+import { useNavigate } from "react-router-dom";
 
 
 export const Login = () => {
     const { store, actions } = useContext(Context);
-    const [ email, setEmail ] = useState('')
-    const [ password, setPassword ]    = useState('')
-    const [ viewPassword, setViewPassword ] = useState(false)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [viewPassword, setViewPassword] = useState(false)
+    const [alert, setAlert] = useState({ show: false, message: '' })
+    const navigate = useNavigate();
 
-
-    // No utilizar useContext. Utilizar useState
-    // Realizar el fetch (al enpoint login) dentro de la función de handleOnSubmit (igual será para el SignUp signup advisor)
     const handleEmail = (event) => setEmail(event.target.value);
     const handlePassword = (event) => setPassword(event.target.value);
 
     const login = async () => {
+        setAlert({ show: false, message: '' })
         const url = process.env.BACKEND_URL + '/api/login';
         const options = {
             method: 'POST',
-            body: JSON.stringify({email, password}),
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            body: JSON.stringify({ email, password }),
+            headers: { 'Content-Type': 'application/json' }
         }
         const response = await fetch(url, options);
         if (response.ok) {
             const data = await response.json();
+            localStorage.setItem('token', data.token);
+            store.user = data.results;
+            setAlert({ show: true, message: 'User logged' });
             console.log(data)
+            navigate("/");
         } else {
+            if (response.status == 404) {
+                const error = await response.text();
+                setAlert({ show: true, message: 'Bad user or password' });
+            }
             console.log('Error: ', response.status, response.statusText);
             /* tratar el error */
-            return {error: 'error en el response', status: response.status, statusText: response.statusText}
+            return { error: 'error en el response', status: response.status, statusText: response.statusText }
         }
     }
 
@@ -56,6 +64,14 @@ export const Login = () => {
                             Remember me
                         </label>
                     </div>
+                    {/* 
+                    <div className="form-group">
+                        <div className="form-check">
+                            <input type="checkbox" className="form-check-input" id="dropdownCheck" />
+                            <label className="form-check-label" htmlFor="dropdownCheck">
+                                Remember me
+                            </label>
+                        </div>
                     </div>
                 */}
                 <button type="button" onClick={login} className="btn btn-warning fw-bold text-dark mt-4 mb-4">Log in</button>
