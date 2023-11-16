@@ -750,7 +750,7 @@ def handle_cart_items_id(member_id, cart_item_id):
     try:
         cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
         cart_item = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id, 
-                                                                        ShoppingCartItems.id == cart_item_id)).scalar()
+                                                                          ShoppingCartItems.id == cart_item_id)).scalar()
         if request.method == 'PUT':
             data = request.get_json()
             cart_item['quantity'] = data['quantity']
@@ -769,29 +769,51 @@ def handle_cart_items_id(member_id, cart_item_id):
 @api.route('/bills', methods=['GET', 'POST'])
 @jwt_required()
 def handle_bills():
-    identity = get_jwt_identity()  # Aquí llega el token
-    # Valido si es admin o author o advisor:
-    if identity[1] or identity[2] or identity[3]:
-        if request.method == 'GET':
-            bills = db.session.execute(db.select(Bills)).scalars()
-            bills_list = [bill.serialize() for bill in bills]
-            response_body = {'message': 'Bills List', 
-                             'results': bills_list}
-            return response_body, 200 
-        if request.method == 'POST':  
+    identity = get_jwt_identity()
+    if request.method == 'GET' and identity[1]:
+        bills = db.session.execute(db.select(Bills)).scalars()
+        bills_list = [bill.serialize() for bill in bills]
+        response_body = {'message': 'Bills List', 
+                         'results': bills_list}
+        return response_body, 200 
+    if request.method == 'POST' and identity[3]:
+        results = {}
+        try:
+            cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
+            cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalar()
+            cart_items_list = [item.serialize() for item in cart_items]
             data = request.get_json()
-            bill = Bills(paying_method=data['paying_method'], 
-                         total_amount=data['total_amount'], 
-                         date=data['date'], 
-                         status=data['status'],
-                         member_id=data['member_id'],
-                         shopping_cart_id=data['shopping_cart_id'])
+            # Genero la factura
+            bill = Bills(paying_method=data['paying_method'],
+                         total_amount=data['total_amount'],
+                         date=datetime.utcnow(),
+                         status='Pending',
+                         member_id=identity[3])
             db.session.add(bill)
             db.session.commit()
+            results['bill'] = bill.serialize()
+            # Genero los items de la factura
+            list_items = []
+            for item in cart_items_list:
+                bill_item = BillItems(quantity=item['quantity'],
+                                      price=item['price'],
+                                      service_id=item['service_id'],
+                                      bill_id=bill.id)
+                db.session.add(bill_item)
+                db.session.commit()
+                list_items.append(bill_item.serialize())
+            results['bill_items'] = list_items
+            # Elimino los items de carrito, y el carrito
+            for item in cart_items:
+                db.session.delete(item)
+            db.session.delete(cart)
             response_body = {'message': 'Bill created', 
-                             'results': bill.serialize()}
+                            'results': results}
             return response_body, 201 
-    response_body = {'message': "Restricted access"}
+        except:
+            response_body['message'] = "Bad request"
+            return response_body, 403
+    response_body['message'] = "Restricted access"
     return response_body, 401
     
 

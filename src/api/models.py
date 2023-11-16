@@ -233,9 +233,9 @@ class Bills(db.Model):
     date = db.Column(db.DateTime)
     status = db.Column(db.Enum('Paid', 'Declined', 'Pending', name='status'), nullable=False)
     member_id = db.Column(db.ForeignKey(Members.id), nullable=False)
-    shopping_cart_id = db.Column(db.ForeignKey(ShoppingCarts.id), nullable=False)
     members = db.relationship('Members', foreign_keys=[member_id])
-    shopping_carts = db.relationship('ShoppingCarts', foreign_keys=[shopping_cart_id]) 
+    # shopping_cart_id = db.Column(db.ForeignKey(ShoppingCarts.id), nullable=False)
+    # shopping_carts = db.relationship('ShoppingCarts', foreign_keys=[shopping_cart_id]) 
     
     def __repr__(self):
         return f'<Bills {self.billing_id_number}>'
@@ -246,8 +246,7 @@ class Bills(db.Model):
                 "total_amount": self.total_amount,
                 "date": self.date,
                 "status": self.status,
-                "member_id": self.member_id,
-                "shopping_cart_id": self.shopping_cart_id}
+                "member_id": self.member_id}
 
 
 class BillItems(db.Model):
@@ -255,7 +254,9 @@ class BillItems(db.Model):
     quantity = db.Column(db.Integer)
     price = db.Column (db.Float)  # por unidad
     service_id = db.Column(db.ForeignKey(Services.id), nullable = False)
-    services = db.relationship('Services')
+    services = db.relationship('Services', foreign_keys=[service_id])
+    bill_id = db.Column(db.ForeignKey(Bills.id), nullable = False)
+    bills = db.relationship('Bills', foreign_keys=[bill_id])
     
     def __repr__(self):
         return f'<BillItems {self.quantity}>'
@@ -264,7 +265,8 @@ class BillItems(db.Model):
         return {"id": self.id,
                 "quantity": self.quantity,
                 "price": self.price,
-                "service_id": self.service_id}
+                "service_id": self.service_id,
+                "bills_id": self.bill_id}
 
 
 class BillingIssues(db.Model):
