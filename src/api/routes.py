@@ -40,6 +40,7 @@ def handle_login():
     email = email.lower() if email else None
     password = data.get("password", None)
     # remember_me = request.json.get("remember_me", False)
+
     user = db.one_or_404(db.select(Users).filter_by(email=email, password=password, is_active=True),
                          description=f"Bad email or password.")
     results = {'user': user.serialize(),
@@ -64,7 +65,16 @@ def handle_login():
                      'results': results}
     """ if remember_me:
         set_access_cookies(response_body, access_token) """
-    return response_body, 201
+    return response_body, 200
+
+
+""" 
+    identity[0] es user.id
+    identity[1] es user.is_admin
+    identity[2] es author_id
+    identity[3] es member_id 
+    identity[4] es advisor_id
+"""
 
 
 @api.route('/signup', methods=["POST"])
