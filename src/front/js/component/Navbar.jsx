@@ -8,10 +8,10 @@ import { BotonLogged } from "./BotonLogged.jsx";
 
 
 export const Navbar = () => {
-	const login = true;
+	const login = false;
 
 	return (
-		<nav class="navbar navbar-expand-md navbar-dark py-2">
+		<nav className="navbar navbar-expand-md navbar-dark py-2">
 			<div className="container-fluid">
 
 				<div className="me-3 ms-5 ps-5">

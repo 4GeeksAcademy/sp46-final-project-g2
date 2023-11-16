@@ -49,4 +49,3 @@ export const ImageUpload = () => {
     </div>
   );
 };
-
