@@ -1,8 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { BotonEditar } from "./BotonEditar.jsx";
 
 
 export const BioCard = () => {
+    const login = true;
     return (
 
         <div className="card mt-1 mb-3 mx-1" >
@@ -23,6 +24,8 @@ export const BioCard = () => {
                 Nobel de Literatura por «el conjunto de una obra que pone de relieve los 
                 problemas que se plantean en la conciencia de los hombres de la actualidad».</p>
             </div>
+            <div className="px-4" > {login? <BotonEditar/>: <span/>} </div>
+            
         </div>
     );
 };
