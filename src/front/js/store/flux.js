@@ -2,6 +2,9 @@ const getState = ({ getStore, getActions, setStore }) => {
   return {
     store: {
       user: {},
+      author: {},
+      member: {},
+      advisor: {},
       message: null,
       demo: [{title: "FIRST", background: "white",initial: "white"},
              {title: "SECOND",background: "white",initial: "white"}]

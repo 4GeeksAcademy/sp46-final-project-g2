@@ -11,15 +11,26 @@ export const Signup = () => {
     const handleAlias = (event) => setAlias(event.target.value);
 
     const signup = async () => {
-        const url = process.env.BACKEND_URL + '/api/signup'; 
+        const url = process.env.BACKEND_URL + '/api/signup';
+        const dataToSend = {
+            "user": {
+                "email": email,
+                "password": password
+            },
+            "author": {
+                "alias": alias
+            },
+            "advisor": {}
+        } 
         const options = {
             method: 'POST',
-            body: JSON.stringify({ email, password, alias }),
+            body: JSON.stringify( dataToSend ),
             headers: {
                 'Content-Type': 'application/json'
             }
         };
-        try {
+        console.log(dataToSend, options, url)
+       /*  try { */
             const response = await fetch(url, options);
             if (response.ok) {
                 const data = await response.json();
@@ -27,9 +38,9 @@ export const Signup = () => {
             } else {
                 console.log('Error: ', response.status, response.statusText);
             }
-        } catch (error) {
+      /*   } catch (error) {
             console.error('Error:', error);
-        }
+        } */
     };
 
     return (
@@ -51,7 +62,7 @@ export const Signup = () => {
                            className="form-control" id="exampleInputAlias1" aria-describedby="aliasHelp" placeholder="Escribe tu nombre de usuario" />
                 </div>
                 <div className="mt-4" style={{ display: 'flex', justifyContent: 'space-between'}}>
-                    <button type="submit" onClick={signup} className="btn btn-warning fw-bold text-dark">Sign up</button>
+                    <button type="button" onClick={signup} className="btn btn-warning fw-bold text-dark">Sign up</button>
                     <Link to="/signup-advisor" >
                         <button className="btn border border-0 font-weight-bold btn-lg">Soy una empresa </button>
                     </Link>

@@ -17,9 +17,25 @@ export const SignUpAdvisor = () => {
 
     const signupAdvisor = async () => {
         const url = process.env.BACKEND_URL + '/api/signup'; 
+        const dataToSend = {
+            "user": {
+                "email": email,
+                "password": password
+            },
+            "author": {},
+            "advisor": {
+                "name": "JohnDoe",
+                "nif": nif,
+                "category": "Mentor",
+                "address": address,
+                "city": city,
+                "country": country,
+                "about_me": ""
+            }
+        } 
         const options = {
             method: 'POST',
-            body: JSON.stringify({ email, password, nif, address, city, country }),
+            body: JSON.stringify( dataToSend ),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -65,7 +81,7 @@ export const SignUpAdvisor = () => {
                     <input type="country" value={country} onChange={handleCountry}  className="form-control" id="exampleInputcountry" aria-describedby="countryHelp" placeholder="Escribe el país de tu empresa" />
                 </div>
                 <div className="mt-4">
-                    <button type="submit" onClick={signupAdvisor} className="btn btn-warning fw-bold text-dark">Sign up</button>
+                    <button type="button" onClick={signupAdvisor} className="btn btn-warning fw-bold text-dark">Sign up</button>
                 </div>
             </form >
         </div >
