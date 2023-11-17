@@ -44,19 +44,25 @@ export const Login = () => {
     }
 
     return (
-        <div className="container">
-            {alert.show ? <Alert>{alert.message}</Alert> : ''}
-            <div className="d-flex align-items-center justify-content-center">
-                <form style={{ width: "400px" }}>
-                    <div className="form-group">
-                        <label htmlFor="exampleInputEmail1">Email address</label>
-                        <input type="email" value={email} onChange={handleEmail}
-                            className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="exampleInputPassword1">Password</label>
-                        <input type="password" value={password} onChange={handlePassword}
-                            className="form-control" id="exampleInputPassword1" placeholder="Password" />
+        <div className="d-flex align-items-center justify-content-center" style={{minHeight: '610px'}}>
+            <form style={{ width: "400px" }}>
+                <div className="form-group">
+                    <label htmlFor="exampleInputEmail1">Email </label>
+                    <input type="email" value={email} onChange={handleEmail}
+                        className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Escribe tu email" />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="exampleInputPassword1">Contraseña</label>
+                    <input type="password"  value={password} onChange={handlePassword}
+                        className="form-control" id="exampleInputPassword1" placeholder="Escribe tu contraseña" />
+                </div>
+                {/* 
+                <div className="form-group">
+                    <div className="form-check">
+                        <input type="checkbox" className="form-check-input" id="dropdownCheck" />
+                        <label className="form-check-label" htmlFor="dropdownCheck">
+                            Remember me
+                        </label>
                     </div>
                     {/* 
                     <div className="form-group">
@@ -67,16 +73,16 @@ export const Login = () => {
                             </label>
                         </div>
                     </div>
-                    */}
-                    <button type="button" onClick={login} className="btn btn-primary btn-block">Log in</button>
-                    <div className="dropdown-divider"></div>
-                    <Link className="dropdown-item" to="/signup">Sign up</Link>
-                    {/* 
-                    <Link className="dropdown-item" to="/signup">New around here? Sign up</Link>
-                    <Link className="dropdown-item" href="#">Forgot password?</Link>
-                    */}
-                </form>
-            </div>
+                */}
+                <button type="button" onClick={login} className="btn btn-warning fw-bold text-dark mt-4 mb-4">Log in</button>
+            <div className="dropdown-divider"></div>
+            <p>¿No estás registrado?</p>
+            <button type="button" className="btn btn-primary btn-block">
+            <Link className="dropdown-item" to="/signup">Sign up</Link>
+            </button>
+            {/* <Link className="dropdown-item" to="/signup">New around here? Sign up</Link>
+            <Link className="dropdown-item" href="#">Forgot password?</Link> */}
+            </form>
         </div>
     );
 };
