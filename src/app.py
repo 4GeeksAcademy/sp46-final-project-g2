@@ -7,11 +7,12 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from api.utils import APIException, generate_sitemap
-from api.models import db
+from api.models import db, Bills, BillItems
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+import stripe
 # from models import Person
 
 
@@ -33,9 +34,15 @@ CORS(app)  # Allow CORS requests to this API
 setup_admin(app)  # Add the admin
 setup_commands(app)  # Add the admin
 app.register_blueprint(api, url_prefix='/api')  # Add all endpoints form the API with a "api" prefix
-
+# JWT setting
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_API_KEY")
 jwt = JWTManager(app)
+# Stripe setting
+stripe_keys = {'secret_key': os.getenv("STRIPE_SECRET_KEY"),
+              'publishable_key': os.getenv("STRIPE_PUBLISHABLE_KEY")}
+stripe.api_key = stripe_keys['secret_key']
+front_url = os.getenv("FRONTEND_URL")
+
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -59,6 +66,72 @@ def serve_any_other_file(path):
     response = send_from_directory(static_file_dir, path)
     response.cache_control.max_age = 0  # Avoid cache memory
     return response
+
+
+@app.route('/config', methods = ['GET'])
+def get_publishable_key():
+    stripe_config = {"publicKey": stripe_keys["publishable_key"]}
+    return jsonify(stripe_config)
+
+
+@app.route('/payment', methods=['POST'])
+@jwt_required()
+def stripe_payment():
+    print('hola')
+    identity = get_jwt_identity()
+    if not identity[3]:
+        response_body['message'] = "Restricted access"
+        return response_body, 401
+    data = request.get_json()  # (force=True)
+    try:
+        # Genero el listado de items
+        # cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
+        # cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalar()
+        # cart_items_list = [item.serialize() for item in cart_items]
+        bill = db.session.execute(db.select(Bills).where(Bills.member_id == identity[3],
+                                                         Bills.status == 'Pending')).scalar()
+        bill_items = db.session.execute(db.select(BillItems).where(BillItems.bill_id == bill.id)).scalars()
+        bill_items_list = [item.serialize() for item in bill_items]
+        line_items = [{'price': item['stripe_price'], 'quantity': item['quantity']} for item in bill_items_list]
+        print(line_items)
+        # line_items=[{'price': 'price_1ODGc9BgaT0Vkd8Nljplbfxe', 'quantity': 10}]
+        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+        session = stripe.checkout.Session.create(payment_method_types=['card'],
+                                                 line_items=line_items,
+                                                 mode='payment',
+                                                 success_url=front_url + '/payment-success',
+                                                 cancel_url=front_url + '/payment-canceled')
+                                                 # ui_mode='embedded',
+        response_body = {'sessionId': session['id']}
+        return response_body, 200
+    except Exception as e:
+        response_body = {'message': str(e)}
+        # return str(e)
+        return response_body, 403
+    # return jsonify(clientSecret=session.client_secret)
+
+
+"""
+# Stripe Sample Example
+@api.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    try:
+        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+        session = stripe.checkout.Session.create(ui_mode='embedded',
+                                                 line_items=[{'price': '{{PRICE_ID}}',
+                                                              'quantity': 1,},],
+                                                 mode='payment',
+                                                 return_url=YOUR_DOMAIN + '/return?session_id={CHECKOUT_SESSION_ID}',)
+    except Exception as e:
+        return str(e)
+    return jsonify(clientSecret=session.client_secret)
+
+
+@app.route('/session-status', methods=['GET'])
+def session_status():
+    session = stripe.checkout.Session.retrieve(request.args.get('session_id'))
+    return jsonify(status=session.status, customer_email=session.customer_details.email)
+"""
 
 
 # This only runs if `$ python src/main.py` is executed

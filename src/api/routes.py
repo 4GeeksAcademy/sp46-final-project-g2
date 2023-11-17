@@ -8,6 +8,7 @@ from api.utils import generate_sitemap, APIException
 from datetime import datetime
 from sqlalchemy import func
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
+import stripe
 
 
 api = Blueprint('api', __name__)
@@ -549,7 +550,9 @@ def handle_services():
                            final_date=data['final_date'], 
                            is_available=data['is_available'],  
                            price=data['price'],
+                           stripe_price=data['stripe_price'],
                            category_id=data['category_id'],
+                           is_active=data['is_active'],
                            advisor_id=data['advisor_id'])
         db.session.add(service)
         db.session.commit()
@@ -696,9 +699,13 @@ def handle_cart_items():
         data = request.get_json()
         cart_item = ShoppingCartItems(price=data['price'], 
                                       service_id=data['service_id'],
+                                      stripe_price=data['stripe_price'],
                                       quantity=data['quantity'],
                                       shopping_cart_id=cart.id)
         db.session.add(cart_item)
+        db.session.commit()
+        # Actualizamos el monto total del carrito
+        cart['total_amount'] += cart_item['price'] * cart_item['quantity']
         db.session.commit()
         results['shopping_cart'] = cart.serialize()
         cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalars()
@@ -770,6 +777,7 @@ def handle_cart_items_id(member_id, cart_item_id):
 @jwt_required()
 def handle_bills():
     identity = get_jwt_identity()
+    response_body = {}
     if request.method == 'GET' and identity[1]:
         bills = db.session.execute(db.select(Bills)).scalars()
         bills_list = [bill.serialize() for bill in bills]
@@ -777,10 +785,10 @@ def handle_bills():
                          'results': bills_list}
         return response_body, 200 
     if request.method == 'POST' and identity[3]:
-        results = {}
-        try:
+            results = {}
+            """try:"""
             cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
-            cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalar()
+            cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalars()
             cart_items_list = [item.serialize() for item in cart_items]
             data = request.get_json()
             # Genero la factura
@@ -797,6 +805,7 @@ def handle_bills():
             for item in cart_items_list:
                 bill_item = BillItems(quantity=item['quantity'],
                                       price=item['price'],
+                                      stripe_price=item['stripe_price'],
                                       service_id=item['service_id'],
                                       bill_id=bill.id)
                 db.session.add(bill_item)
@@ -810,9 +819,11 @@ def handle_bills():
             response_body = {'message': 'Bill created', 
                             'results': results}
             return response_body, 201 
-        except:
-            response_body['message'] = "Bad request"
-            return response_body, 403
+            """
+            except:
+                response_body['message'] = "Bad request"
+                return response_body, 403
+            """    
     response_body['message'] = "Restricted access"
     return response_body, 401
     
@@ -852,6 +863,7 @@ def handle_bill_by_id(bill_id):
     return response_body, 401
 
 
+"""  TODO: Si ya tiempo
 @api.route('/billing-issues', methods=['GET', 'POST'])
 @jwt_required()
 def handle_billing_issues():
@@ -879,7 +891,6 @@ def handle_billing_issues():
     return response_body, 401
 
 
-"""  TODO: Si ya tiempo
 @api.route('/posts', methods=['GET']) 
 def handle_get_posts():
     posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()

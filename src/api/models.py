@@ -161,7 +161,8 @@ class Services(db.Model):
     final_date = db.Column(db.DateTime)
     is_available = db.Column(db.Boolean(), unique = False, nullable = False)
     price = db.Column(db.Float)
-    is_active = db.Column(db.Boolean, unique = False, nullable = False)
+    stripe_price = db.Column(db.String(50), unique=False, nullable=False)
+    is_active = db.Column(db.Boolean, nullable = False)
     category_id = db.Column(db.Integer, db.ForeignKey(CategoryServices.id))
     advisor_id = db.Column(db.ForeignKey(Advisors.id))
     categories = db.relationship('CategoryServices', foreign_keys=[category_id])
@@ -178,6 +179,7 @@ class Services(db.Model):
                 "final_date": self.final_date,
                 "is_available": self.is_available,
                 "price": self.price,
+                "stripe_price": self.stripe_price,
                 "is_active": self.is_active,
                 "category_id": self.category_id,
                 "advisor_id": self.advisor_id}
@@ -209,6 +211,7 @@ class ShoppingCartItems(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     quantity = db.Column(db.Integer)
     price = db.Column(db.Float, nullable = False)
+    stripe_price = db.Column(db.String(50), nullable=False)
     service_id = db.Column(db.ForeignKey(Services.id), nullable = False)
     services = db.relationship('Services')
     # Definimos la relación con ShoppingCarts
@@ -222,6 +225,7 @@ class ShoppingCartItems(db.Model):
         return {"id": self.id,
                 "quantity": self.quantity,
                 "price": self.price,
+                "stripe_price": self.stripe_price,
                 "service_id": self.service_id,
                 "shopping_cart_id": self.shopping_cart_id}
 
@@ -238,7 +242,7 @@ class Bills(db.Model):
     # shopping_carts = db.relationship('ShoppingCarts', foreign_keys=[shopping_cart_id]) 
     
     def __repr__(self):
-        return f'<Bills {self.billing_id_number}>'
+        return f'<Bills {self.id}>'
     
     def serialize(self):
         return {"id": self.id,
@@ -253,6 +257,7 @@ class BillItems(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     quantity = db.Column(db.Integer)
     price = db.Column (db.Float)  # por unidad
+    stripe_price = db.Column(db.String(50), nullable=False)
     service_id = db.Column(db.ForeignKey(Services.id), nullable = False)
     services = db.relationship('Services', foreign_keys=[service_id])
     bill_id = db.Column(db.ForeignKey(Bills.id), nullable = False)
@@ -265,6 +270,7 @@ class BillItems(db.Model):
         return {"id": self.id,
                 "quantity": self.quantity,
                 "price": self.price,
+                "stripe_price": self.stripe_price,
                 "service_id": self.service_id,
                 "bills_id": self.bill_id}
 

@@ -11,6 +11,9 @@ import { Navbar } from "./component/Navbar.jsx";
 import { Footer } from "./component/Footer.jsx";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup.jsx"
+import { CheckoutForm } from "./pages/CheckoutForm.jsx"
+import { Cancel } from "./pages/Cancel.jsx";
+import { Success } from "./pages/Success.jsx";
 
 
 // Create your first component
@@ -31,7 +34,10 @@ const Layout = () => {
                         <Route element={<Signup />} path="/signup" />
                         <Route element={<Demo />} path="/demo" />
                         <Route element={<Single />} path="/single/:theid" />
-                        <Route element={<h1>Not found!</h1>} />
+                        <Route element={<h1>Not found!</h1>} path="*"/>
+                        <Route element={<CheckoutForm />} path="/checkout" />
+                        <Route element={<Success />} path="?success=true"/>
+                        <Route element={<Cancel />} path="?canceled=true"/>
                     </Routes>
                     <Footer />
                 </ScrollToTop>
