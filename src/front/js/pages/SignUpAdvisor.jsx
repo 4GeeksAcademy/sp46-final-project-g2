@@ -16,29 +16,53 @@ export const SignUpAdvisor = () => {
     const handleCountry = (event) => setCountry(event.target.value);
 
     const signupAdvisor = async () => {
-        const url = process.env.BACKEND_URL + '/api/signup'; 
+        const url = process.env.BACKEND_URL + '/api/signup';
+        const dataToSend = {
+            "user": {
+                "email": email,
+                "password": password
+            },
+            "author": {},
+            "advisor": {
+                "name": "JohnDoe",
+                "nif": nif,
+                "category": "category",
+                "address": address,
+                "city": city,
+                "country": country,
+                "about_me": ""
+            }
+        }
         const options = {
             method: 'POST',
-            body: JSON.stringify({ email, password, nif, address, city, country }),
+            body: JSON.stringify(dataToSend),
             headers: {
                 'Content-Type': 'application/json'
             }
         };
-        try {
-            const response = await fetch(url, options);
-            if (response.ok) {
-                const data = await response.json();
-                console.log(data);
-            } else {
-                console.log('Error: ', response.status, response.statusText);
-            }
-        } catch (error) {
-            console.error('Error:', error);
+        console.log(dataToSend, options, url)
+        /*  try { */
+        const response = await fetch(url, options);
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            setEmail('');
+            setPassword('');
+            setNif('');
+            setAddress('');
+            setCity('');
+            setCountry('');
+
+        } else {
+            console.log('Error: ', response.status, response.statusText);
         }
+        /*   } catch (error) {
+              console.error('Error:', error);
+          } */
     };
 
     return (
-        <div className="d-flex align-items-center justify-content-center" style={{minHeight: '610px'}}>
+        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '610px' }}>
             <form style={{ width: "400px" }}>
                 <div className="form-group">
                     <label htmlFor="exampleInputEmail1">Email</label>
@@ -50,22 +74,22 @@ export const SignUpAdvisor = () => {
                 </div>
                 <div className="form-group">
                     <label htmlFor="exampleInputNif">NIF</label>
-                    <input type="nif" value={nif} onChange={handleNif} className="form-control" id="exampleInputNif1" aria-describedby="nifHelp" placeholder="Escribe el NIF de tu empresa" />
+                    <input type="text" value={nif} onChange={handleNif} className="form-control" id="exampleInputNif1" aria-describedby="nifHelp" placeholder="Escribe el NIF de tu empresa" />
                 </div>
                 <div className="form-group">
                     <label htmlFor="exampleInputAddress">Dirección</label>
-                    <input type="address" value={address} onChange={handleAddress} className="form-control" id="exampleInputAddress" aria-describedby="addressHelp" placeholder="Escribe la dirección de tu empresa" />
+                    <input type="text" value={address} onChange={handleAddress} className="form-control" id="exampleInputAddress" aria-describedby="addressHelp" placeholder="Escribe la dirección de tu empresa" />
                 </div>
                 <div className="form-group">
                     <label htmlFor="exampleInputCity">Ciudad</label>
-                    <input type="city" value={city} onChange={handleCity}  className="form-control" id="exampleInputCity" aria-describedby="cityHelp" placeholder="Escribe la ciudad de tu empresa" />
+                    <input type="text" value={city} onChange={handleCity} className="form-control" id="exampleInputCity" aria-describedby="cityHelp" placeholder="Escribe la ciudad de tu empresa" />
                 </div>
                 <div className="form-group">
                     <label htmlFor="exampleInputEmail1">País</label>
-                    <input type="country" value={country} onChange={handleCountry}  className="form-control" id="exampleInputcountry" aria-describedby="countryHelp" placeholder="Escribe el país de tu empresa" />
+                    <input type="text" value={country} onChange={handleCountry} className="form-control" id="exampleInputcountry" aria-describedby="countryHelp" placeholder="Escribe el país de tu empresa" />
                 </div>
                 <div className="mt-4">
-                    <button type="submit" onClick={signupAdvisor} className="btn btn-warning fw-bold text-dark">Sign up</button>
+                    <button type="button" onClick={signupAdvisor} className="btn btn-warning fw-bold text-dark">Sign up</button>
                 </div>
             </form >
         </div >

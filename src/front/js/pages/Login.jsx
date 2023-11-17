@@ -31,6 +31,8 @@ export const Login = () => {
             store.user = data.results;
             setAlert({ show: true, message: 'User logged' });
             console.log(data)
+            setEmail('');
+            setPassword('');
             navigate("/");
         } else {
             if (response.status == 404) {
@@ -44,7 +46,7 @@ export const Login = () => {
     }
 
     return (
-        <div className="d-flex align-items-center justify-content-center" style={{minHeight: '610px'}}>
+        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '610px' }}>
             <form style={{ width: "400px" }}>
                 <div className="form-group">
                     <label htmlFor="exampleInputEmail1">Email </label>
@@ -53,7 +55,7 @@ export const Login = () => {
                 </div>
                 <div className="form-group">
                     <label htmlFor="exampleInputPassword1">Contraseña</label>
-                    <input type="password"  value={password} onChange={handlePassword}
+                    <input type="password" value={password} onChange={handlePassword}
                         className="form-control" id="exampleInputPassword1" placeholder="Escribe tu contraseña" />
                 </div>
                 {/* 
@@ -75,12 +77,14 @@ export const Login = () => {
                     </div>
                 */}
                 <button type="button" onClick={login} className="btn btn-warning fw-bold text-dark mt-4 mb-4">Log in</button>
-            <div className="dropdown-divider"></div>
-            <p>¿No estás registrado?</p>
-            <button type="button" className="btn btn-primary btn-block">
-            <Link className="dropdown-item" to="/signup">Sign up</Link>
-            </button>
-            {/* <Link className="dropdown-item" to="/signup">New around here? Sign up</Link>
+                <div className="dropdown-divider"></div>
+                <p>¿No estás registrado?</p>
+                <Link className="dropdown-item" to="/signup">
+                    <button type="button" className="btn btn-primary btn-block">
+                        Sign up
+                    </button>
+                </Link>
+                {/* <Link className="dropdown-item" to="/signup">New around here? Sign up</Link>
             <Link className="dropdown-item" href="#">Forgot password?</Link> */}
             </form>
         </div>

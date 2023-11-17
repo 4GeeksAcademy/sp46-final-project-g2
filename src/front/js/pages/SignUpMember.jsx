@@ -13,24 +13,40 @@ export const SignUpMember = () => {
 
     const signupMember = async () => {
         const url = process.env.BACKEND_URL + '/api/members'; 
+        const dataToSend = {
+            "user": {},
+            "author": {},
+            "advisor": {}, 
+            "member": {
+                "name": name, 
+                "dni": dni, 
+                "address": address,
+                "awards": awards
+            }
+        } 
         const options = {
             method: 'POST',
-            body: JSON.stringify({ name, dni, address, awards }), // Tenemos que enviar aquí el token?
+            body: JSON.stringify( dataToSend ), 
             headers: {
                 'Content-Type': 'application/json'
             }
         };
-        try {
-            const response = await fetch(url, options);
-            if (response.ok) {
-                const data = await response.json();
-                console.log(data);
-            } else {
-                console.log('Error: ', response.status, response.statusText);
-            }
-        } catch (error) {
-            console.error('Error:', error);
+        console.log(dataToSend, options, url)
+        /*  try { */
+        const response = await fetch(url, options);
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            setName('');
+            setDni('');
+            setAddress('');
+            setAwards('');
+        } else {
+            console.log('Error: ', response.status, response.statusText);
         }
+  /*   } catch (error) {
+        console.error('Error:', error);
+    } */
     };
 
     return (
@@ -53,7 +69,7 @@ export const SignUpMember = () => {
                     <input type="text" value={awards} onChange={handleAwards} className="form-control" id="exampleInputawards" aria-describedby="awardsHelp" placeholder="Indica aquí si tienes premios a tu nombre" />
                 </div>
                 <div className="mt-4">
-                    <button type="submit" onClick={signupMember} className="btn btn-warning fw-bold text-dark">Inscribirse como Miembro</button>
+                    <button type="button" onClick={signupMember} className="btn btn-warning fw-bold text-dark">Inscribirse como Miembro</button>
                 </div>
             </form >
         </div >
