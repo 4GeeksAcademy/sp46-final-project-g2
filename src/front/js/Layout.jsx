@@ -29,6 +29,7 @@ import { PostList } from "./pages/PostList.jsx";
 import { Cover } from "./pages/Cover.jsx"; 
 import { SignUpAdvisor } from "./pages/SignUpAdvisor.jsx";
 import { SignUpMember } from "./pages/SignUpMember.jsx";
+import { PenApi } from "./pages/PenApi.jsx";
 
 
 // Create your first component
@@ -67,6 +68,7 @@ const Layout = () => {
                         <Route element={<CheckoutForm />} path="/checkout" />
                         <Route element={<Success />} path="?success=true"/>
                         <Route element={<Cancel />} path="?canceled=true"/>
+                        <Route element={<PenApi/>} path="pen-api"/>
                     </Routes>
                     <Footer />
                 </ScrollToTop>

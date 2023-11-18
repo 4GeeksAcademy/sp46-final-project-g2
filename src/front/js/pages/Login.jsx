@@ -28,6 +28,9 @@ export const Login = () => {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.token);
+            //localStorage.getItem('token'); -->> para obtener el token en localStorage
+            //localStorage.removeItem('token'), -->>>para eliminar el token
+            //localStorage.clear(); --->> para eliminar todo.
             store.user = data.results;
             setAlert({ show: true, message: 'User logged' });
             console.log(data)
