@@ -2,14 +2,12 @@ import React, { useState } from "react";
 
 export const SignUpMember = () => {
     const [name, setName] = useState('');
-    const [dni, setDni] = useState('');
+    const [nif, setNif] = useState('');
     const [address, setAddress] = useState('');
-    const [awards, setAwards] = useState('');
 
     const handleName = (event) => setName(event.target.value);
-    const handleDni = (event) => setDni(event.target.value);
+    const handleNif = (event) => setNif(event.target.value);
     const handleAddress = (event) => setAddress(event.target.value);
-    const handleAwards = (event) => setAwards(event.target.value);
 
     const signupMember = async () => {
         const url = process.env.BACKEND_URL + '/api/members'; 
@@ -19,9 +17,10 @@ export const SignUpMember = () => {
             "advisor": {}, 
             "member": {
                 "name": name, 
-                "dni": dni, 
+                "nif": nif, 
                 "address": address,
-                "awards": awards
+                "is_active": true,
+                "status": "Active"
             }
         } 
         const options = {
@@ -38,9 +37,8 @@ export const SignUpMember = () => {
             const data = await response.json();
             console.log(data);
             setName('');
-            setDni('');
+            setNif('');
             setAddress('');
-            setAwards('');
         } else {
             console.log('Error: ', response.status, response.statusText);
         }
@@ -57,16 +55,12 @@ export const SignUpMember = () => {
                     <input type="text" value={name} onChange={handleName} className="form-control" id="exampleInputName" aria-describedby="addressName" placeholder="Escribe aquí tu nombre y apellidos" />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="exampleInputNif">DNI</label>
-                    <input type="text" value={dni} onChange={handleDni} className="form-control" id="exampleInputNif1" aria-describedby="nifHelp" placeholder="Escribe aquí tu DNI" />
+                    <label htmlFor="exampleInputNif">NIF</label>
+                    <input type="text" value={nif} onChange={handleNif} className="form-control" id="exampleInputNif1" aria-describedby="nifHelp" placeholder="Escribe aquí tu NIF" />
                 </div>
                 <div className="form-group">
                     <label htmlFor="exampleInputAddress">Dirección</label>
                     <input type="text" value={address} onChange={handleAddress} className="form-control" id="exampleInputAddress" aria-describedby="addressHelp" placeholder="Escribe aquí tu dirección" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="exampleInputAwards">Premios</label>
-                    <input type="text" value={awards} onChange={handleAwards} className="form-control" id="exampleInputawards" aria-describedby="awardsHelp" placeholder="Indica aquí si tienes premios a tu nombre" />
                 </div>
                 <div className="mt-4">
                     <button type="button" onClick={signupMember} className="btn btn-warning fw-bold text-dark">Inscribirse como Miembro</button>
