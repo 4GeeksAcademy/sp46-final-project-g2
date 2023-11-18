@@ -29,6 +29,7 @@ import { PostList } from "./pages/PostList.jsx";
 import { Cover } from "./pages/Cover.jsx"; 
 import { SignUpAdvisor } from "./pages/SignUpAdvisor.jsx";
 import { SignUpMember } from "./pages/SignUpMember.jsx";
+import { BotonPagoTest } from "./component/BotonPagoTest.jsx";
 
 
 // Create your first component
@@ -64,6 +65,7 @@ const Layout = () => {
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} path="*"/>
+                        <Route element={<BotonPagoTest />} path="/boton-pago" />
                         <Route element={<CheckoutForm />} path="/checkout" />
                         <Route element={<Success />} path="?success=true"/>
                         <Route element={<Cancel />} path="?canceled=true"/>
