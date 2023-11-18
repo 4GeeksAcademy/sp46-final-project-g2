@@ -47,7 +47,7 @@ export const Navbar = () => {
 								Servicios
 							</a>
 
-							<ul class="dropdown-menu">
+							<ul className="dropdown-menu">
 
 								<li className="list-group-item-action">
 									<Link to="/pen-to-print">
@@ -81,8 +81,8 @@ export const Navbar = () => {
 
 				</div>
 			</div>
-
-			<div className="modal fade" id="navbarModal" tabindex="-1" aria-labelledby="navbarModalLabel" aria-hidden="true"  >
+			{/* hemos eliminado tabindex="-1" del div de debajo */}
+			<div className="modal fade" id="navbarModal" aria-labelledby="navbarModalLabel" aria-hidden="true"  >
 				<div className="modal-dialog" >
 					<div className="modal-content" >
 						<form className="w-100">

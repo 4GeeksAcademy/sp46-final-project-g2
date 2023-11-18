@@ -10,6 +10,9 @@ import { Home } from "./pages/Home.jsx";
 import { Footer } from "./component/Footer.jsx";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup.jsx"
+import { CheckoutForm } from "./pages/CheckoutForm.jsx"
+import { Cancel } from "./pages/Cancel.jsx";
+import { Success } from "./pages/Success.jsx";
 import { Form } from "./pages/Form.jsx";
 import { DisclaimerView } from "./pages/DisclimerView.jsx";
 import { PrivacyPolicyView } from "./pages/PrivacyPolicyView.jsx";
@@ -60,7 +63,10 @@ const Layout = () => {
                         <Route element={<DisclaimerView />} path="/disclaimer-view" />
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
-                        <Route element={<h1>Not found!</h1>} />
+                        <Route element={<h1>Not found!</h1>} path="*"/>
+                        <Route element={<CheckoutForm />} path="/checkout" />
+                        <Route element={<Success />} path="?success=true"/>
+                        <Route element={<Cancel />} path="?canceled=true"/>
                     </Routes>
                     <Footer />
                 </ScrollToTop>

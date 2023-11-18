@@ -20,7 +20,9 @@ export const SignUpAdvisor = () => {
     const handleCategoryChange = (selectedCategory) => setCategory(selectedCategory); 
 
     const signupAdvisor = async () => {
+
         const url = process.env.BACKEND_URL + '/api/signup';
+
         const dataToSend = {
             "user": {
                 "email": email,
@@ -40,6 +42,7 @@ export const SignUpAdvisor = () => {
         const options = {
             method: 'POST',
             body: JSON.stringify(dataToSend),
+
             headers: {
                 'Content-Type': 'application/json'
             }

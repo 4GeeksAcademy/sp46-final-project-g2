@@ -25,6 +25,7 @@ export const Signup = () => {
         const options = {
             method: 'POST',
             body: JSON.stringify(dataToSend),
+
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -44,6 +45,7 @@ export const Signup = () => {
         /*   } catch (error) {
               console.error('Error:', error);
           } */
+
     };
 
     return (
@@ -65,6 +67,7 @@ export const Signup = () => {
                         className="form-control" id="exampleInputAlias1" aria-describedby="aliasHelp" placeholder="Escribe tu nombre de usuario" />
                 </div>
                 <div className="mt-4" style={{ display: 'flex', justifyContent: 'space-between' }}>
+
                     <button type="button" onClick={signup} className="btn btn-warning fw-bold text-dark">Sign up</button>
                     <Link to="/signup-advisor" >
                         <button className="btn border border-0 font-weight-bold btn-lg">Soy una empresa </button>
