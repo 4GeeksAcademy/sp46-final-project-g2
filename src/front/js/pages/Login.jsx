@@ -31,6 +31,8 @@ export const Login = () => {
             store.user = data.results;
             setAlert({ show: true, message: 'User logged' });
             console.log(data)
+            setEmail('');
+            setPassword('');
             navigate("/");
         } else {
             if (response.status == 404) {
