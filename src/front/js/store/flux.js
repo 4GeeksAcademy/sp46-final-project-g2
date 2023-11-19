@@ -1,13 +1,19 @@
+import { loadStripe } from '@stripe/stripe-js';
+
 const getState = ({ getStore, getActions, setStore }) => {
   return {
     store: {
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwMDQxODQ5MSwianRpIjoiOGQ5MzA1NjctYzhiYi00ZjA1LWE5YzMtMWU5ZDhiYTY4MjAwIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6WzIsZmFsc2UsMiwxLG51bGxdLCJuYmYiOjE3MDA0MTg0OTEsImV4cCI6MTcwMDQxOTM5MX0.-7eV4hUdNqYxhdBMfpcptUvIEwcU_RvJg-rdIYKjBV4',
       user: {},
       author: {},
       member: {},
       advisor: {},
+      cart: {},
+      bill: {total_amount: 0},
+      stripePublicKey: '',
       message: null,
-      demo: [{title: "FIRST", background: "white",initial: "white"},
-             {title: "SECOND",background: "white",initial: "white"}]
+      demo: [{ title: "FIRST", background: "white", initial: "white" },
+      { title: "SECOND", background: "white", initial: "white" }]
     },
     actions: {
       // Use getActions to call a function within a fuction
@@ -37,6 +43,42 @@ const getState = ({ getStore, getActions, setStore }) => {
         });
         // Reset the global store
         setStore({ demo: demo });
+      },
+      getStripePublicKey: async () => {
+        const url = `${process.env.BACKEND_URL}/stripe-key`
+        const options = {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+        }
+        const response = await fetch(url, options);
+        if (response.ok) {
+          const data = await response.json();
+          setStore({ stripePublicKey: data.publicKey });
+          return true
+        } else {
+          console.log('Error:', response.status, response.statusText);
+          return false
+        }
+      },
+      processPayment: async () => {
+        const stripe = await loadStripe(getStore().stripePublicKey)
+        const url = `${process.env.BACKEND_URL}/payment`
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getStore().token}`
+          },
+          body: JSON.stringify({})
+        }
+        const response = await fetch(url, options);
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          stripe.redirectToCheckout({ sessionId: data.sessionId });
+        } else {
+          console.log('Error:', response.status, response.statusText);
+        }
       }
     }
   };
