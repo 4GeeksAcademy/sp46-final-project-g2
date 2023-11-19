@@ -3,10 +3,12 @@ import { BotonPago } from "./BotonPago.jsx";
 
 export const BotonPagoTest = () => {
   return (
-    <>
-      <h5>Carrito de compra</h5>
+    <div className="container text-center mt-5">
+      <h1>Carrito de compra</h1>
+      <p className="text-start">Tu Servicio</p>
+      <p className="text-start">Otro Servicio</p>
       <BotonPago />
-    </>
+    </div>
   )
 }
 

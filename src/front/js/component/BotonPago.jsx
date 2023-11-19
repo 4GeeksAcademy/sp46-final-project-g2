@@ -9,14 +9,14 @@ export const BotonPago = () => {
 
   useEffect(() => {
     async function setUpStripe() {
-      await actions.getStripePublicKey()
-      /* if (store.member.id) {
+      // if (store.member.id) {
         await actions.getStripePublicKey()
-      } else {
+      /* } else {
         navigate("/")
         alert("You are not a member")
       } */
     }
+    
     setUpStripe()
   }, [])
 

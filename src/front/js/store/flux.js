@@ -3,17 +3,13 @@ import { loadStripe } from '@stripe/stripe-js';
 const getState = ({ getStore, getActions, setStore }) => {
   return {
     store: {
-      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwMDI4MDI1MCwianRpIjoiZDEwMjQzZmMtNmNjYy00MTYzLTk1NWUtMzZkOGQ2NzEwNDNjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6WzIsZmFsc2UsMiwxLG51bGxdLCJuYmYiOjE3MDAyODAyNTAsImV4cCI6MTcwMDI4MTE1MH0.y4deIEBkbA2mcIVZkt8mGVpPmnnnRk8p1ZATLM94iHM',
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwMDQxODQ5MSwianRpIjoiOGQ5MzA1NjctYzhiYi00ZjA1LWE5YzMtMWU5ZDhiYTY4MjAwIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6WzIsZmFsc2UsMiwxLG51bGxdLCJuYmYiOjE3MDA0MTg0OTEsImV4cCI6MTcwMDQxOTM5MX0.-7eV4hUdNqYxhdBMfpcptUvIEwcU_RvJg-rdIYKjBV4',
       user: {},
       author: {},
       member: {},
       advisor: {},
       cart: {},
-      bill: {},
-      carrito: [
-        { price: 'price_1ODGc9BgaT0Vkd8Nljplbfxe', quantity: 2 },
-        { price: 'price_1ODedhBgaT0Vkd8NCpP0HvAG', quantity: 2 }
-      ],
+      bill: {total_amount: 0},
       stripePublicKey: '',
       message: null,
       demo: [{ title: "FIRST", background: "white", initial: "white" },
@@ -49,13 +45,10 @@ const getState = ({ getStore, getActions, setStore }) => {
         setStore({ demo: demo });
       },
       getStripePublicKey: async () => {
-        // const data = await axios.get(`${urlBack}/config`)
-        const url = `${process.env.BACKEND_URL}/config`
+        const url = `${process.env.BACKEND_URL}/stripe-key`
         const options = {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: {'Content-Type': 'application/json'}
         }
         const response = await fetch(url, options);
         if (response.ok) {
@@ -69,9 +62,6 @@ const getState = ({ getStore, getActions, setStore }) => {
       },
       processPayment: async () => {
         const stripe = await loadStripe(getStore().stripePublicKey)
-        // const data = await axios.post(`${urlBack}/payment`, {
-        //  carrito: getStore().carrito
-        // })
         const url = `${process.env.BACKEND_URL}/payment`
         const options = {
           method: 'POST',
@@ -79,14 +69,13 @@ const getState = ({ getStore, getActions, setStore }) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${getStore().token}`
           },
-          body: JSON.stringify({ carrito: getStore().carrito })
+          body: JSON.stringify({})
         }
         const response = await fetch(url, options);
         if (response.ok) {
           const data = await response.json();
-
           console.log(data);
-          console.log(stripe.redirectToCheckout({ sessionId: data.sessionId }));
+          stripe.redirectToCheckout({ sessionId: data.sessionId });
         } else {
           console.log('Error:', response.status, response.statusText);
         }
