@@ -10,7 +10,7 @@ import { BotonSeguir } from "./BotonSeguir.jsx";
 import { BotonEditar } from "./BotonEditar.jsx";
 
 
-export const ProfileCard = () => {
+export const ProfileCard = (props) => {
     const login = true;
 
     return (
@@ -19,16 +19,16 @@ export const ProfileCard = () => {
             <img src= {pic} className="card-img-top " alt="..." style={{ maxHeight: 'auto' }}/>
                 <div className="card-body">
                     <h5 className="card-title my-1">Albert Camus</h5>
-                    <h6 className="card-subtitle mb-2 text-body-secondary">Sysiphus</h6>
+                    <h6 className="card-subtitle mb-2 text-body-secondary">{props.alias}</h6>
                     {login? <BotonEditar/>: <BotonSeguir/> }
-                    <p className="card-text">Every act of rebellion expresses a nostalgia for innocence and an appeal to the essence of being</p>
+                    <p className="card-text">{props.quote}</p>
                 </div>
                 <ul className="list-group list-group-flush">
                     <li className="list-group-item">                        
-                        <p className="card-text text-body-secondary"><FontAwesomeIcon icon={faPenNib} /> 7 nov 1913 </p>
+                        <p className="card-text text-body-secondary"><FontAwesomeIcon icon={faPenNib} /> {props.birthday} </p>
                     </li>
                     <li className="list-group-item">
-                        <p className="card-text text-body-secondary"><FontAwesomeIcon icon={faLocationDot} /> Mondovi, Argelia Francesa </p>
+                        <p className="card-text text-body-secondary"><FontAwesomeIcon icon={faLocationDot} /> {props.city}, {props.country} </p>
                     </li>
                     <li className="list-group-item">
                         <p className="card-text text-body-secondary"><FontAwesomeIcon icon={faBookOpenReader} /> <span className="text-light"> 153 </span> seguidores </p>

@@ -9,13 +9,13 @@ import pic from "../../img/sisifo.jpg"
 
 export const PostCard = () => {
   return (
-    <div className="card mb-2 mx-1" style={{ height: '218pxpx' }}>
+    <div className="card mb-2 mx-1" style={{ height: '218px' }}>
       <div className="row g-0">
 
         <div className="col-5 col-md-4 col-lg-3 col-xl-3 col-xxl-2 ">
           <div className="">
             <Link to="/post-view">
-              <img height src={pic} className="img-fluid rounded-start" 
+              <img src={pic} className="img-fluid rounded-start" 
               alt="..." style={{ height: '217px', width: '155px' }} />
             </Link>
           </div>

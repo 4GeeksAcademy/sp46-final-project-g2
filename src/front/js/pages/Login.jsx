@@ -31,12 +31,13 @@ export const Login = () => {
             //localStorage.getItem('token'); -->> para obtener el token en localStorage
             //localStorage.removeItem('token'), -->>>para eliminar el token
             //localStorage.clear(); --->> para eliminar todo.
-            store.user = data.results;
+            actions.handleLogin(data);
             setAlert({ show: true, message: 'User logged' });
-            console.log(data)
+            //console.log(data)
             setEmail('');
             setPassword('');
-            navigate("/");
+            navigate("/author-profile");
+               
         } else {
             if (response.status == 404) {
                 const error = await response.text();

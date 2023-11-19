@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import Logo from "../../img/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { BotonIngresar } from "./BotonIngresar.jsx";
 import { BotonLogged } from "./BotonLogged.jsx";
+//import { Context } from "../store/appContext";
 
 
-export const Navbar = () => {
-	const login = false;
-
+export const Navbar = (props) => {
 	return (
 		<nav className="navbar navbar-expand-md navbar-dark py-2">
 			<div className="container-fluid">
@@ -76,7 +76,7 @@ export const Navbar = () => {
 						</button>
 					</div>
 					<div className="row g-0 ">						
-						{login?	<BotonLogged/>: <BotonIngresar/> }
+						<BotonIngresar/>
 					</div>
 
 				</div>

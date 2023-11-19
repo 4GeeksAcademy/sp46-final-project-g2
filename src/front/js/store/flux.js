@@ -5,9 +5,11 @@ const getState = ({ getStore, getActions, setStore }) => {
       author: {},
       member: {},
       advisor: {},
+      isLoged: false,
+      token: '',
       message: null,
-      demo: [{title: "FIRST", background: "white",initial: "white"},
-             {title: "SECOND",background: "white",initial: "white"}]
+      demo: [{ title: "FIRST", background: "white", initial: "white" },
+      { title: "SECOND", background: "white", initial: "white" }]
     },
     actions: {
       // Use getActions to call a function within a fuction
@@ -26,6 +28,24 @@ const getState = ({ getStore, getActions, setStore }) => {
           // console.log("Error loading message from backend", error)
         }
       },
+      handleLogin: (data) => {
+        console.log("recibimos:", data);
+        const activeToken= data.token; 
+        const activeUser = data.results; 
+        setStore({ user: activeUser.user, advisor:  activeUser.advisor, member: activeUser.member, 
+        author: activeUser.author, isLoged: true, token: activeToken
+        });
+        const store = getStore();
+        console.log("isLoged es", store.isLoged);
+      },
+      logout: () => {
+				const newObj = {};
+				setStore({ user: newObj, advisor:  newObj, member: newObj, 
+          author: newObj, isLoged: false, token: ''
+          });
+          const store = getStore();
+          console.log("sesión cerrada correctamente", store.loggedButton, store.isLoged);
+			},
       changeColor: (index, color) => {
         // Get the store
         const store = getStore();

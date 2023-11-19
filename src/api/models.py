@@ -30,7 +30,7 @@ class Users(db.Model):
 class Authors(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     alias = db.Column(db.String(120), unique = True, nullable = False)
-    birth_date = db.Column(db.DateTime)
+    birth_date = db.Column(db.Date)
     city = db.Column(db.String(120))
     country = db.Column(db.String(120))
     quote = db.Column(db.String(120))
@@ -299,7 +299,7 @@ class Posts(db.Model):
     title = db.Column(db.String(50), nullable = False)
     abstract = db.Column(db.String(80))
     tag = db.Column(db.String(50))
-    text = db.Column(db.String(50), nullable = False)
+    text = db.Column(db.String(3000), nullable = False)
     created_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
     is_published = db.Column(db.Boolean(), unique = False, nullable = False)
