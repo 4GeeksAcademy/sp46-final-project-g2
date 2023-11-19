@@ -8,13 +8,24 @@ db = SQLAlchemy()
 # base = declarative_base()
 
 
+class UserImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(255), unique=True, nullable=False)
+
+    def __repr__(self):
+        return '<Image %r>' % self.id
+
+    def serialize(self):
+        return {"url": self.url,
+                "id": self.id}
+
+
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     email = db.Column(db.String(120), unique = True, nullable = False)
     password = db.Column(db.String(10), unique = False, nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     is_admin = db.Column(db.Boolean, unique = False, nullable = False)
-
     
     def __repr__(self):
         return f'<Users {self.email}>'

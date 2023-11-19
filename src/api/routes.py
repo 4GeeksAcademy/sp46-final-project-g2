@@ -9,6 +9,8 @@ from datetime import datetime
 from sqlalchemy import func
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
 import stripe
+import cloudinary.uploader
+import cloudinary
 
 
 api = Blueprint('api', __name__)
@@ -21,6 +23,37 @@ api = Blueprint('api', __name__)
     identity[3] es member.id 
     identity[4] es advisor.id
 """
+
+
+@api.route('/upload', methods=['POST'])
+def handle_upload():
+    # Configuración de Cloudinary con mi cuenta (Elisa)
+    cloudinary.config(cloud_name = "dmepjpbta", 
+                      api_key = "637966295945941", 
+                      api_secret = "***************************")
+    if 'image' not in request.files:
+        response_body = {"message": "No image to upload"}
+        return response_body, 400
+    uploaded_file = request.files['image']
+    try:
+        # Upload de la imagen a Cloudinary
+        result = cloudinary.uploader.upload(uploaded_file,
+                                            public_id=f'sample_folder/profile/my-image-name',
+                                            crop='limit',
+                                            width=450,
+                                            height=450,
+                                            eager=[{'width': 200, 'height': 200, 'crop': 'thumb', 'gravity': 'face', 'radius': 100}],
+                                            tags=['profile_picture'])
+
+        # Guardar la URL de la imagen en la base de datos
+        new_image = UserImage(url=result['secure_url'])
+        db.session.add(new_image)
+        db.session.commit()
+        response_body = {"url": result['secure_url'], "id": new_image.id}
+        return response_body, 200
+    except Exception as e:
+        response_body = {"message": str(e)}
+        return response_body, 500
 
 
 @api.route('/test', methods=["POST"])  # Mensajes en JSON?

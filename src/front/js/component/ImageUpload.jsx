@@ -8,26 +8,16 @@ export const ImageUpload = () => {
   };
 
   const handleUpload = () => {
-    // Aquí puedes realizar alguna acción con el archivo seleccionado, como subirlo a un servidor.
-    // Por ejemplo, si necesitas enviarlo a un servidor, puedes usar fetch para realizar una solicitud POST.
     if (selectedFile) {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      // Luego puedes usar fetch para enviar el formData al servidor
-      // Ejemplo usando fetch:
-      /*
-      fetch('URL_DEL_SERVIDOR', {
-        method: 'POST',
-        body: formData,
-      })
-      .then(response => {
-        // Manejo de la respuesta del servidor
-      })
-      .catch(error => {
-        // Manejo de errores
-      });
-      */
-    }
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        fetch('https://upgraded-yodel-4xpp46rvx643q9r4-3001.app.github.dev/upload', 
+              {method: 'POST',
+               body: formData})
+        .then(response => response.json())
+        .then(data => {console.log('URL de la imagen subida:', data.url)})
+        .catch(error => {console.error('Error al subir la imagen:', error)})
+      }
   };
 
   return (
