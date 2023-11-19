@@ -7,17 +7,29 @@ export const ImageUpload = () => {
     setSelectedFile(event.target.files[0]);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (selectedFile) {
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        fetch('https://upgraded-yodel-4xpp46rvx643q9r4-3001.app.github.dev/upload', 
-              {method: 'POST',
-               body: formData})
-        .then(response => response.json())
-        .then(data => {console.log('URL de la imagen subida:', data.url)})
-        .catch(error => {console.error('Error al subir la imagen:', error)})
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      const url = process.env.BACKEND_URL + '/upload';
+      const options = {
+        method: 'POST',
+        body: formData,
+        headers: { 'Content-Type': 'application/json' }
+      };
+      try {
+        const response = await fetch(url, options);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('URL de la imagen subida:', data.url);
+        } else {
+          const error = await response.json();
+          console.error('Error al subir la imagen:', error.message);
+        }
+      } catch (error) {
+        console.error('Error al subir la imagen:', error);
       }
+    }
   };
 
   return (
