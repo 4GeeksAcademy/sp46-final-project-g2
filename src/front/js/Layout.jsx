@@ -26,6 +26,7 @@ import { PostList } from "./pages/PostList.jsx";
 import { Cover } from "./pages/Cover.jsx"; 
 import { SignUpAdvisor } from "./pages/SignUpAdvisor.jsx";
 import { SignUpMember } from "./pages/SignUpMember.jsx";
+import { PenApi } from "./pages/PenApi.jsx";
 import { PaymentSuccess } from "./pages/PaymentSuccess.jsx";
 import { PaymentCanceled } from "./pages/PaymentCanceled.jsx";
 import { BotonPagoTest } from "./component/BotonPagoTest.jsx";
@@ -64,6 +65,10 @@ const Layout = () => {
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} path="*"/>
+                        <Route element={<CheckoutForm />} path="/checkout" />
+                        <Route element={<Success />} path="?success=true"/>
+                        <Route element={<Cancel />} path="?canceled=true"/>
+                        <Route element={<PenApi/>} path="pen-api"/>
                         <Route element={<PaymentSuccess />} path="/payment-success"/>
                         <Route element={<PaymentCanceled />} path="/payment-canceled"/>
                         <Route element={<BotonPagoTest />} path="/boton-pago" />
