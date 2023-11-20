@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
+from api.models import db, UserImage, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
 from sqlalchemy import func
@@ -11,10 +11,11 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 import stripe
 import cloudinary.uploader
 import cloudinary
+from flask_cors import CORS
 
 
 api = Blueprint('api', __name__)
-
+CORS(api)
 
 """ 
     identity[0] es user.id

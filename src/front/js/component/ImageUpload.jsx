@@ -17,18 +17,16 @@ export const ImageUpload = () => {
         body: formData,
         headers: { 'Content-Type': 'application/json' }
       };
-      try {
-        const response = await fetch(url, options);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('URL de la imagen subida:', data.url);
-        } else {
-          const error = await response.json();
-          console.error('Error al subir la imagen:', error.message);
-        }
-      } catch (error) {
-        console.error('Error al subir la imagen:', error);
+
+      const response = await fetch(url, options);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('URL de la imagen subida:', data.url);
+      } else {
+        const error = await response.json();
+        console.error('Error al subir la imagen:', error.message);
       }
+      console.error('Error al subir la imagen:', error);
     }
   };
 
@@ -41,7 +39,6 @@ export const ImageUpload = () => {
       <button className="btn btn-primary" onClick={handleUpload}>
         Subir
       </button>
-      {/* Puedes agregar más elementos para mostrar la imagen seleccionada si lo deseas */}
       {selectedFile && (
         <div className="mt-3">
           <h4>Imagen Seleccionada:</h4>
