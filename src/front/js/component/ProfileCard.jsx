@@ -48,7 +48,7 @@ export const ProfileCard = (props) => {
         <div className="card my-1 mx-1"  >
             <img src={pic} className="card-img-top " alt="..." style={{ maxHeight: 'auto' }} />
             <div className="card-body">
-                <h5 className="card-title my-1">Albert Camus</h5>
+                <h5 className="card-title my-1">{newAlias}</h5>
                 {editOn ?
                     <div className="input-group input-group-sm mb-3"><input type="text" className="form-control" placeholder="Alias"
                         aria-label="Alias" aria-describedby="basic-addon1" 

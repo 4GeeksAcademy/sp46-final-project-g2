@@ -1,8 +1,8 @@
 import React, {useContext} from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
-//import pic from "../../img/edgar.png"
-import pic from "../../img/camus.jpeg"
+import pic from "../../img/edgar.png"
+//import pic from "../../img/camus.jpeg"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";

@@ -11,10 +11,13 @@ export const AuthorProfile = () => {
 
   const { store, actions } = useContext(Context);
 
- 
+  useEffect(() => {
+    actions.getPostsByAuthors();
+}, []);
 
 
   const elemento = store.selectedAuthor;
+  const publicacion = store.postsByAuthor;
 
   if (store.isLogged) {
     return (
@@ -36,15 +39,10 @@ export const AuthorProfile = () => {
               <BioCard about={store.author.about_me} /> 
               :
               <BioCard about={elemento[0].about_me} />
-            }             
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
+            }
+            {store.postsByAuthor.map((post) =>             
+            <PostCard titulo= {post.title} tags={post.tag} texto={post.texto}/>
+            )}
           </div>
         </div>
       </div>
@@ -61,15 +59,10 @@ export const AuthorProfile = () => {
           </div>
           <div className="col-12 col-md-9">
             <BioCard about={elemento[0].about_me} />
-
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
-            <PostCard />
+            {store.postsByAuthor.map((post) =>             
+            <PostCard titulo= {post.title} tags={post.tag} texto={post.texto}/>
+            )}
+            
           </div>
         </div>
       </div>
