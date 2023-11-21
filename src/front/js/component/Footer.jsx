@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,20 +17,18 @@ export const Footer = () => {
         </div>
         <div className="col mb-3">
         </div>
+         <div className="col mb-3">
+          <Link to="/contact-us" className="nav-link p-0 text-light">
+          <h4 style={{ textDecoration: "underline" }}>Contacto</h4>
+          </Link>
+        </div>
         <div className="col mb-3">
           <h4 style={{ textDecoration: "underline" }}>Nuestro Equipo</h4>
           <ul className="nav flex-column">
             <li className="nav-item mb-2"><a href="https://github.com/hchocobar" target="_blank" className="nav-link p-0 text-light">Héctor Chocobar</a></li>
+            <li className="nav-item mb-2"><a href="https://github.com/ElisaGDR" target="_blank" className="nav-link p-0 text-light">Elisa García</a></li>
             <li className="nav-item mb-2"><a href="https://github.com/carlosp-11" target="_blank" className="nav-link p-0 text-light">Carlos Ponce</a></li>
             <li className="nav-item mb-2"><a href="https://github.com/GsX26" target="_blank" className="nav-link p-0 text-light">Gonzalo Suárez</a></li>
-            <li className="nav-item mb-2"><a href="https://github.com/ElisaGDR" target="_blank" className="nav-link p-0 text-light">Elisa García</a></li>
-          </ul>
-        </div>
-        <div className="col mb-3">
-          <h4 style={{ textDecoration: "underline" }}>Contacto</h4>
-          <ul className="nav flex-column">
-            <li className="nav-item mb-2">Mail: info@literaryink.com</li>
-            <li className="nav-item mb-2">Teléfono: 632 14 15 88</li>
           </ul>
         </div>
         <div className="col mb-3">

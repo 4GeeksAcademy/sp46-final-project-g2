@@ -26,10 +26,12 @@ import { PostList } from "./pages/PostList.jsx";
 import { Cover } from "./pages/Cover.jsx"; 
 import { SignUpAdvisor } from "./pages/SignUpAdvisor.jsx";
 import { SignUpMember } from "./pages/SignUpMember.jsx";
+import { ContactUs } from "./component/ContactUs.jsx";
 import { PenApi } from "./pages/PenApi.jsx";
 import { PaymentSuccess } from "./pages/PaymentSuccess.jsx";
 import { PaymentCanceled } from "./pages/PaymentCanceled.jsx";
 import { BotonPagoTest } from "./component/BotonPagoTest.jsx";
+
 
 
 // Create your first component
@@ -65,6 +67,7 @@ const Layout = () => {
                         <Route element={<Reviews />} path="/reviews" />
                         <Route element={<ShoppingCart />} path="/shopping-cart" />
                         <Route element={<DisclaimerView />} path="/disclaimer-view" />
+                        <Route element={<ContactUs />} path="/contact-us" />
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} path="*"/>
