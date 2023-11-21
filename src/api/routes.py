@@ -924,11 +924,11 @@ def handle_billing_issues():
             return response_body, 200 
     response_body = {'message': "Restricted access"}
     return response_body, 401
-
+"""
 
 @api.route('/posts', methods=['GET']) 
 def handle_get_posts():
-    posts = db.session.execute(db.select(Posts).order_by(Posts.id)).scalars()
+    posts = db.session.execute(db.select(Posts)).scalars()
     posts_list = [post.serialize() for post in posts]
     response_body = {'message': 'Posts List', 
                      'results': posts_list}
@@ -961,7 +961,7 @@ def handle_posts():
 
 @api.route('/posts/<int:post_id>', methods=['GET'])
 def handle_get_post_id(post_id):
-    post = db.one_or_404(db.select(Posts).filter_by(post_id=member_id), 
+    post = db.one_or_404(db.select(Posts).filter_by(id=post_id), 
                          description=f"Post not found , 404.")
     response_body = {'message': 'Post', 
                      'results': post.serialize()}
@@ -997,9 +997,9 @@ def handle_post_id(post_id):
     return response_body, 401
 
 
-@api.route('/users/<int:user_id>/posts', methods=['GET'])
-def handle_get_post_by_user_id(user_id):   
-        posts = db.session.execute(db.select(Posts).filter_by(user_id=user_id)).scalars()
+@api.route('/authors/<int:author_id>/posts', methods=['GET'])
+def handle_get_post_by_user_id(author_id):   
+        posts = db.session.execute(db.select(Posts).filter_by(author_id=author_id)).scalars()
         posts_list = [post.serialize() for post in posts]
         response_body = {'message': 'Posts List', 
                          'results': posts_list}
@@ -1017,7 +1017,7 @@ def handle_post_by_user_id(user_id):
     response_body = {'message': "Restricted access"}
     return response_body, 401
 
-
+"""
 @api.route('/media', methods=['GET']) 
 def handle_get_media():
         media = db.session.execute(db.select(Media).order_by(Media.id)).scalars()
