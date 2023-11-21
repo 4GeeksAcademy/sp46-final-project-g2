@@ -209,7 +209,8 @@ const getState = ({ getStore, getActions, setStore }) => {
           console.log(data)
         } else {
           console.log('error', response.status, response.text)
-
+        }
+      },
       getStripePublicKey: async () => {
         const url = `${process.env.BACKEND_URL}/stripe-key`
         const options = {
