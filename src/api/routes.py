@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, UserImage, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
+from api.models import db, Users, Authors, Members, Advisors, Followers, CategoryServices, Services, ShoppingCarts, ShoppingCartItems, Bills, BillItems, BillingIssues, Posts, Media, Likes, Comments, ReportPosts
 from api.utils import generate_sitemap, APIException
 from datetime import datetime
 from sqlalchemy import func
@@ -11,11 +11,15 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 import stripe
 import cloudinary.uploader
 import cloudinary
-from flask_cors import CORS
 
 
 api = Blueprint('api', __name__)
-CORS(api)
+
+cloudinary.config(
+  cloud_name = os.getenv("CLOUD_NAME"),
+  api_key = os.getenv("API_KEY"),
+  api_secret = os.getenv("API_SECRET")
+)
 
 """ 
     identity[0] es user.id
@@ -25,38 +29,25 @@ CORS(api)
     identity[4] es advisor.id
 """
 
-
 @api.route('/upload', methods=['POST'])
 def handle_upload():
-    # Configuración de Cloudinary con mi cuenta (Elisa)
-    cloudinary.config(cloud_name = "dmepjpbta", 
-                      api_key = "637966295945941", 
-                      api_secret = "***************************")
     if 'image' not in request.files:
-        response_body = {"message": "No image to upload"}
-        return response_body, 400
-    uploaded_file = request.files['image']
-    try:
-        # Upload de la imagen a Cloudinary
-        result = cloudinary.uploader.upload(uploaded_file,
-                                            public_id=f'sample_folder/profile/my-image-name',
-                                            crop='limit',
-                                            width=450,
-                                            height=450,
-                                            eager=[{'width': 200, 'height': 200, 'crop': 'thumb', 'gravity': 'face', 'radius': 100}],
-                                            tags=['profile_picture'])
-
-        # Guardar la URL de la imagen en la base de datos
-        new_image = UserImage(url=result['secure_url'])
-        db.session.add(new_image)
-        db.session.commit()
-        response_body = {"url": result['secure_url'], "id": new_image.id}
-        return response_body, 200
-    except Exception as e:
-        response_body = {"message": str(e)}
-        return response_body, 500
-
-
+        raise APIException("No image to upload")
+    result = cloudinary.uploader.upload(request.files['image'],
+                                        public_id=f'example/my-image-name',
+                                        crop='limit',
+                                        width=450,
+                                        height=450,
+                                        eager=[{'width': 200, 'height': 200,
+                                                'crop': 'thumb', 'gravity': 'face',
+                                                'radius': 100}],
+                                        tags=['profile_picture'])
+    print(result)
+    print(result['secure_url'])
+    response_body = {'results': result['url']}
+    return response_body, 200
+    
+   
 @api.route('/test', methods=["POST"])  # Mensajes en JSON?
 def handle_test():
     data = request.get_json()

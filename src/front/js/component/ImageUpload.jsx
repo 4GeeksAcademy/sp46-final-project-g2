@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { Context } from '/workspaces/sp46-final-project-g2/src/front/js/store/appContext.js'
 
 export const ImageUpload = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const { store, actions } = useContext(Context);
+  const [files, setFiles] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+
+  const uploadFile = (e) => {
+    e.preventDefault();
+    if (files) {
+      actions.uploadFile(files[0]);
+    }
   };
 
-  const handleUpload = async () => {
-    if (selectedFile) {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      const url = process.env.BACKEND_URL + '/upload';
-      const options = {
-        method: 'POST',
-        body: formData,
-        headers: { 'Content-Type': 'application/json' }
+  const handleFileChange = (e) => {
+    setFiles(e.target.files);
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewImage(e.target.result);
       };
-
-      const response = await fetch(url, options);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('URL de la imagen subida:', data.url);
-      } else {
-        const error = await response.json();
-        console.error('Error al subir la imagen:', error.message);
-      }
-      console.error('Error al subir la imagen:', error);
+      reader.readAsDataURL(e.target.files[0]);
     }
+  };
+  const handleReset = () => {
+    setFiles(null);
+    setPreviewImage(null);
+    window.location.reload(); 
   };
 
   return (
@@ -36,15 +36,18 @@ export const ImageUpload = () => {
       <div className="mb-3">
         <input type="file" className="form-control" onChange={handleFileChange} />
       </div>
-      <button className="btn btn-primary" onClick={handleUpload}>
+      <button className="btn btn-primary" onClick={uploadFile}>
         Subir
       </button>
-      {selectedFile && (
-        <div className="mt-3">
-          <h4>Imagen Seleccionada:</h4>
-          <img src={URL.createObjectURL(selectedFile)} alt="Imagen Seleccionada" style={{ maxWidth: '300px' }} />
-        </div>
-      )}
+      <button onClick={handleReset} className="btn btn-primary" type="reset">Cancelar</button>
+      <div className="mt-3">
+        {previewImage && (
+          <div>
+            <h4>Imagen Seleccionada:</h4>
+            <img className="img-thumbnail" src={previewImage} alt="Imagen Seleccionada" />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
