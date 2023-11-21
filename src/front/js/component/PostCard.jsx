@@ -10,7 +10,6 @@ import { Context } from "../store/appContext";
 
 export const PostCard = (props) => {
   const {store, actions} = useContext(Context); 
-
   const handleIdpost = () => {
     actions.setPostIdNumber(props.idNumber)
     actions.selectPost();
@@ -18,7 +17,8 @@ export const PostCard = (props) => {
   }
 
   useEffect(() => {
-    actions.getPosts();
+    store.postsList;
+   // actions.getPosts();
 }, []);
 
   return (

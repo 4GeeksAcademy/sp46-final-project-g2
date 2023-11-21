@@ -13,27 +13,20 @@ import { Context } from "../store/appContext.js";
 
 export const ProfileCard = (props) => {
     const { store, actions } = useContext(Context);
-    
+    const login = store.isLogged; 
     
     useEffect(() => {
         store.authorIdNumber;
         store.isLogged
       }, []);
-
-
-
-
-    const login = store.isLogged;    
    
     const [editOn, setEditOn] = useState(false);
     const [newAlias, setNewAlias] = useState(props.alias);
     const [newCity, setnewCity] = useState(props.city);
     const [newBirthDate, setNewBirthDate] = useState(props.birthday);
     const localDate = new Date(newBirthDate).toLocaleDateString();
-    //props.birthday
     const [newCountry, setNewCountry] = useState(props.country);
-    const [newQuote, setNewQuote] = useState(props.quote);
-    
+    const [newQuote, setNewQuote] = useState(props.quote);    
     
     const handleEdit = () => {
         if (editOn) {
@@ -56,7 +49,9 @@ export const ProfileCard = (props) => {
                     </div> :
                     <h6 className="card-subtitle mb-2 text-body-secondary">{newAlias}</h6>
                 }
-                {login && (store.authorIdNumber == store.author.id || store.authorIdNumber==0)? <span onClick={handleEdit}> {<BotonEditar /> }</span>: <span/> } 
+                {(store.authorIdNumber == store.author.id) || (login && store.authorIdNumber==0)? 
+                <span onClick={handleEdit}> {<BotonEditar /> }</span>: 
+                login? <span> {<BotonSeguir />} </span>: <span/> } 
                 {editOn ?
                     <div className="input-group input-group-sm mb-3"><input type="text" className="form-control" placeholder="Cita"
                         aria-label="Cita" aria-describedby="basic-addon1" 

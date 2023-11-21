@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 
 export const BotonLogged = () => {
+    
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
     const handleLogout = () => {
