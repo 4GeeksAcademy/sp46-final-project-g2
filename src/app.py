@@ -81,23 +81,23 @@ def stripe_payment():
     if not identity[3]:
         response_body['message'] = "Restricted access"
         return response_body, 401
-    try:
-        # Genero el listado de items
-        bill = db.session.execute(db.select(Bills).where(Bills.member_id == identity[3],
-                                                         Bills.status == 'Pending')).scalar()
-        bill_items = db.session.execute(db.select(BillItems).where(BillItems.bill_id == bill.id)).scalars()
-        bill_items_list = [item.serialize() for item in bill_items]
-        line_items = [{'price': item['stripe_price'], 'quantity': item['quantity']} for item in bill_items_list]
-        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-        session = stripe.checkout.Session.create(line_items=line_items,
-                                                 mode='payment',
-                                                 success_url=front_url + '/payment-success',
-                                                 cancel_url=front_url + '/payment-canceled')
-        response_body = {'sessionId': session['id']}
-        return response_body, 200
-    except Exception as e:
-        response_body = {'message': str(e)}
-        return response_body, 403
+    # try:
+    # Genero el listado de items
+    bill = db.session.execute(db.select(Bills).where(Bills.member_id == identity[3],
+                                                     Bills.status == 'Pending')).scalar()
+    bill_items = db.session.execute(db.select(BillItems).where(BillItems.bill_id == bill.id)).scalars()
+    bill_items_list = [item.serialize() for item in bill_items]
+    line_items = [{'price': item['stripe_price'], 'quantity': item['quantity']} for item in bill_items_list]
+    # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+    session = stripe.checkout.Session.create(line_items=line_items,
+                                             mode='payment',
+                                             success_url=front_url + '/payment-success',
+                                             cancel_url=front_url + '/payment-canceled')
+    response_body = {'sessionId': session['id']}
+    return response_body, 200
+    # except Exception as e:
+       # response_body = {'message': str(e)}
+       # return response_body, 403
     # return jsonify(clientSecret=session.client_secret)
 
 

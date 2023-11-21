@@ -210,11 +210,12 @@ const getState = ({ getStore, getActions, setStore }) => {
       processPayment: async () => {
         const stripe = await loadStripe(getStore().stripePublicKey)
         const url = `${process.env.BACKEND_URL}/payment`
+        const token = localStorage.getItem("token");
         const options = {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getStore().token}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({})
         }
