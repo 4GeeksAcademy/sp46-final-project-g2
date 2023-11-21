@@ -62,7 +62,7 @@ export const AuthorProfile = () => {
               :
               <div>
                 {store.postsByAuthor.map((post) =>
-                  <PostCard titulo={post.title} tags={post.tag} texto={post.texto} />
+                   <PostCard titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
                 )}
               </div>
             }
@@ -71,43 +71,49 @@ export const AuthorProfile = () => {
       </div>
     );
   } else {
-    return (
-      <div className="container mb-5">
-        <div className="row g-0 py-3">
-          <div className="col-12 col-md-3">
-            <ProfileCard alias={elemento[0].alias} birthday={elemento[0].birth_date}
-              city={elemento[0].city} country={elemento[0].country}
-              quote={elemento[0].quote} />
+    if (store.authorIdNumber != 0) {
+      return (
+        <div className="container mb-5">
+          <div className="row g-0 py-3">
+            <div className="col-12 col-md-3">
+              <ProfileCard alias={elemento[0].alias} birthday={elemento[0].birth_date}
+                city={elemento[0].city} country={elemento[0].country}
+                quote={elemento[0].quote} />
 
-          </div>
-          <div className="col-12 col-md-9">
-            <BioCard about={elemento[0].about_me} />
+            </div>
+            <div className="col-12 col-md-9">
+              <BioCard about={elemento[0].about_me} />
 
-            {timing ?
-              <div className="conteiner text-center " style={{ minHeight: "620px" }}>
-                <div className="mt-5 pt-5">
-                  <div className=" spinner-grow text-warning mt-5 mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                    <span className="visually-hidden">Loading...</span>
+              {timing ?
+                <div className="conteiner text-center " style={{ minHeight: "620px" }}>
+                  <div className="mt-5 pt-5">
+                    <div className=" spinner-grow text-warning mt-5 mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              :
-              <div>
-                {store.postsByAuthor.map((post) =>
-                  <PostCard titulo={post.title} tags={post.tag} texto={post.texto} />
-                )}
-              </div>
-            }
+                :
+                <div>
+                  {store.postsByAuthor.map((post) =>
+                     <PostCard titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
+                  )}
+                </div>
+              }
 
+            </div>
           </div>
         </div>
-      </div>
-    )
+      )
+    } else {
+      return (
+        <div> {navigate('/')}  </div>
+      )
+    }
   }
 };

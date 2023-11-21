@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { BotonEditar } from "./BotonEditar.jsx";
+import { BotonCancelar } from "./BotonCancelar.jsx";
 import { Context } from "../store/appContext.js";
 
 
@@ -8,15 +9,23 @@ export const BioCard = (props) => {
     const login = store.isLogged;
     
     const [editOn, setEditOn] = useState(false);
+    const [cancelOn, setCancelOn] = useState(false);
     const [newAboutMe, setNewAboutMe] = useState(props.about);
     
     const handleEdit = () => {
         if (editOn) {
             actions.editAboutMe(newAboutMe)
-            setEditOn(false);            
+            setCancelOn(false);
+            setEditOn(false);
         } else {
             setEditOn(true);
-        }        
+            setCancelOn(true);
+        }
+    }
+
+    const handleCancelar = () => {
+        setEditOn(false);
+        setCancelOn(false);
     }
 
     return (
@@ -27,12 +36,19 @@ export const BioCard = (props) => {
                     <div className="input-group input-group-sm mb-3">
                         <textarea type="text" className="form-control" placeholder="Acerca de mí..." 
                         aria-label="Acerca de mí" aria-describedby="basic-addon1" 
-                        onChange={(e) => { setNewAboutMe(e.target.value) }} defaultValue={newAboutMe} />
+                        onChange={(e) => { setNewAboutMe(e.target.value) }} defaultValue={newAboutMe} 
+                        />
                     </div> :
                     <p className="card-text py-4 px-4">{newAboutMe}</p>
                 }
             </div>
-            <div className="px-4" > {login && (store.authorIdNumber == store.author.id || store.authorIdNumber == 0)? <span onClick={handleEdit}> {<BotonEditar /> }</span>: <span/>} </div>
+            <div className="px-4" > {login && (store.authorIdNumber == store.author.id || store.authorIdNumber == 0)? 
+                <div> 
+                    <span onClick={handleEdit}> {<BotonEditar /> } </span> 
+                    {cancelOn? <span onClick={handleCancelar}> {<BotonCancelar /> } </span>: <span/>}
+                </div>: 
+                <span/>} 
+            </div>
         </div>
     );
 };

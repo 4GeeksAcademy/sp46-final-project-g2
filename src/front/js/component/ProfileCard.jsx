@@ -1,5 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 import pic from "../../img/camus.jpeg"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenNib } from "@fortawesome/free-solid-svg-icons";
@@ -8,12 +9,15 @@ import { faBookOpenReader } from "@fortawesome/free-solid-svg-icons";
 import { faAlignJustify } from "@fortawesome/free-solid-svg-icons";
 import { BotonSeguir } from "./BotonSeguir.jsx";
 import { BotonEditar } from "./BotonEditar.jsx";
+import { BotonCancelar} from "./BotonCancelar.jsx";
 import { Context } from "../store/appContext.js";
 
 
 export const ProfileCard = (props) => {
+    const navigate = useNavigate();
     const { store, actions } = useContext(Context);
     const login = store.isLogged; 
+   
     
     useEffect(() => {
         store.authorIdNumber;
@@ -21,6 +25,7 @@ export const ProfileCard = (props) => {
       }, []);
    
     const [editOn, setEditOn] = useState(false);
+    const [cancelOn, setCancelOn] = useState(false);
     const [newAlias, setNewAlias] = useState(props.alias);
     const [newCity, setnewCity] = useState(props.city);
     const [newBirthDate, setNewBirthDate] = useState(props.birthday);
@@ -31,12 +36,19 @@ export const ProfileCard = (props) => {
     const handleEdit = () => {
         if (editOn) {
             actions.editProfile(newAlias,newBirthDate,newCity,newCountry,newQuote)
+            setCancelOn(false);
             setEditOn(false);
         } else {
             setEditOn(true);
+            setCancelOn(true);
         }
     }
 
+    const handleCancelar = () => {
+        setEditOn(false);
+        setCancelOn(false);
+    }
+   
     return (
         <div className="card my-1 mx-1"  >
             <img src={pic} className="card-img-top " alt="..." style={{ maxHeight: 'auto' }} />
@@ -50,8 +62,14 @@ export const ProfileCard = (props) => {
                     <h6 className="card-subtitle mb-2 text-body-secondary">{newAlias}</h6>
                 }
                 {(store.authorIdNumber == store.author.id) || (login && store.authorIdNumber==0)? 
-                <span onClick={handleEdit}> {<BotonEditar /> }</span>: 
-                login? <span> {<BotonSeguir />} </span>: <span/> } 
+                    <div> <span onClick={handleEdit}> {<BotonEditar /> } </span>  
+                        {cancelOn? 
+                            <span onClick={handleCancelar}> {<BotonCancelar />} </span> : 
+                        <span/> 
+                        }
+                    </div> : 
+                    login? <span> {<BotonSeguir />} </span>: <span/> 
+                } 
                 {editOn ?
                     <div className="input-group input-group-sm mb-3"><input type="text" className="form-control" placeholder="Cita"
                         aria-label="Cita" aria-describedby="basic-addon1" 
@@ -97,4 +115,6 @@ export const ProfileCard = (props) => {
             </ul>
         </div>
     );
+   
+    
 };

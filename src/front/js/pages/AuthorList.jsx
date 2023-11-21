@@ -21,7 +21,7 @@ export const AuthorList = () => {
             <div className="pt-5 border-top" >
 
                 {timing ?
-                    <div className="conteiner text-center " style={{ minHeight: "620px" }}>
+                    <div className="conteiner text-center " style={{ minHeight: "790px" }}>
                         <div className="mt-5 pt-5">
                             <div className="mt-5 pt-5">
                                 <div className="pt-5">

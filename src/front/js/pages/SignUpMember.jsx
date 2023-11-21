@@ -48,7 +48,7 @@ export const SignUpMember = () => {
     };
 
     return (
-        <div className="d-flex align-items-center justify-content-center" style={{minHeight: '610px'}}>
+        <div className="d-flex align-items-center justify-content-center" style={{minHeight: '790px'}}>
             <form style={{ width: "400px" }}>
                 <div className="form-group">
                     <label htmlFor="exampleInputName">Nombre y apellidos</label>
