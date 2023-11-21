@@ -191,6 +191,27 @@ const getState = ({ getStore, getActions, setStore }) => {
         // Reset the global store
         setStore({ demo: demo });
       },
+
+      uploadFile: async fileToUpload => {
+        let data = new FormData();
+        data.append("image", fileToUpload);
+        const url = process.env.BACKEND_URL + '/api/upload';
+        const options = {
+          method: "POST",
+          body: data,
+          headers: {
+            Authorization: `Basic ${process.env.API_KEY}:${process.env.API_SECRET}`
+          }
+        };
+        console.log(options)
+        const response = await fetch(url, options)
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data)
+        } else {
+          console.log('error', response.status, response.text)
+        }
+      },
       getStripePublicKey: async () => {
         const url = `${process.env.BACKEND_URL}/stripe-key`
         const options = {
@@ -210,12 +231,11 @@ const getState = ({ getStore, getActions, setStore }) => {
       processPayment: async () => {
         const stripe = await loadStripe(getStore().stripePublicKey)
         const url = `${process.env.BACKEND_URL}/payment`
-        const token = localStorage.getItem("token");
         const options = {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${getStore().token}`
           },
           body: JSON.stringify({})
         }
@@ -226,6 +246,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           stripe.redirectToCheckout({ sessionId: data.sessionId });
         } else {
           console.log('Error:', response.status, response.statusText);
+
         }
       }
     }
