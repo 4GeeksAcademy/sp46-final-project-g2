@@ -37,6 +37,9 @@ const Layout = () => {
     // The basename is used when your project is published in a subdirectory and not in the root of the domain.
     // You can set the basename on the .env file located at the root of this project, E.g: BASENAME=/react-hello-webapp/
     const basename = process.env.BASENAME || "";
+    //<Route element={<Success />} path="?success=true"/>
+    //<Route element={<CheckoutForm />} path="/checkout" />
+    //<Route element={<Cancel />} path="?canceled=true"/>
     if(!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL/ >;
 
     return (
@@ -65,9 +68,8 @@ const Layout = () => {
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} path="*"/>
-                        <Route element={<CheckoutForm />} path="/checkout" />
-                        <Route element={<Success />} path="?success=true"/>
-                        <Route element={<Cancel />} path="?canceled=true"/>
+                       
+                        
                         <Route element={<PenApi/>} path="pen-api"/>
                         <Route element={<PaymentSuccess />} path="/payment-success"/>
                         <Route element={<PaymentCanceled />} path="/payment-canceled"/>

@@ -316,7 +316,7 @@ class Posts(db.Model):
                 "abstract": self.abstract,
                 "tag": self.tag,
                 "text": self.text,
-                "created_date": self.created.date,
+                "created_date": self.created_date,
                 "update_date": self.update_date,
                 "is_published": self.is_published,
                 "is_active": self.is_active,
