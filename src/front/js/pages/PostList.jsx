@@ -16,7 +16,7 @@ export const PostList = () => {
     }, []);
 
     return (
-        <div className="container bg-dark text-light mb-5">
+        <div className="container bg-dark text-light mb-5" style={{minHeight: "790px"}}>
             <h2 className="mt-4 text-body-primary"> PUBLICACIONES </h2>
             <div className="pt-5 border-top">
 
@@ -41,7 +41,7 @@ export const PostList = () => {
                     :
                     <div>
                         {store.postsList.map((post) =>
-                            <PostCard titulo={post.title} tags={post.tag} texto={post.text} />
+                            <PostCard titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
                         )}
                     </div>
                 }

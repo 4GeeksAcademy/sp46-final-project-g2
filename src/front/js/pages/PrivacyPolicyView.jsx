@@ -2,7 +2,7 @@ import React from "react";
 
 export const PrivacyPolicyView = () => {
     return (
-        <div className="container bg-dark text-light">
+        <div className="container bg-dark text-light" style={{minHeight: "790px"}}>
         <h2>Política de Privacidad</h2>
         <p>Tu privacidad es importante para nosotros. Es la política de LiteraryInk respetar tu privacidad con respecto a cualquier información que podamos recopilar de ti a través de nuestro sitio web.</p>
         <ul>

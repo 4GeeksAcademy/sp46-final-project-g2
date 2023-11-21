@@ -45,6 +45,8 @@ const getState = ({ getStore, getActions, setStore }) => {
       },
       setPostIdNumber: (postId) => {
         setStore({ postIdNumber: postId });
+        const store = getStore();
+        console.log(store.postIdNumber);
       },
       handleLogin: (data) => {
         console.log("recibimos:", data);
@@ -83,8 +85,7 @@ const getState = ({ getStore, getActions, setStore }) => {
       getPosts: async () => {
         const url = `${process.env.BACKEND_URL}/api/posts`
         const options = {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          method: 'GET'
         }
         const response = await fetch(url, options);
         if (response.ok) {
@@ -99,8 +100,8 @@ const getState = ({ getStore, getActions, setStore }) => {
         }
       },
       selectPost: () => {
-        const store = getStore();
-        const onePost = store.PostsList.filter((post) => post.id == store.postIdNumber)
+        const store = getStore();        
+        const onePost = store.postsList.filter((post) => post.id == store.postIdNumber)
         console.log(onePost);
         setStore({ selectedPost: onePost })
       },

@@ -2,7 +2,7 @@ import React from "react";
 
 export const DisclaimerView = () => {
     return (
-        <div className="container bg-dark text-light">
+        <div className="container bg-dark text-light" style={{minHeight: "790px"}}>
             <h2>Términos y Condiciones</h2>
             <p>Estos Términos y Condiciones rigen el uso de LiteraryInk y todo su contenido y servicios. Al acceder y utilizar el Sitio web, aceptas cumplir y quedar sujeto a estos Términos. Si no estás de acuerdo con estos Términos, te recomendamos que no utilices el Sitio web.</p>
             <ul>

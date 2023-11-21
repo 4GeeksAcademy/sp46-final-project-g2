@@ -13,13 +13,9 @@ export const PostCard = (props) => {
   const handleIdpost = () => {
     actions.setPostIdNumber(props.idNumber)
     actions.selectPost();
-    console.log (props.idNumber)
   }
 
-  useEffect(() => {
-    store.postsList;
-   // actions.getPosts();
-}, []);
+
 
   return (
     <div className="card mb-2 mx-1" style={{ height: '218px' }}>
