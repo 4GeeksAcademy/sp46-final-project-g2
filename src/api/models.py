@@ -14,7 +14,6 @@ class Users(db.Model):
     password = db.Column(db.String(10), unique = False, nullable = False)
     is_active = db.Column(db.Boolean, unique = False, nullable = False)
     is_admin = db.Column(db.Boolean, unique = False, nullable = False)
-
     
     def __repr__(self):
         return f'<Users {self.email}>'
