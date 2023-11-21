@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export const PenToPrint = () => {
     return (
-        <div className="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+        <div className="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden" style={{minHeight: "790px"}}>
             <div className="my-3 py-3">
                 <h2 className="display-5">Pen to Print</h2>
                 <p className="lead">Transcriba sus notas manuscritas a texto digital.</p>

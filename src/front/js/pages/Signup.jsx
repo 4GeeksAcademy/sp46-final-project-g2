@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [alias, setAlias] = useState('');
@@ -39,6 +41,7 @@ export const Signup = () => {
             setEmail('');
             setPassword('');
             setAlias('');
+            navigate('/');
         } else {
             console.log('Error: ', response.status, response.statusText);
         }
@@ -49,7 +52,7 @@ export const Signup = () => {
     };
 
     return (
-        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '610px' }}>
+        <div className="d-flex align-items-center justify-content-center mx-3" style={{ minHeight: '790px' }}>
             <form style={{ width: "400px" }}>
                 <div className="form-group">
                     <label htmlFor="exampleInputEmail1">Email</label>

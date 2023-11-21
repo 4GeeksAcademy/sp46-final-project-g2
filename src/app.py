@@ -68,7 +68,7 @@ def serve_any_other_file(path):
     return response
 
 
-@app.route('/config', methods = ['GET'])
+@app.route('/stripe-key', methods = ['GET'])
 def get_publishable_key():
     stripe_config = {"publicKey": stripe_keys["publishable_key"]}
     return jsonify(stripe_config)
@@ -77,36 +77,26 @@ def get_publishable_key():
 @app.route('/payment', methods=['POST'])
 @jwt_required()
 def stripe_payment():
-    print('hola')
     identity = get_jwt_identity()
     if not identity[3]:
         response_body['message'] = "Restricted access"
         return response_body, 401
-    data = request.get_json()  # (force=True)
     try:
         # Genero el listado de items
-        # cart = db.session.execute(db.select(ShoppingCarts).where(ShoppingCarts.member_id == identity[3])).scalar()
-        # cart_items = db.session.execute(db.select(ShoppingCartItems).where(ShoppingCartItems.shopping_cart_id == cart.id)).scalar()
-        # cart_items_list = [item.serialize() for item in cart_items]
         bill = db.session.execute(db.select(Bills).where(Bills.member_id == identity[3],
                                                          Bills.status == 'Pending')).scalar()
         bill_items = db.session.execute(db.select(BillItems).where(BillItems.bill_id == bill.id)).scalars()
         bill_items_list = [item.serialize() for item in bill_items]
         line_items = [{'price': item['stripe_price'], 'quantity': item['quantity']} for item in bill_items_list]
-        print(line_items)
-        # line_items=[{'price': 'price_1ODGc9BgaT0Vkd8Nljplbfxe', 'quantity': 10}]
         # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-        session = stripe.checkout.Session.create(payment_method_types=['card'],
-                                                 line_items=line_items,
+        session = stripe.checkout.Session.create(line_items=line_items,
                                                  mode='payment',
                                                  success_url=front_url + '/payment-success',
                                                  cancel_url=front_url + '/payment-canceled')
-                                                 # ui_mode='embedded',
         response_body = {'sessionId': session['id']}
         return response_body, 200
     except Exception as e:
         response_body = {'message': str(e)}
-        # return str(e)
         return response_body, 403
     # return jsonify(clientSecret=session.client_secret)
 

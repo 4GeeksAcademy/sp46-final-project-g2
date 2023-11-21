@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export const Reviews = () => {
     return (
-        <div className="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+        <div className="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden" style={{minHeight: "790px"}}>
             <div className="my-3 py-3">
                 <h2 className="display-5">Reviews</h2>
                 <p className="lead">¿Está en búsqueda de una evaluación literaria de alta calidad?</p>

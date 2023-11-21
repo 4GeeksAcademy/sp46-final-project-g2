@@ -28,12 +28,16 @@ export const Login = () => {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.token);
-            store.user = data.results;
+            //localStorage.getItem('token'); -->> para obtener el token en localStorage
+            //localStorage.removeItem('token'), -->>>para eliminar el token
+            //localStorage.clear(); --->> para eliminar todo.
+            actions.handleLogin(data);
             setAlert({ show: true, message: 'User logged' });
-            console.log(data)
+            //console.log(data)
             setEmail('');
             setPassword('');
-            navigate("/");
+            navigate("/author-profile");
+               
         } else {
             if (response.status == 404) {
                 const error = await response.text();
@@ -46,7 +50,7 @@ export const Login = () => {
     }
 
     return (
-        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '610px' }}>
+        <div className="d-flex align-items-center justify-content-center mx-3" style={{ minHeight: '790px' }}>
             <form style={{ width: "400px" }}>
                 <div className="form-group">
                     <label htmlFor="exampleInputEmail1">Email </label>
