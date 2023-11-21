@@ -50,7 +50,9 @@ export const PenToPrint = () => {
                                             <li>20€ Dto en talleres</li>
                                             <li>3 reviews incluidas</li>
                                         </ul>
+                                        <Link to="/signup-member">
                                         <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mb-4">Hazte miembro</button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

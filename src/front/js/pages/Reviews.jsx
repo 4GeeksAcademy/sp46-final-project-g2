@@ -61,7 +61,9 @@ export const Reviews = () => {
                                         <li>20€ Dto en talleres</li>
                                         <li>Acceso a Pen to Write</li>
                                     </ul>
+                                    <Link to="/signup-member">
                                     <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mb-4">Hazte miembro</button>
+                                    </Link>
                                     </div>
                                 </div>
                             </div>
