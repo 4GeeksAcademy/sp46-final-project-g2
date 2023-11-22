@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { PostCard } from "../component/PostCard.jsx";
 import { Context } from "../store/appContext.js";
+import { Spinner } from "../component/Spinner.jsx";
 
 
 export const PostList = () => {
@@ -9,13 +10,9 @@ export const PostList = () => {
     const timing = timeUp;
 
     useEffect(() => {
+        actions.relationPostAuthor();
         actions.getPosts();
-        // (store.postsList.length == 0) ? setTimeUp(false): setTimeUp(true)
-        /*
-        setTimeout(() => {
-            setTimeUp(false)
-        }, 1000)
-        */
+        actions.getAuthors();
     }, []);
 
     return (
@@ -24,27 +21,11 @@ export const PostList = () => {
             <div className="pt-5 border-top">
 
                 {store.postsList.length == 0 ?
-                    <div className="conteiner text-center " style={{ minHeight: "620px" }}>
-                    <div className="mt-5 pt-5">
-                        <div className="mt-5 pt-5">
-                            <div className="pt-5">
-                                <div className=" spinner-grow text-warning mt-5 mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                                <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                                <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                   <Spinner />
                     :
                     <div>
                         {store.postsList.map((post) =>
-                            <PostCard titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
+                            <PostCard key= {post.id} titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} author={post.author_id}/>
                         )}
                     </div>
                 }

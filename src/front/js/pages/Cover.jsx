@@ -1,9 +1,13 @@
-import React from "react";
+import React, {useEffect, useContext} from "react";
 import { Link } from "react-router-dom";
 import pic from "../../img/logo.png"
+import { Context } from "../store/appContext";
 
 
 export const Cover = () => {
+    const { store, actions } = useContext(Context)
+    useEffect ( () => {
+    }, [] )
     return (
         <div className="d-flex h-100 text-center text-bg-dark py-5 my-5" style={{minHeight: '790px'}}>
             <div className="cover-container d-flex w-100 h-100 p-3 py-5 my-5 mx-auto flex-column">
