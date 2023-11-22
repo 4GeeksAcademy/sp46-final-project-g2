@@ -206,8 +206,10 @@ const getState = ({ getStore, getActions, setStore }) => {
         if (response.ok) {
           const data = await response.json();
           console.log(data)  // data contiene la url de la imagen
+          return data;
         } else {
           console.log('error', response.status, response.text)
+          return "No image url"
         }
       },
       getStripePublicKey: async () => {

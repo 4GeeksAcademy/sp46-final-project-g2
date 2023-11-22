@@ -14,7 +14,7 @@ export const BotonIngresar = () => {
     if (!store.isLogged){
     return (
         <Link to="/login">
-            <button className="btn btn-warning fw-bold text-dark w-100"> Ingresa </button>
+            <button className="btn btn-warning fw-bold text-dark w-100"> Ingresar </button>
         </Link>
     );
     }else {

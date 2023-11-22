@@ -932,6 +932,7 @@ def handle_billing_issues():
 @api.route('/posts', methods=['GET']) 
 def handle_get_posts():
     posts = db.session.execute(db.select(Posts)).scalars()
+    # join con author para mostrar el nombre del autor
     posts_list = [post.serialize() for post in posts]
     response_body = {'message': 'Posts List', 
                      'results': posts_list}

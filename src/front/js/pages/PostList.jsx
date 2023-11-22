@@ -10,9 +10,12 @@ export const PostList = () => {
 
     useEffect(() => {
         actions.getPosts();
+        // (store.postsList.length == 0) ? setTimeUp(false): setTimeUp(true)
+        /*
         setTimeout(() => {
             setTimeUp(false)
         }, 1000)
+        */
     }, []);
 
     return (
@@ -20,7 +23,7 @@ export const PostList = () => {
             <h2 className="mt-4 text-body-primary"> PUBLICACIONES </h2>
             <div className="pt-5 border-top">
 
-                {timing ?
+                {store.postsList.length == 0 ?
                     <div className="conteiner text-center " style={{ minHeight: "620px" }}>
                     <div className="mt-5 pt-5">
                         <div className="mt-5 pt-5">
