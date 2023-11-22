@@ -62,7 +62,7 @@ export const AuthorProfile = () => {
               :
               <div>
                 {store.postsByAuthor.map((post) =>
-                   <PostCard titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
+                   <PostCard key={post.id} titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
                 )}
               </div>
             }

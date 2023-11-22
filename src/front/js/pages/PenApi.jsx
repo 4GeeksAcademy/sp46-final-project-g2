@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Context } from '../store/appContext';
+import {Cover} from '../pages/Cover.jsx'
+
 
 export const PenApi = () => {
     const { store, actions } = useContext(Context);
@@ -10,7 +12,7 @@ export const PenApi = () => {
     let logged = false;
 
     useEffect(() => {
-        logged = store.isLogged;
+       logged = store.isLogged
     }, []);
 
     const handleFileChange = (event) => {
@@ -41,9 +43,10 @@ export const PenApi = () => {
             }
         }
     };
-
-    if (store.isLogged) {
-        return (
+    return(
+    !store.isLogged ? 
+        <Cover/>: 
+            
             <div className="container mt-5" style={{minHeight: "790px"}}>
                 <h2><small>Subir Imagen</small></h2>
                 <div className="mb-3">
@@ -64,15 +67,11 @@ export const PenApi = () => {
                     <div className="col-12 col-md-6">
                         <div className="form-floating">
                             <textarea className="form-control" placeholder="" id="floatingTextarea" defaultValue={convertedText} style={{ minHeight: "450px" }}></textarea>
-                            <label for="floatingTextarea" className="form-label">Texto editable</label>
+                            <label htmlFor="floatingTextarea" className="form-label">Texto editable</label>
                         </div>
                     </div>
                 </div>
             </div>
-        );
-    } else {
-        return (
-            <div> {navigate('/')}  </div>
-        )
-    }
+    )
+    
 };
