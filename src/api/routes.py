@@ -15,11 +15,6 @@ import cloudinary
 
 api = Blueprint('api', __name__)
 
-cloudinary.config(
-  cloud_name = os.getenv("CLOUD_NAME"),
-  api_key = os.getenv("API_KEY"),
-  api_secret = os.getenv("API_SECRET")
-)
 
 """ 
     identity[0] es user.id
@@ -29,22 +24,30 @@ cloudinary.config(
     identity[4] es advisor.id
 """
 
-@api.route('/upload', methods=['POST'])
+
+cloudinary.config(cloud_name = os.getenv("CLOUD_NAME"),
+                  api_key = os.getenv("API_KEY"),
+                  api_secret = os.getenv("API_SECRET"),
+                  secure = True)
+
+
+@api.route('/upload', methods=['POST', 'GET'])
 def handle_upload():
     if 'image' not in request.files:
         raise APIException("No image to upload")
-    result = cloudinary.uploader.upload(request.files['image'],
+    image = request.files['image']
+    result = cloudinary.uploader.upload(image,
                                         public_id=f'example/my-image-name',
                                         crop='limit',
                                         width=450,
                                         height=450,
-                                        eager=[{'width': 200, 'height': 200,
-                                                'crop': 'thumb', 'gravity': 'face',
+                                        eager=[{'width': 200,
+                                                'height': 200,
+                                                'crop': 'thumb',
+                                                'gravity': 'face',
                                                 'radius': 100}],
                                         tags=['profile_picture'])
-    print(result)
-    print(result['secure_url'])
-    response_body = {'results': result['url']}
+    response_body = {'results': result['secure_url']}
     return response_body, 200
     
    
