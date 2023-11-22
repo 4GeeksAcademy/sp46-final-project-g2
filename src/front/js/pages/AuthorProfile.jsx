@@ -5,6 +5,8 @@ import { PostCard } from "../component/PostCard.jsx";
 import { BioCard } from "../component/BioCard.jsx";
 import { Context } from "../store/appContext.js";
 import { useNavigate } from "react-router-dom";
+import { Cover } from "../pages/Cover.jsx"
+import { Spinner } from "../component/Spinner.jsx"
 
 export const AuthorProfile = () => {
   const navigate = useNavigate();
@@ -15,17 +17,21 @@ export const AuthorProfile = () => {
 
   useEffect(() => {
     actions.getPostsByAuthors();
+    /*
     setTimeout(() => {
       setTimeUp(false)
     }, 1000)
+    */
+
   }, []);
 
 
   const elemento = store.selectedAuthor;
   const publicacion = store.postsByAuthor;
 
-  if (store.isLogged) {
-    return (
+  return (
+
+    store.isLogged ?
       <div className="container mb-5">
         <div className="row g-0 py-3">
           <div className="col-12 col-md-3">
@@ -45,75 +51,45 @@ export const AuthorProfile = () => {
               :
               <BioCard about={elemento[0].about_me} />
             }
-            {timing ?
-              <div className="text-center " style={{ minHeight: "620px" }}>
-                <div className="mt-5 pt-5">
-                  <div className=" spinner-grow text-warning mt-5 mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              </div>
+            {store.postsByAuthor.length == 0 ?
+              <Spinner />
               :
               <div>
                 {store.postsByAuthor.map((post) =>
-                   <PostCard key={post.id} titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
+                  <PostCard key={post.id} titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
                 )}
               </div>
             }
           </div>
         </div>
       </div>
-    );
-  } else {
-    if (store.authorIdNumber != 0) {
-      return (
+      :
+      store.authorIdNumber != 0 ?
         <div className="container mb-5">
           <div className="row g-0 py-3">
+
             <div className="col-12 col-md-3">
               <ProfileCard alias={elemento[0].alias} birthday={elemento[0].birth_date}
                 city={elemento[0].city} country={elemento[0].country}
                 quote={elemento[0].quote} />
-
             </div>
+
             <div className="col-12 col-md-9">
               <BioCard about={elemento[0].about_me} />
-
-              {timing ?
-                <div className="conteiner text-center " style={{ minHeight: "620px" }}>
-                  <div className="mt-5 pt-5">
-                    <div className=" spinner-grow text-warning mt-5 mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <div className=" spinner-grow text-warning mt-5  mx-1" role="status" style={{ height: "3rem", width: "3rem" }}>
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
-                </div>
+              {store.postsByAuthor.length == 0 ?
+                <Spinner />
                 :
                 <div>
                   {store.postsByAuthor.map((post) =>
-                     <PostCard titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} />
+                    <PostCard key={post.id} titulo={post.title} tags={post.tag} texto={post.text} idNumber={post.id} author= {post.author_id}/>
                   )}
                 </div>
               }
-
             </div>
+
           </div>
         </div>
-      )
-    } else {
-      return (
-        <div> {navigate('/')}  </div>
-      )
-    }
-  }
+        :
+        <Cover />
+  );
 };

@@ -2,25 +2,25 @@ import React from "react";
 
 export const Jumbotron = () => {
   const jumbotronStyle = {
-    backgroundImage: 'url("https://i0.wp.com/www.nuevarevista.net/wp-content/uploads/2018/03/Literatura-universal.jpg?fit=1021%2C598&ssl=1")',
+    backgroundImage: 'url("https://img.freepik.com/vector-gratis/fondo-textura-acuarela-negra-pintada-mano_1017-14837.jpg?size=626&ext=jpg&ga=GA1.1.1749064473.1700160771&semt=ais")',
     backgroundSize: 'cover',
+    fontSize: '50px',
     backgroundPosition: 'center',
     color: 'white', // Color del texto para que sea legible sobre la imagen de fondo
-    textAlign: 'center',
-    padding: '100px 0', // Ajusta el relleno según sea necesario
+    //textAlign: 'center',
+    padding: '80px 0', // Ajusta el relleno según sea necesario
   };
-
   return (
     <div style={jumbotronStyle}>
       <div className="container">
         <h1 className="display-5 fw-bold">Literayink</h1>
         <p className="col-md-8 fs-4">
-          Es una plataforma inventada que es algo así como una red social para escritores primerizos, con su apartado gratuito donde además de leer y escribir a modo de blog puedes crear comunidad y ver eventos y concursos. Y luego registrándote y pagando una membresía puedes obtener servicios como reviews de críticos literarios de renombre, mentorías y talleres de varias temáticas como por ejemplo "publica tu primer libro" y te ayudan en el proceso desde creativo hasta editorial, y luego cuantas con los servicios de Apis externas de AI (una de ellas transcribe a partir de una imagen, tu texto escrito a mano a caracteres digitales). Entonces es como una mezcla de red social/blog + e-commerce para adentrarse en el mundo profesional. Con su parte gratuita y su parte de membresía
+        Conecta, inspira y comparte tu pasión por las letras en nuestra comunidad exclusiva para escritores. Descubre un espacio donde la creatividad fluye, las historias se entrelazan y las palabras cobran vida.
         </p>
         <button className="btn btn-primary btn-lg" type="button">
-          Post
+          Sumérgete en la escritura
         </button>
-      </div>
+        </div>
     </div>
   );
 };

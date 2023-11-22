@@ -40,13 +40,22 @@ const getState = ({ getStore, getActions, setStore }) => {
           // console.log("Error loading message from backend", error)
         }
       },
+      relationPostAuthor: () => {
+        const store = getStore();
+        let obj ={}
+        if (store.postsList.length >0) {store.postsList.map((post)=>{ obj [post.id] = post.author_id })
+        
+        console.log(obj)
+      }
+        //store.authorsList
+      },
       setAuthorIdNumber: (idNumber) => {
         setStore({ authorIdNumber: idNumber });
       },
       setPostIdNumber: (postId) => {
         setStore({ postIdNumber: postId });
         const store = getStore();
-        console.log(store.postIdNumber);
+        console.log("el id del post seleccionado es", store.postIdNumber);
       },
       handleLogin: (data) => {
         console.log("recibimos:", data);
@@ -70,7 +79,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           const data = await response.json();
           setStore({ authorsList: data.results });
           const store = getStore()
-          console.log(store.authorsList);
+          console.log("authorsList es",store.authorsList);
           return true
         } else {
           console.log('Error:', response.status, response.statusText);
@@ -82,7 +91,7 @@ const getState = ({ getStore, getActions, setStore }) => {
         const oneAuthor = store.authorsList.filter((author) => author.id == store.authorIdNumber)
         setStore({ selectedAuthor: oneAuthor })
       },
-      getPosts: async () => {
+      getPosts: async () => {  
         const url = `${process.env.BACKEND_URL}/api/posts`
         const options = {
           method: 'GET'
@@ -91,8 +100,8 @@ const getState = ({ getStore, getActions, setStore }) => {
         if (response.ok) {
           const data = await response.json();
           setStore({ postsList: data.results });
-          const store = getStore()
-          console.log(store.postsList);
+          const stored = getStore()
+          console.log(stored.postsList);
           return true
         } else {
           console.log('Error:', response.status, response.statusText);
@@ -102,11 +111,12 @@ const getState = ({ getStore, getActions, setStore }) => {
       selectPost: () => {
         const store = getStore();        
         const onePost = store.postsList.filter((post) => post.id == store.postIdNumber)
-        console.log(onePost);
+        console.log("el post seleccionado es", onePost);
         setStore({ selectedPost: onePost })
       },
       getPostsByAuthors: async () => {
         const store = getStore();
+        if (store.postsList.length==0) getActions().getPosts()
         const url = `${process.env.BACKEND_URL}/api/authors/${store.authorIdNumber}/posts`
         const options = {
           method: 'GET',
