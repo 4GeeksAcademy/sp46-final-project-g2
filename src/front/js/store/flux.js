@@ -1,4 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js';
+import moment, { isMoment } from 'moment/moment';
 
 const getState = ({ getStore, getActions, setStore }) => {
   return {
@@ -42,11 +43,12 @@ const getState = ({ getStore, getActions, setStore }) => {
       },
       relationPostAuthor: () => {
         const store = getStore();
-        let obj ={}
-        if (store.postsList.length >0) {store.postsList.map((post)=>{ obj [post.id] = post.author_id })
-        
-        console.log(obj)
-      }
+        let obj = {}
+        if (store.postsList.length > 0) {
+          store.postsList.map((post) => { obj[post.id] = post.author_id })
+
+          console.log(obj)
+        }
         //store.authorsList
       },
       setAuthorIdNumber: (idNumber) => {
@@ -79,7 +81,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           const data = await response.json();
           setStore({ authorsList: data.results });
           const store = getStore()
-          console.log("authorsList es",store.authorsList);
+          console.log("authorsList es", store.authorsList);
           return true
         } else {
           console.log('Error:', response.status, response.statusText);
@@ -91,7 +93,7 @@ const getState = ({ getStore, getActions, setStore }) => {
         const oneAuthor = store.authorsList.filter((author) => author.id == store.authorIdNumber)
         setStore({ selectedAuthor: oneAuthor })
       },
-      getPosts: async () => {  
+      getPosts: async () => {
         const url = `${process.env.BACKEND_URL}/api/posts`
         const options = {
           method: 'GET'
@@ -109,14 +111,14 @@ const getState = ({ getStore, getActions, setStore }) => {
         }
       },
       selectPost: () => {
-        const store = getStore();        
+        const store = getStore();
         const onePost = store.postsList.filter((post) => post.id == store.postIdNumber)
         console.log("el post seleccionado es", onePost);
         setStore({ selectedPost: onePost })
       },
       getPostsByAuthors: async () => {
         const store = getStore();
-        if (store.postsList.length==0) getActions().getPosts()
+        if (store.postsList.length == 0) getActions().getPosts()
         const url = `${process.env.BACKEND_URL}/api/authors/${store.authorIdNumber}/posts`
         const options = {
           method: 'GET',
@@ -189,79 +191,112 @@ const getState = ({ getStore, getActions, setStore }) => {
           console.log('Error:', response.status, response.statusText);
         }
       },
-      changeColor: (index, color) => {
-        // Get the store
+      createPost: async (nTitle, nTag, nText) => {
         const store = getStore();
-        // We have to loop the entire demo array to look for the respective index
-        // and change its color
-        const demo = store.demo.map((element, i) => {
-          if (i === index) element.background = color;
-          return element;
-        });
-        // Reset the global store
-        setStore({ demo: demo });
-      },
-      uploadFile: async (fileToUpload) => {
-        const data = new FormData();
-        data.append("image", fileToUpload);
-        const url = process.env.BACKEND_URL + '/api/upload';
-        const options = {
-          method: "POST",
-          body: data,
-          headers: {
-            Authorization: `Basic ${process.env.API_KEY}:${process.env.API_SECRET}`
-          }
-        };
-        const response = await fetch(url, options)
-        if (response.ok) {
-          const data = await response.json();
-          console.log(data)  // data contiene la url de la imagen
-          return data;
-        } else {
-          console.log('error', response.status, response.text)
-          return "No image url"
-        }
-      },
-      getStripePublicKey: async () => {
-        const url = `${process.env.BACKEND_URL}/stripe-key`
-        const options = {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        }
-        const response = await fetch(url, options);
-        if (response.ok) {
-          const data = await response.json();
-          setStore({ stripePublicKey: data.publicKey });
-          return true
-        } else {
-          console.log('Error:', response.status, response.statusText);
-          return false
-        }
-      },
-      processPayment: async () => {
-        const stripe = await loadStripe(getStore().stripePublicKey)
-        const url = `${process.env.BACKEND_URL}/payment`
+        const url = `${process.env.BACKEND_URL}/api/posts`
+        const ahora = moment().format('MMMM Do YYYY, h:mm:ss a')
+        
+        console.log(url)
+        console.log(ahora)
+        
         const options = {
           method: 'POST',
+          body: JSON.stringify({
+            "title": nTitle, "abstract": "", "tag": nTag,
+            "text": nText, "created_date": ahora, "update_date": 
+            ahora,"is_published": true, "is_active": true,
+            author_id: store.author.id
+          }),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getStore().token}`
-          },
-          body: JSON.stringify({})
+            'Authorization': `Bearer ${store.token}`
+          },          
         }
         const response = await fetch(url, options);
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          stripe.redirectToCheckout({ sessionId: data.sessionId });
         } else {
           console.log('Error:', response.status, response.statusText);
-
         }
+      },
+
+
+
+    },
+    changeColor: (index, color) => {
+      // Get the store
+      const store = getStore();
+      // We have to loop the entire demo array to look for the respective index
+      // and change its color
+      const demo = store.demo.map((element, i) => {
+        if (i === index) element.background = color;
+        return element;
+      });
+      // Reset the global store
+      setStore({ demo: demo });
+    },
+    uploadFile: async (fileToUpload) => {
+      const data = new FormData();
+      data.append("image", fileToUpload);
+      const url = process.env.BACKEND_URL + '/api/upload';
+      const options = {
+        method: "POST",
+        body: data,
+        headers: {
+          Authorization: `Basic ${process.env.API_KEY}:${process.env.API_SECRET}`
+        }
+      };
+      const response = await fetch(url, options)
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data)  // data contiene la url de la imagen
+        return data;
+      } else {
+        console.log('error', response.status, response.text)
+        return "No image url"
+      }
+    },
+    getStripePublicKey: async () => {
+      const url = `${process.env.BACKEND_URL}/stripe-key`
+      const options = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      }
+      const response = await fetch(url, options);
+      if (response.ok) {
+        const data = await response.json();
+        setStore({ stripePublicKey: data.publicKey });
+        return true
+      } else {
+        console.log('Error:', response.status, response.statusText);
+        return false
+      }
+    },
+    processPayment: async () => {
+      const stripe = await loadStripe(getStore().stripePublicKey)
+      const url = `${process.env.BACKEND_URL}/payment`
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getStore().token}`
+        },
+        body: JSON.stringify({})
+      }
+      const response = await fetch(url, options);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        stripe.redirectToCheckout({ sessionId: data.sessionId });
+      } else {
+        console.log('Error:', response.status, response.statusText);
+
       }
     }
-  };
+  }
 };
+
 
 
 export default getState;

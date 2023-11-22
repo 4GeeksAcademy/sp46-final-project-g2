@@ -942,9 +942,9 @@ def handle_get_posts():
 @api.route('/posts', methods=['POST']) 
 @jwt_required()
 def handle_posts():
-    identity = get_jwt_identity()  # Aquí llega el token
+    # identity = get_jwt_identity()  # Aquí llega el token
     # Valido si es admin o author:
-    if identity[1] or identity[2]:
+    # if identity[1] or identity[2]:
         data = request.get_json()
         post = Posts(title=data['title'], 
                      abstract=data['abstract'],
@@ -953,14 +953,15 @@ def handle_posts():
                      created_date=data['created_date'],
                      update_date=data['update_date'],
                      is_active=True,
-                     is_published=True)  
+                     is_published=True, 
+                     author_id=data['author_id'])  
         db.session.add(post)
         db.session.commit()
         response_body = {'message': 'Post created', 
                          'results': post.serialize()}
         return response_body, 201 
-    response_body = {'message': "Restricted access"}
-    return response_body, 401
+   # response_body = {'message': "Restricted access"}
+   # return response_body, 401
 
 
 @api.route('/posts/<int:post_id>', methods=['GET'])
