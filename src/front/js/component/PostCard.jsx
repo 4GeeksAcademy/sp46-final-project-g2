@@ -9,6 +9,7 @@ import sisifo from "../../img/sisifo.jpg"
 import habitacion from "../../img/habitacion.png"
 import cuervo from "../../img/cuervo.png"
 import casa from "../../img/casa.jpg"
+import bookcover from "../../img/bookcover.png"
 import { Context } from "../store/appContext";
 
 export const PostCard = (props) => {
@@ -64,7 +65,7 @@ export const PostCard = (props) => {
           <div className="">
             <Link to="/post-view">
               <img src={
-                props.idNumber == 2? sisifo: props.idNumber==3? cuervo: props.idNumber == 5? habitacion: casa
+                props.idNumber == 2? sisifo: props.idNumber==3? cuervo: props.idNumber == 5? habitacion: props.idNumber == 1?casa : bookcover
               } className="img-fluid rounded-start"
                 alt="..." style={{ height: '217px', width: '155px' }} />
             </Link>

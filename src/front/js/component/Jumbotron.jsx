@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import transparent from "../../img/transparent.png"
+
 
 export const Jumbotron = () => {
   return (
@@ -10,10 +12,11 @@ export const Jumbotron = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         color: 'white',
-        height: '600px',
+        minHeight: '880px',
       }}
     >
       <div className="container">
+      <img src={transparent} ></img>
         <p className="fs-4">
           Bienvenido a LiteraryInk.
         </p>

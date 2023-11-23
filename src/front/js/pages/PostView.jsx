@@ -4,10 +4,12 @@ import sisifo from "../../img/sisifo.jpg"
 import habitacion from "../../img/habitacion.png"
 import cuervo from "../../img/cuervo.png"
 import casa from "../../img/casa.jpg"
+import bookcover from "../../img/bookcover.png"
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { PostElement } from "../component/PostElement.jsx";
 import { Cover } from "./Cover.jsx";
+import { BotonEditar } from "../component/BotonEditar.jsx";
 
 export const PostView = () => {
     const { store, actions } = useContext(Context)
@@ -62,7 +64,7 @@ export const PostView = () => {
                                 </h2>
                                 <img
                                     src={
-                                        store.selectedPost[0].id== 2? sisifo : store.selectedPost[0].id==3? cuervo : store.selectedPost[0].id==1? casa: habitacion
+                                        store.selectedPost[0].id== 2? sisifo : store.selectedPost[0].id==3? cuervo : store.selectedPost[0].id==1? casa: store.selectedPost[0].id==5? habitacion : bookcover
                                     }
                                     alt="Imagen de la publicación"
                                     className="img-fluid d-block mx-auto mb-4"
@@ -73,9 +75,12 @@ export const PostView = () => {
                                     <p> {store.selectedPost[0].text} </p>
 
                                     <div className="tags mt-3">
+                                    
                                         <strong>Etiquetas:</strong> {store.selectedPost[0].tag}
+                                       
                                     </div>
-                                    <div className="accordion mt-5" id="accordionExample">
+                                   { store.isLogged ? <BotonEditar />: null }
+                                    <div className="accordion mt-3" id="accordionExample">
                                         <div className="accordion-item">
                                             <h2 className="accordion-header">
                                                 <button className="accordion-button" type="button" 
@@ -85,14 +90,12 @@ export const PostView = () => {
                                             </h2>
                                             <div id="collapseOne" className="accordion-collapse collapse" data-bs-parent="#accordionExample">
                                                 <div className="accordion-body">
-                                                    <strong>Robert McKey:</strong> {revText}
+                                                    <strong>Robert McKey:  </strong> {revText}
                                                 </div>
                                             </div>
                                         </div>
-
-
-
                                     </div>
+                                    
                                 </article>
                             </div>
                             <div className="col-lg-4 col-md-12" style={{ marginTop: '30px' }}>
