@@ -15,11 +15,14 @@ export const Jumbotron2 = () => {
     >
       <div className="container" style={{maxWidth: "50%", alignItems: "left" }}> 
         <h1 className="display-5 fw-bold">Publica</h1>
-        <p className="custom-text">
+        <div className="row">
+          <div className="col-8">
+        <p className="custom-text mt-3">
           Embárcate en un viaje a través de las páginas virtuales, explorando la diversidad de estilos y géneros.
           Únete a nosotros en este viaje literario, donde la pluma es nuestra brújula y las historias son el mapa que nos guía.
           ¡Bienvenidos a nuestro mundo de palabras, donde cada línea es una invitación a explorar la creatividad sin límites!
         </p>
+        </div></div>
         <Link className="dropdown-item" to="/login">
           <button className="btn btn-warning fw-bold text-dark mt-4 mb-4" type="button">
             Iniciar Travesía Literaria

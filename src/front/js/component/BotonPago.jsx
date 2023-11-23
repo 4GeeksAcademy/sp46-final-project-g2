@@ -11,18 +11,18 @@ export const BotonPago = () => {
   useEffect(() => {
     function setUpStripe() {
       // if (store.member.id) {
-        // actions.getStripePublicKey()
+      // actions.getStripePublicKey()
       /* } else {
         navigate("/")
         alert("You are not a member")
       } */
       getStripePublicKey();
     }
-    
+
     setUpStripe()
   }, [])
 
- const getStripePublicKey= async () => {
+  const getStripePublicKey = async () => {
     const url = `${process.env.BACKEND_URL}/stripe-key`
     const options = {
       method: 'GET',
@@ -39,7 +39,7 @@ export const BotonPago = () => {
     }
   };
 
-  const processPayment= async () => {
+  const processPayment = async () => {
     const stripe = await loadStripe(stripeKey)
     const url = `${process.env.BACKEND_URL}/payment`
     const options = {
@@ -62,13 +62,13 @@ export const BotonPago = () => {
 
 
   return (
-    <div className="d-flex justify-content-end my-5 me-5 pt-4">
-      <div className="align-content-center">
-        <button className="btn btn-warning fw-bold text-dark w-100 " onClick={() => processPayment()}>
-          Comprar
-        </button>
-      </div>
-    </div>
+    <div className="d-flex justify-content-center py-4"> 
+    < div className = "align-content-center" >
+      <button className="btn btn-warning fw-bold text-dark w-100 " onClick={() => processPayment()}>
+        Comprar
+      </button>
+      </div >
+  </div>
 
   )
 }

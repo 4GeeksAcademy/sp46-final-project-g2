@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Context } from '../store/appContext';
-import {Cover} from '../pages/Cover.jsx'
+import { Cover } from '../pages/Cover.jsx'
 
 
 export const PenApi = () => {
@@ -12,7 +12,7 @@ export const PenApi = () => {
     let logged = false;
 
     useEffect(() => {
-       logged = store.isLogged
+        logged = store.isLogged
     }, []);
 
     const handleFileChange = (event) => {
@@ -43,11 +43,14 @@ export const PenApi = () => {
             }
         }
     };
-    return(
-    !store.isLogged ? 
-        <Cover/>: 
-            
-            <div className="container mt-5" style={{minHeight: "790px"}}>
+    return (
+        !store.isLogged ?
+            <Cover /> :
+
+            <div className="container mt-5" style={{ minHeight: "790px" }}>
+                <h2 className="mt-4 text-body-primary"> PEN TO PRINT </h2>
+                <div className="pt-5 border-top" ></div>
+                
                 <h2><small>Subir Imagen</small></h2>
                 <div className="mb-3">
                     <input type="file" className="form-control" onChange={handleFileChange} />
@@ -73,5 +76,5 @@ export const PenApi = () => {
                 </div>
             </div>
     )
-    
+
 };

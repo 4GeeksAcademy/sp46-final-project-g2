@@ -31,15 +31,15 @@ export const ImageUpload = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2><small>Subir Imagen</small></h2>
+    <div className="container">
+      <h3><small>Subir Imagen</small></h3>
       <div className="mb-3">
         <input type="file" className="form-control" onChange={handleFileChange} />
       </div>
-      <button className="btn btn-primary" onClick={uploadFile}>
+      <button className="btn btn-primary me-3" onClick={uploadFile}>
         Subir
       </button>
-      <button onClick={handleReset} className="btn btn-primary" type="reset">Cancelar</button>
+      <button onClick={handleReset} className="btn btn-primary mx-3" type="reset">Cancelar</button>
       <div className="mt-3">
         {previewImage && (
           <div>

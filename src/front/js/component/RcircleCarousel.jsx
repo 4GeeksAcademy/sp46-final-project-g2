@@ -1,10 +1,10 @@
 import React from "react";
 export const RcircleCarousel = () => {
   return (
-    <div id="myCarousel" className="carousel slide" data-bs-ride="carousel">
+    <div id="myCarousel" className="carousel slide" data-bs-ride="carousel" >
       <div className="carousel-inner">
         <div className="carousel-item active">
-          <div className="card mx-auto text-center" style={{ width: "100%", backgroundColor: "rgba(0,0,0,.2)"}}>
+          <div className="card mx-auto text-center pt-5" style={{ width: "100%", backgroundColor: "rgba(0,0,0,.2)", minHeight: "500px"}}>
             <img
               src="https://play-lh.googleusercontent.com/7ikRKiSS29q0ug3ZFvViL4Qmv8uOH1K_W7C-Go_gj4Z9L6y5hDW19nyRgnpwoBe32sE"
               className="card-img-top rounded-circle mx-auto mt-3"
@@ -26,7 +26,7 @@ export const RcircleCarousel = () => {
           </div>
         </div>
         <div className="carousel-item">
-          <div className="card mx-auto text-center" style={{ width: "100%", backgroundColor: "rgba(0,0,0,.2)" }}>
+          <div className="card mx-auto text-center pt-5" style={{ width: "100%", backgroundColor: "rgba(0,0,0,.2)", minHeight: "500px" }}>
             <img
               src="https://img.freepik.com/foto-gratis/persona-haciendo-scrapbooking-casa_23-2149614050.jpg?w=360&t=st=1700694532~exp=1700695132~hmac=7f4fb98143759975389f3e161e4f036ba2e8496a4f1b498e6d22dba0d2618277"
               className="card-img-top rounded-circle mx-auto mt-3"
@@ -48,7 +48,7 @@ export const RcircleCarousel = () => {
           </div>
         </div>
         <div className="carousel-item">
-          <div className="card mx-auto text-center" style={{ width: "100%", backgroundColor: "rgba(0,0,0,.2)" }}>
+          <div className="card mx-auto text-center pt-5" style={{ width: "100%", backgroundColor: "rgba(0,0,0,.2)", minHeight: "500px"}}>
             <img
               src="https://img.freepik.com/foto-gratis/gente-negocios-leyendo-buenas-criticas_1098-21692.jpg?w=996&t=st=1700694645~exp=1700695245~hmac=5c6c5a5304596ca2e080bbb32d442c9420033f218bbce40fa249c38c2b4892b1"
               className="card-img-top rounded-circle mx-auto mt-3"
