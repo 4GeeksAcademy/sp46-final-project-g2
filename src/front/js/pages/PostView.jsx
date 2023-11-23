@@ -13,7 +13,7 @@ export const PostView = () => {
     let authorP = []
     const [authorName, setAuthorName] = useState('')
     const [selReview, setSelReview] = useState(2)
-    const [revText, setRevText] = useState('Esta obra literaria es simplemente cautivadora. La prosa fluye con una elegancia que envuelve al lector desde la primera página, creando un vínculo íntimo con los personajes y la trama. El autor/a tiene el don de pintar vívidas imágenes con las palabras, estimulando la imaginación y evocando emociones profundas. La estructura narrativa es magistral, con giros inesperados que mantienen la intriga hasta la última palabra. Cada párrafo es una delicia literaria, y la riqueza de los detalles revela un dominio excepcional del arte de contar historias. En resumen, una experiencia literaria memorable que deja una impresión duradera.')
+    const [revText, setRevText] = useState("Esta fascinante narración de misterio me envolvió desde la primera página hasta la última con su trama ingeniosamente construida y personajes intrigantes. El autor ha tejido hábilmente una red de misterios y giros que mantuvieron mi atención en vilo en todo momento. La ambientación cuidadosamente detallada y la atmósfera misteriosa añadieron capas de suspense, creando un escenario perfecto para una historia que mantuvo mi mente activa tratando de descifrar cada pista. Los personajes están hábilmente desarrollados, cada uno con su propio conjunto de secretos y motivaciones, lo que añadió profundidad a la trama y mantuvo mi interés en descubrir más sobre ellos. La resolución del misterio fue sorprendente y satisfactoria, y el autor/a demostró un talento excepcional para mantener el suspenso hasta el final. En resumen, esta narración de misterio es un viaje emocionante lleno de intriga y sorpresas. Recomiendo encarecidamente esta obra a los amantes del género, ya que ofrece una experiencia de lectura cautivadora que dejará a los lectores ansiosos por más. ¡Una verdadera joya del misterio que no decepcionará a aquellos que buscan una historia envolvente y bien elaborada!")
 
     const reviews = {
         1: "Esta fascinante narración de misterio me envolvió desde la primera página hasta la última con su trama ingeniosamente construida y personajes intrigantes. El autor ha tejido hábilmente una red de misterios y giros que mantuvieron mi atención en vilo en todo momento. La ambientación cuidadosamente detallada y la atmósfera misteriosa añadieron capas de suspense, creando un escenario perfecto para una historia que mantuvo mi mente activa tratando de descifrar cada pista. Los personajes están hábilmente desarrollados, cada uno con su propio conjunto de secretos y motivaciones, lo que añadió profundidad a la trama y mantuvo mi interés en descubrir más sobre ellos. La resolución del misterio fue sorprendente y satisfactoria, y el autor/a demostró un talento excepcional para mantener el suspenso hasta el final. En resumen, esta narración de misterio es un viaje emocionante lleno de intriga y sorpresas. Recomiendo encarecidamente esta obra a los amantes del género, ya que ofrece una experiencia de lectura cautivadora que dejará a los lectores ansiosos por más. ¡Una verdadera joya del misterio que no decepcionará a aquellos que buscan una historia envolvente y bien elaborada!",
@@ -72,11 +72,12 @@ export const PostView = () => {
                                     <div className="accordion mt-5" id="accordionExample">
                                         <div className="accordion-item">
                                             <h2 className="accordion-header">
-                                                <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                <button className="accordion-button" type="button" 
+                                                data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                                                     Reviews de los expertos
                                                 </button>
                                             </h2>
-                                            <div id="collapseOne" className="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                                            <div id="collapseOne" className="accordion-collapse collapse" data-bs-parent="#accordionExample">
                                                 <div className="accordion-body">
                                                     <strong>Robert McKey:</strong> {revText}
                                                 </div>

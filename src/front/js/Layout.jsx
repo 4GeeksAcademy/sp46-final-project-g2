@@ -72,7 +72,7 @@ const Layout = () => {
                         <Route element={<ContactUs />} path="/contact-us" />
                         <Route element={<PrivacyPolicyView />} path="/privacy-policy-view" />
                         <Route element={<Single />} path="/single/:theid" />
-                        <Route element={<h1>Not found!</h1>} path="*"/>
+                        <Route element={<h1 className="mx-auto">Not found!</h1>} path="*"/>
                         <Route element= {<Membership />} path="/member" />
                         <Route element={<PenApi/>} path="pen-api"/>
                         <Route element={<PaymentSuccess />} path="/payment-success"/>

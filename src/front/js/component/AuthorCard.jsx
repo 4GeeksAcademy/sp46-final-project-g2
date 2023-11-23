@@ -1,8 +1,9 @@
 import React, {useContext, useEffect, useState} from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
-import pic from "../../img/edgar.png"
-//import pic from "../../img/camus.jpeg"
+import edgar from "../../img/edgar.png"
+import camus from "../../img/camus.jpeg"
+import woolf from "../../img/woolf.jpg"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
@@ -21,6 +22,7 @@ export const AuthorCard = (props) => {
     setSeguidores (Math.floor(Math.random() * 1000)+1)
     setEscritos (Math.floor(Math.random() * 100)+1)
     setValoracion(((Math.random() * 4)+1).toFixed(1))
+
   }, [])
 
 
@@ -37,8 +39,15 @@ export const AuthorCard = (props) => {
         <div className="col-6 col-md-3 col-lg-2 col-xl-2 col-xxl-2 ">
           <div className=" ">
             <Link to="/author-profile">
-              <img src={pic} className="img-fluid rounded-start" 
+              
+              <img src={
+                props.idNumber == 1? camus : props.idNumber == 3? edgar: woolf
+
+
+              } className="img-fluid rounded-start" 
+              
               alt="..." style={{ height:'217px', width: '155px'  }}  />
+              
             </Link>
           </div>
         </div>

@@ -50,6 +50,7 @@ export const Login = () => {
     }
 
     return (
+        
         <div className="d-flex align-items-center justify-content-center mx-3" style={{ minHeight: '790px' }}>
             <form style={{ width: "400px" }}>
                 <div className="form-group">

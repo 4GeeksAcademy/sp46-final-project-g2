@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import pic from "../../img/camus.jpeg"
 import { Context } from "../store/appContext";
 import { Cover } from "./Cover.jsx";
+import { BotonPago } from "../component/BotonPago.jsx";
 //import { AuthorCard } from "../component/AuthorCard.jsx"
 
 
@@ -60,9 +61,7 @@ export const Membership = () => {
                         </div>
                         <div className="card-body text-center">
                             <h1 className="card-title pricing-card-title bg-primary w-25 mx-auto" style={{ fontSize: '20px', color: '' }}>11,95€</h1>
-                            <Link to="/boton-pago">
-                                <button type="button" className="btn btn-warning fw-bold text-dark mr-2 my-3">Comprar</button>
-                            </Link>
+                            <BotonPago />
                         </div>
                     </div>
 
@@ -72,9 +71,7 @@ export const Membership = () => {
                         </div>
                         <div className="card-body text-center">
                             <h1 className="card-title pricing-card-title bg-primary w-25 mx-auto" style={{ fontSize: '20px', color: '' }}>359€</h1>
-                            <Link to="/shopping-cart">
-                                <button type="button" className="btn btn-warning fw-bold text-dark mr-2 my-3">Comprar</button>
-                            </Link>
+                            <div className="mx-auto "> <BotonPago /> </div>
                         </div>
                     </div>
                 </div>
