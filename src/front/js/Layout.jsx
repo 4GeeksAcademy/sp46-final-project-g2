@@ -32,7 +32,7 @@ import { PaymentSuccess } from "./pages/PaymentSuccess.jsx";
 import { PaymentCanceled } from "./pages/PaymentCanceled.jsx";
 import { BotonPagoTest } from "./component/BotonPagoTest.jsx";
 import { Membership } from "./pages/Membership.jsx";
-import { LandingPage } from "./component/LandingPage.jsx";
+//import { LandingPage } from "./component/LandingPage.jsx";
 
 
 
@@ -52,7 +52,7 @@ const Layout = () => {
                 <ScrollToTop>
                     <Navbar />
                     <Routes>
-                        <Route element={<LandingPage />} path="/" />
+                        <Route element={<Cover />} path="/" />
                         <Route element={<Form/>} path="/form" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
