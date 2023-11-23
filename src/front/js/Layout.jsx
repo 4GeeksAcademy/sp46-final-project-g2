@@ -32,6 +32,7 @@ import { PaymentSuccess } from "./pages/PaymentSuccess.jsx";
 import { PaymentCanceled } from "./pages/PaymentCanceled.jsx";
 import { BotonPagoTest } from "./component/BotonPagoTest.jsx";
 import { Membership } from "./pages/Membership.jsx";
+import { LandingPage } from "./component/LandingPage.jsx";
 
 
 
@@ -51,7 +52,7 @@ const Layout = () => {
                 <ScrollToTop>
                     <Navbar />
                     <Routes>
-                        <Route element={<Cover />} path="/" />
+                        <Route element={<LandingPage />} path="/" />
                         <Route element={<Form/>} path="/form" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Signup />} path="/signup" />
@@ -73,7 +74,6 @@ const Layout = () => {
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} path="*"/>
                         <Route element= {<Membership />} path="/member" />
-                        
                         <Route element={<PenApi/>} path="pen-api"/>
                         <Route element={<PaymentSuccess />} path="/payment-success"/>
                         <Route element={<PaymentCanceled />} path="/payment-canceled"/>
