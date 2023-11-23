@@ -1,4 +1,4 @@
-import { loadStripe } from '@stripe/stripe-js';
+//import { loadStripe } from '@stripe/stripe-js';
 import moment, { isMoment } from 'moment/moment';
 
 const getState = ({ getStore, getActions, setStore }) => {
@@ -194,17 +194,17 @@ const getState = ({ getStore, getActions, setStore }) => {
       createPost: async (nTitle, nTag, nText) => {
         const store = getStore();
         const url = `${process.env.BACKEND_URL}/api/posts`
-        const ahora = moment().format('MMMM Do YYYY, h:mm:ss a')
+       // const ahora = moment().format('MMMM Do YYYY, h:mm:ss a')
         
         console.log(url)
-        console.log(ahora)
+        //console.log(ahora)
         
         const options = {
           method: 'POST',
           body: JSON.stringify({
             "title": nTitle, "abstract": "", "tag": nTag,
-            "text": nText, "created_date": ahora, "update_date": 
-            ahora,"is_published": true, "is_active": true,
+            "text": nText, "created_date": "", "update_date": 
+            "", "is_published": true, "is_active": true,
             author_id: store.author.id
           }),
           headers: {
@@ -256,7 +256,9 @@ const getState = ({ getStore, getActions, setStore }) => {
         console.log('error', response.status, response.text)
         return "No image url"
       }
-    },
+    }
+    /*,
+    
     getStripePublicKey: async () => {
       const url = `${process.env.BACKEND_URL}/stripe-key`
       const options = {
@@ -294,6 +296,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
       }
     }
+    */
   }
 };
 

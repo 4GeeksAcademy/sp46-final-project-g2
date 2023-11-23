@@ -47,7 +47,7 @@ export const PostCard = (props) => {
       actions.setAuthorIdNumber(store.selectedPost[0].author_id)
     */
       setLeidos (Math.floor(Math.random() * 1000))
-      setValoracion(Math.floor(Math.random() * 5)+1)
+      setValoracion(((Math.random() * 4)+1).toFixed(1))
     
   }, [])
 
@@ -86,8 +86,12 @@ export const PostCard = (props) => {
             </h6>
             <p className="card-text text-truncate">{props.texto}</p>
             <h6 className="card-subtitle fw-lighter mb-2"> <FontAwesomeIcon icon={faGlasses} size="sm" /> <span className="text-light"> {leidos} </span> veces leído </h6>
-            <h6 className="card-subtitle fw-lighter mb-2"> <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStar} size="sm" />
-              <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStarHalfStroke} size="sm" /> - {valoracion}
+            <h6 className="card-subtitle fw-lighter mb-2"> <FontAwesomeIcon icon={faStar} size="sm" />
+             {/*
+                <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStar} size="sm" />
+                <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStarHalfStroke} size="sm" />
+                */}
+                 <span className="text-light border text-center px-2 mx-1 mt-2 py-0" >{valoracion}</span>
             </h6>
           </div>
         </div>

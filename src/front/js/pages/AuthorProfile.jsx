@@ -32,7 +32,7 @@ export const AuthorProfile = () => {
   return (
 
     store.isLogged ?
-      <div className="container mb-5">
+      <div className="container mb-5" style={{minHeight: "790px"}}>
         <div className="row g-0 py-3">
           <div className="col-12 col-md-3">
             {(store.authorIdNumber == store.user.id) || store.authorIdNumber == 0 ?
@@ -65,7 +65,7 @@ export const AuthorProfile = () => {
       </div>
       :
       store.authorIdNumber != 0 ?
-        <div className="container mb-5">
+        <div className="container mb-5" style={{minHeight: "790px"}}>
           <div className="row g-0 py-3">
 
             <div className="col-12 col-md-3">

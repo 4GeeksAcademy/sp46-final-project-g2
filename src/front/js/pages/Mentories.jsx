@@ -44,7 +44,7 @@ export const Mentories = () => {
                                     </div>
                                     <div className="card-body">
                                         <h1 className="card-title pricing-card-title" style={{ fontSize: '20px', color: 'black' }}>359€</h1>
-                                        <Link to="/shopping-cart">
+                                        <Link to="/login">
                                         <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mt-4">Comprar</button>
                                         </Link>
                                     </div>
@@ -60,7 +60,7 @@ export const Mentories = () => {
                                             <li>3 reviews incluidas</li>
                                             <li>Acceso a Pen to Write</li>
                                         </ul>
-                                        <Link to="/signup-member">
+                                        <Link to="/login">
                                         <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mb-4">Hazte miembro</button>
                                         </Link>
                                     </div>

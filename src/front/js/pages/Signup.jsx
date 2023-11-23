@@ -75,6 +75,13 @@ export const Signup = () => {
                     <Link to="/signup-advisor" >
                         <button className="btn border border-0 font-weight-bold btn-lg">Soy una empresa </button>
                     </Link>
+
+                </div>
+                <p className="mt-4 pt-5">¿Ya estás registrado?</p>
+                <div className="" style={{ display: 'flex', justifyContent: 'space-between' }}>                
+                    <Link to="/login" >
+                        <button type="button" className="btn btn-primary btn-block"> Login </button>
+                    </Link>
                 </div>
             </form >
         </div >

@@ -950,8 +950,8 @@ def handle_posts():
                      abstract=data['abstract'],
                      tag=data['tag'],
                      text=data['text'],
-                     created_date=data['created_date'],
-                     update_date=data['update_date'],
+                     created_date= datetime.now(),
+                     update_date= datetime.now(),
                      is_active=True,
                      is_published=True, 
                      author_id=data['author_id'])  

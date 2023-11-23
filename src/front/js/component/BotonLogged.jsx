@@ -32,7 +32,7 @@ export const BotonLogged = () => {
 
                 <li className="list-group-item-action">
                     <Link to="/member">
-                        <button className="btn border border-0 py-1"> Mi cuenta </button>
+                        <button className="btn border border-0 py-1"> Suscripción </button>
                     </Link>
                 </li>
 

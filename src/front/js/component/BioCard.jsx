@@ -36,7 +36,8 @@ export const BioCard = (props) => {
                     <div className="input-group input-group-sm mb-3">
                         <textarea type="text" className="form-control" placeholder="Acerca de mí..." 
                         aria-label="Acerca de mí" aria-describedby="basic-addon1" 
-                        onChange={(e) => { setNewAboutMe(e.target.value) }} defaultValue={newAboutMe} 
+                        onChange={(e) => { setNewAboutMe(e.target.value) }} defaultValue={newAboutMe}
+                        style={{minHeight: "200px"}} 
                         />
                     </div> :
                     <p className="card-text py-4 px-4">{newAboutMe}</p>
