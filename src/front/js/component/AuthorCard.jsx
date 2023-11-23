@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
 import pic from "../../img/edgar.png"
@@ -12,6 +12,17 @@ import { faBookOpenReader } from "@fortawesome/free-solid-svg-icons";
 
 export const AuthorCard = (props) => {
   const {store, actions} = useContext(Context);
+  const [seguidores, setSeguidores] = useState(0)
+  const [escritos, setEscritos] = useState(0)
+  const [valoracion, setValoracion] = useState(0)
+  
+
+  useEffect(()=> {
+    setSeguidores (Math.floor(Math.random() * 1000)+1)
+    setEscritos (Math.floor(Math.random() * 100)+1)
+    setValoracion(((Math.random() * 4)+1).toFixed(1))
+  }, [])
+
 
   const handleIdAuthor = () => {
     actions.setAuthorIdNumber(props.idNumber)
@@ -40,12 +51,16 @@ export const AuthorCard = (props) => {
             <p className="card-text text-truncate pb-1"> {props.aboutMe} </p>
             <div className="">
               <h6 className="card-text text-body-secondary"><small className="text-body-secondary"> <FontAwesomeIcon icon={faBookOpenReader} />
-                <span className="text-light"> 153 </span> seguidores </small></h6>
+                <span className="text-light"> {seguidores} </span> seguidores </small></h6>
               <h6 className="card-text text-body-secondary"> <small className="text-body-secondary"><FontAwesomeIcon icon={faAlignJustify} />
-                <span className="text-light"> 75 </span> posts </small></h6>
+                <span className="text-light"> {escritos} </span> posts </small></h6>
               <h6 className="card-subtitle fw-lighter"> <small className="text-body-secondary"><FontAwesomeIcon icon={faStar} size="sm" />
+                {/*
                 <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStar} size="sm" />
-                <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStarHalfStroke} size="sm" /> - 4,5  </small>
+                <FontAwesomeIcon icon={faStar} size="sm" /><FontAwesomeIcon icon={faStarHalfStroke} size="sm" />
+                */}
+                 <span className="text-light border text-center px-2 mx-1 mt-2 py-0" >{valoracion}</span>
+                 </small>
               </h6>
             </div>
           </div>          

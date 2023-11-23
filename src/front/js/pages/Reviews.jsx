@@ -45,7 +45,7 @@ export const Reviews = () => {
                                 </div>
                                 <div className="card-body">
                                     <h1 className="card-title pricing-card-title" style={{fontSize: '20px', color: 'black'}}>11,95€</h1>
-                                    <Link to="/shopping-cart">
+                                    <Link to="/login">
                                     <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mt-4">Comprar</button>
                                     </Link>
                                     </div>
@@ -61,7 +61,7 @@ export const Reviews = () => {
                                         <li>20€ Dto en talleres</li>
                                         <li>Acceso a Pen to Write</li>
                                     </ul>
-                                    <Link to="/signup-member">
+                                    <Link to="/login">
                                     <button type="button" className="btn btn-warning fw-bold text-dark mr-2 mb-4">Hazte miembro</button>
                                     </Link>
                                     </div>

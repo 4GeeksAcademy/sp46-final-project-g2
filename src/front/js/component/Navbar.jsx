@@ -30,16 +30,18 @@ export const Navbar = (props) => {
 					<ul className="navbar-nav me-auto mb-lg-0">
 
 						<li className="nav-item">
+							<Link to="/author-list">
+								<button className="btn border border-0 mt-1"> Autores </button>
+							</Link>
+						</li>
+						
+						<li className="nav-item">
 							<Link to="/posts">
 								<button className="btn border border-0 mt-1 "> Publicaciones </button>
 							</Link>
 						</li>
 
-						<li className="nav-item">
-							<Link to="/author-list">
-								<button className="btn border border-0 mt-1"> Autores </button>
-							</Link>
-						</li>
+
 
 						<li className="nav-item dropdown ">
 							<a className="nav-link dropdown-toggle border border-0" href="#" role="button"
@@ -70,13 +72,13 @@ export const Navbar = (props) => {
 						</li>
 					</ul>
 
-					<div>
+					<div>{/*
 						<button className="btn border-0 mx-3" data-bs-toggle="modal" data-bs-target="#navbarModal">
 							<FontAwesomeIcon icon={faMagnifyingGlass} size="xl" />
-						</button>
+						</button>*/}
 					</div>
-					<div className="row g-0 ">						
-						<BotonIngresar/>
+					<div className="row g-0 ">
+						<BotonIngresar />
 					</div>
 
 				</div>
