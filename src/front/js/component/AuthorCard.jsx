@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import edgar from "../../img/edgar.png"
 import camus from "../../img/camus.jpeg"
 import woolf from "../../img/woolf.jpg"
+import incognit from "../../img/incognit.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
@@ -41,7 +42,7 @@ export const AuthorCard = (props) => {
             <Link to="/author-profile">
               
               <img src={
-                props.idNumber == 1? camus : props.idNumber == 3? edgar: woolf
+                props.idNumber == 1? camus : props.idNumber == 3? edgar: props.idNumber == 4? woolf : incognit
 
 
               } className="img-fluid rounded-start" 

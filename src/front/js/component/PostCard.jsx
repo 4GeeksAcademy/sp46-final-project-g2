@@ -5,7 +5,10 @@ import { faHashnode } from "@fortawesome/free-brands-svg-icons";
 import { faGlasses } from "@fortawesome/free-solid-svg-icons";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
-import pic from "../../img/sisifo.jpg"
+import sisifo from "../../img/sisifo.jpg"
+import habitacion from "../../img/habitacion.png"
+import cuervo from "../../img/cuervo.png"
+import casa from "../../img/casa.jpg"
 import { Context } from "../store/appContext";
 
 export const PostCard = (props) => {
@@ -60,7 +63,9 @@ export const PostCard = (props) => {
         <div className="col-6 col-md-3 col-lg-2 col-xl-2 col-xxl-2 ">
           <div className="">
             <Link to="/post-view">
-              <img src={pic} className="img-fluid rounded-start"
+              <img src={
+                props.idNumber == 2? sisifo: props.idNumber==3? cuervo: props.idNumber == 5? habitacion: casa
+              } className="img-fluid rounded-start"
                 alt="..." style={{ height: '217px', width: '155px' }} />
             </Link>
           </div>

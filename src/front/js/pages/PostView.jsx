@@ -1,5 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import sisifo from "../../img/sisifo.jpg"
+import habitacion from "../../img/habitacion.png"
+import cuervo from "../../img/cuervo.png"
 import casa from "../../img/casa.jpg"
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
@@ -58,9 +61,12 @@ export const PostView = () => {
                                     {store.selectedPost[0].title}
                                 </h2>
                                 <img
-                                    src={casa}
+                                    src={
+                                        store.selectedPost[0].id== 2? sisifo : store.selectedPost[0].id==3? cuervo : store.selectedPost[0].id==1? casa: habitacion
+                                    }
                                     alt="Imagen de la publicación"
                                     className="img-fluid d-block mx-auto mb-4"
+                                    style={{maxHeight: "400px"}}
                                 />
                                 <article className="blog-post" style={{ textAlign: 'justify', maxWidth: '100%' }}>
                                     <p className="blog-post-meta">{store.selectedPost[0].created_date} - {authorName} </p>

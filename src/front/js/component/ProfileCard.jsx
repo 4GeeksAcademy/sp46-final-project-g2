@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import edgar from "../../img/edgar.png"
 import camus from "../../img/camus.jpeg"
 import woolf from "../../img/woolf.jpg"
-import pic from "../../img/camus.jpeg"
+import incognit from "../../img/incognit.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenNib } from "@fortawesome/free-solid-svg-icons";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
@@ -54,7 +54,7 @@ export const ProfileCard = (props) => {
     return (
         <div className="card my-1 mx-1"  >
             <img src={
-                store.author.id == 1? camus : store.author.id == 3? poe : woolf
+                store.author.id == 1? camus : store.author.id == 3? poe : store.author.id == 4? woolf : incognit
             } className="card-img-top " alt="..." style={{ maxHeight: 'auto' }} />
             <div className="card-body">
                 <h5 className="card-title my-1">{newAlias}</h5>
