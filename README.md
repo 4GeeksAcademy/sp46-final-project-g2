@@ -61,7 +61,7 @@ And you will see the following message:
 
 ### **Important note for the database and the data inside it**
 
-Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run ```pipenv run insert-test-data```.
+Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run npm install --save @stripe/react-stripe-js @stripe/stripe-jspipenv run insert-test-data```.
 
 ### Front-End Manual Installation:
 
@@ -69,6 +69,14 @@ Every Github codespace environment will have **its own database**, so if you're 
 
 1. Install the packages: `$ npm install`
 2. Start coding! start the webpack dev server `$ npm run start`
+
+### Stripe Installation:
+
+```pipenv install stripe```
+
+```npm install --save @stripe/react-stripe-js @stripe/stripe-js```
+
+
 
 ## Publish your website!
 
