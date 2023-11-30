@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 8cc32425e1b6
+Revision ID: 7db5d88cda68
 Revises: 
-Create Date: 2023-11-17 03:13:42.858535
+Create Date: 2023-11-30 14:49:51.137784
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8cc32425e1b6'
+revision = '7db5d88cda68'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -53,7 +53,7 @@ def upgrade():
     op.create_table('authors',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('alias', sa.String(length=120), nullable=False),
-    sa.Column('birth_date', sa.DateTime(), nullable=True),
+    sa.Column('birth_date', sa.Date(), nullable=True),
     sa.Column('city', sa.String(length=120), nullable=True),
     sa.Column('country', sa.String(length=120), nullable=True),
     sa.Column('quote', sa.String(length=120), nullable=True),
@@ -96,7 +96,7 @@ def upgrade():
     sa.Column('title', sa.String(length=50), nullable=False),
     sa.Column('abstract', sa.String(length=80), nullable=True),
     sa.Column('tag', sa.String(length=50), nullable=True),
-    sa.Column('text', sa.String(length=50), nullable=False),
+    sa.Column('text', sa.String(length=3000), nullable=False),
     sa.Column('created_date', sa.DateTime(), nullable=True),
     sa.Column('update_date', sa.DateTime(), nullable=True),
     sa.Column('is_published', sa.Boolean(), nullable=False),
