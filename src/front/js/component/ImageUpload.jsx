@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Context } from '/workspaces/sp46-final-project-g2/src/front/js/store/appContext.js'
+import { Context } from "../store/appContext.js";
 
 export const ImageUpload = () => {
   const { store, actions } = useContext(Context);
